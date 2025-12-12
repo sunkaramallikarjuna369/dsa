@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stacks & Queues - 3D Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: #888; font-size: 1.1em; }
+        .algorithm-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .algo-btn {
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .algo-btn:hover, .algo-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 450px;
+        }
+        .step-description {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            border: none;
+            color: #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
+
+        /* Stack Visualization */
+        .stack-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 40px;
+            perspective: 1000px;
+        }
+        .stack-tower {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            min-height: 350px;
+            position: relative;
+        }
+        .stack-base {
+            width: 150px;
+            height: 20px;
+            background: linear-gradient(180deg, #333, #111);
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .stack-plate {
+            width: 120px;
+            height: 50px;
+            background: linear-gradient(180deg, #00ffff33, #00888833);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 3px 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
+        }
+        .stack-plate.top {
+            border-color: #00ff00;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
+        }
+        .stack-plate.pushing {
+            animation: pushIn 0.5s ease;
+            border-color: #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+        .stack-plate.popping {
+            animation: popOut 0.5s ease;
+            border-color: #ff3333;
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.5);
+        }
+        @keyframes pushIn {
+            from { transform: translateY(-100px) scale(0.5); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes popOut {
+            from { transform: translateY(0) scale(1); opacity: 1; }
+            to { transform: translateY(-100px) scale(0.5); opacity: 0; }
+        }
+        .top-label {
+            position: absolute;
+            right: -60px;
+            color: #00ff00;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* Queue Visualization */
+        .queue-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+        .queue-track {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-width: 500px;
+            justify-content: center;
+        }
+        .queue-item {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #00ffff33, #00888833);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        .queue-item.front {
+            border-color: #00ff00;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);
+        }
+        .queue-item.rear {
+            border-color: #ff00ff;
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.4);
+        }
+        .queue-item.enqueue {
+            animation: slideIn 0.5s ease;
+            border-color: #ffd700;
+        }
+        .queue-item.dequeue {
+            animation: slideOut 0.5s ease;
+            border-color: #ff3333;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-100px); opacity: 0; }
+        }
+        .queue-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 15px;
+        }
+        .queue-label {
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .queue-label.front { background: #00ff0033; color: #00ff00; }
+        .queue-label.rear { background: #ff00ff33; color: #ff00ff; }
+
+        .arrow-in, .arrow-out {
+            font-size: 2em;
+            margin: 0 10px;
+        }
+        .arrow-in { color: #00ff00; }
+        .arrow-out { color: #ff3333; }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+        .info-label { color: #888; font-size: 0.9em; }
+        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .speed-label { color: #888; }
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Stacks & Queues</h1>
+        <p class="subtitle">Interactive 3D Visualization</p>
+    </header>
+    <div class="container">
+        <div class="algorithm-selector" id="algoSelector"></div>
+        <div class="visualization-area">
+            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
+            <div id="vizContent"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="nextBtn" disabled>Next</button>
+            <button class="control-btn" id="resetBtn">Reset</button>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
+            <span class="speed-label" id="speedValue">800ms</span>
+        </div>
+    </div>
+
+    <script>
+        const visualData = {
+            "world": "04_stacks_and_queues",
+            "algorithms": [
+                {
+                    "algorithm": "stack_push_pop",
+                    "description": "Stack push and pop operations (LIFO)",
+                    "steps": [
+                        {"step": 1, "description": "Empty stack - ready for operations", "stack": [], "action": "init"},
+                        {"step": 2, "description": "Push 10 onto stack", "stack": [10], "pushed": 10, "action": "push"},
+                        {"step": 3, "description": "Push 20 onto stack", "stack": [10, 20], "pushed": 20, "action": "push"},
+                        {"step": 4, "description": "Push 30 onto stack", "stack": [10, 20, 30], "pushed": 30, "action": "push"},
+                        {"step": 5, "description": "Peek top element: 30", "stack": [10, 20, 30], "peeked": 30, "action": "peek"},
+                        {"step": 6, "description": "Pop 30 from stack (LIFO)", "stack": [10, 20], "popped": 30, "action": "pop"},
+                        {"step": 7, "description": "Pop 20 from stack", "stack": [10], "popped": 20, "action": "pop"},
+                        {"step": 8, "description": "Push 40 onto stack", "stack": [10, 40], "pushed": 40, "action": "push"},
+                        {"step": 9, "description": "Final stack state", "stack": [10, 40], "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "queue_enqueue_dequeue",
+                    "description": "Queue enqueue and dequeue operations (FIFO)",
+                    "steps": [
+                        {"step": 1, "description": "Empty queue - ready for operations", "queue": [], "action": "init"},
+                        {"step": 2, "description": "Enqueue 10 at rear", "queue": [10], "enqueued": 10, "action": "enqueue"},
+                        {"step": 3, "description": "Enqueue 20 at rear", "queue": [10, 20], "enqueued": 20, "action": "enqueue"},
+                        {"step": 4, "description": "Enqueue 30 at rear", "queue": [10, 20, 30], "enqueued": 30, "action": "enqueue"},
+                        {"step": 5, "description": "Peek front element: 10", "queue": [10, 20, 30], "peeked": 10, "action": "peek"},
+                        {"step": 6, "description": "Dequeue 10 from front (FIFO)", "queue": [20, 30], "dequeued": 10, "action": "dequeue"},
+                        {"step": 7, "description": "Dequeue 20 from front", "queue": [30], "dequeued": 20, "action": "dequeue"},
+                        {"step": 8, "description": "Enqueue 40 at rear", "queue": [30, 40], "enqueued": 40, "action": "enqueue"},
+                        {"step": 9, "description": "Final queue state", "queue": [30, 40], "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "balanced_parentheses",
+                    "description": "Check balanced parentheses using stack",
+                    "input": {"expression": "((a+b)*(c-d))"},
+                    "steps": [
+                        {"step": 1, "description": "Check expression: ((a+b)*(c-d))", "stack": [], "char": "", "action": "init"},
+                        {"step": 2, "description": "Read '(' - push to stack", "stack": ["("], "char": "(", "index": 0, "action": "push"},
+                        {"step": 3, "description": "Read '(' - push to stack", "stack": ["(", "("], "char": "(", "index": 1, "action": "push"},
+                        {"step": 4, "description": "Read 'a' - skip (not bracket)", "stack": ["(", "("], "char": "a", "index": 2, "action": "skip"},
+                        {"step": 5, "description": "Read '+' - skip (not bracket)", "stack": ["(", "("], "char": "+", "index": 3, "action": "skip"},
+                        {"step": 6, "description": "Read 'b' - skip (not bracket)", "stack": ["(", "("], "char": "b", "index": 4, "action": "skip"},
+                        {"step": 7, "description": "Read ')' - matches '(' on top, pop!", "stack": ["("], "char": ")", "index": 5, "action": "pop_match"},
+                        {"step": 8, "description": "Read '*' - skip (not bracket)", "stack": ["("], "char": "*", "index": 6, "action": "skip"},
+                        {"step": 9, "description": "Read '(' - push to stack", "stack": ["(", "("], "char": "(", "index": 7, "action": "push"},
+                        {"step": 10, "description": "Read 'c' - skip", "stack": ["(", "("], "char": "c", "index": 8, "action": "skip"},
+                        {"step": 11, "description": "Read '-' - skip", "stack": ["(", "("], "char": "-", "index": 9, "action": "skip"},
+                        {"step": 12, "description": "Read 'd' - skip", "stack": ["(", "("], "char": "d", "index": 10, "action": "skip"},
+                        {"step": 13, "description": "Read ')' - matches '(' on top, pop!", "stack": ["("], "char": ")", "index": 11, "action": "pop_match"},
+                        {"step": 14, "description": "Read ')' - matches '(' on top, pop!", "stack": [], "char": ")", "index": 12, "action": "pop_match"},
+                        {"step": 15, "description": "Stack empty - BALANCED!", "stack": [], "result": "balanced", "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "circular_queue",
+                    "description": "Circular queue with wrap-around",
+                    "capacity": 5,
+                    "steps": [
+                        {"step": 1, "description": "Initialize circular queue (capacity 5)", "queue": [null,null,null,null,null], "front": -1, "rear": -1, "action": "init"},
+                        {"step": 2, "description": "Enqueue 10", "queue": [10,null,null,null,null], "front": 0, "rear": 0, "action": "enqueue"},
+                        {"step": 3, "description": "Enqueue 20", "queue": [10,20,null,null,null], "front": 0, "rear": 1, "action": "enqueue"},
+                        {"step": 4, "description": "Enqueue 30", "queue": [10,20,30,null,null], "front": 0, "rear": 2, "action": "enqueue"},
+                        {"step": 5, "description": "Dequeue 10", "queue": [null,20,30,null,null], "front": 1, "rear": 2, "dequeued": 10, "action": "dequeue"},
+                        {"step": 6, "description": "Enqueue 40", "queue": [null,20,30,40,null], "front": 1, "rear": 3, "action": "enqueue"},
+                        {"step": 7, "description": "Enqueue 50", "queue": [null,20,30,40,50], "front": 1, "rear": 4, "action": "enqueue"},
+                        {"step": 8, "description": "Enqueue 60 - wraps to index 0!", "queue": [60,20,30,40,50], "front": 1, "rear": 0, "wrapped": true, "action": "enqueue"},
+                        {"step": 9, "description": "Circular queue demonstration complete", "queue": [60,20,30,40,50], "front": 1, "rear": 0, "action": "complete"}
+                    ]
+                }
+            ]
+        };
+
+        let currentAlgo = null;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let speed = 800;
+
+        function init() {
+            const selector = document.getElementById('algoSelector');
+            visualData.algorithms.forEach((algo, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'algo-btn';
+                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => selectAlgorithm(index);
+                selector.appendChild(btn);
+            });
+            document.getElementById('prevBtn').onclick = prevStep;
+            document.getElementById('nextBtn').onclick = nextStep;
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('resetBtn').onclick = reset;
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = 2100 - e.target.value;
+                document.getElementById('speedValue').textContent = speed + 'ms';
+            };
+        }
+
+        function selectAlgorithm(index) {
+            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+            currentAlgo = visualData.algorithms[index];
+            currentStep = 0;
+            stopPlay();
+            renderStep();
+            updateControls();
+        }
+
+        function renderStep() {
+            if (!currentAlgo) return;
+            const step = currentAlgo.steps[currentStep];
+            document.getElementById('stepDesc').textContent = step.description;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
+            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+
+            const content = document.getElementById('vizContent');
+            
+            switch(currentAlgo.algorithm) {
+                case 'stack_push_pop':
+                case 'balanced_parentheses':
+                    renderStack(content, step);
+                    break;
+                case 'queue_enqueue_dequeue':
+                    renderQueue(content, step);
+                    break;
+                case 'circular_queue':
+                    renderCircularQueue(content, step);
+                    break;
+            }
+        }
+
+        function renderStack(container, step) {
+            const stack = step.stack || [];
+            const isPush = step.action === 'push';
+            const isPop = step.action === 'pop' || step.action === 'pop_match';
+
+            let html = '<div class="stack-container"><div class="stack-tower">';
+            
+            stack.forEach((val, i) => {
+                const isTop = i === stack.length - 1;
+                const animClass = isTop && isPush ? 'pushing' : '';
+                html += `<div class="stack-plate ${isTop ? 'top' : ''} ${animClass}"><span>${val}</span>${isTop ? '<span class="top-label">TOP</span>' : ''}</div>`;
+            });
+            
+            if (isPop && step.popped !== undefined) {
+                html += `<div class="stack-plate popping">${step.popped}</div>`;
+            }
+            
+            html += '<div class="stack-base"></div></div></div>';
+            
+            html += '<div class="info-panel">';
+            html += `<div class="info-box"><div class="info-label">Size</div><div class="info-value">${stack.length}</div></div>`;
+            if (step.pushed !== undefined) html += `<div class="info-box"><div class="info-label">Pushed</div><div class="info-value" style="color:#ffd700;">${step.pushed}</div></div>`;
+            if (step.popped !== undefined) html += `<div class="info-box"><div class="info-label">Popped</div><div class="info-value" style="color:#ff3333;">${step.popped}</div></div>`;
+            if (step.peeked !== undefined) html += `<div class="info-box"><div class="info-label">Peek</div><div class="info-value" style="color:#00ff00;">${step.peeked}</div></div>`;
+            if (step.char) html += `<div class="info-box"><div class="info-label">Current Char</div><div class="info-value">${step.char}</div></div>`;
+            if (step.result) html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#00ff00;">${step.result.toUpperCase()}</div></div>`;
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function renderQueue(container, step) {
+            const queue = step.queue || [];
+            const isEnqueue = step.action === 'enqueue';
+            const isDequeue = step.action === 'dequeue';
+
+            let html = '<div class="queue-container">';
+            html += '<div class="queue-track">';
+            html += '<span class="arrow-out">&#8592;</span>';
+            
+            if (isDequeue && step.dequeued !== undefined) {
+                html += `<div class="queue-item dequeue">${step.dequeued}</div>`;
+            }
+            
+            queue.forEach((val, i) => {
+                const isFront = i === 0;
+                const isRear = i === queue.length - 1;
+                const animClass = isRear && isEnqueue ? 'enqueue' : '';
+                html += `<div class="queue-item ${isFront ? 'front' : ''} ${isRear ? 'rear' : ''} ${animClass}">${val}</div>`;
+            });
+            
+            html += '<span class="arrow-in">&#8592;</span>';
+            html += '</div>';
+            
+            html += '<div class="queue-labels"><span class="queue-label front">FRONT (Dequeue)</span><span class="queue-label rear">REAR (Enqueue)</span></div>';
+            html += '</div>';
+            
+            html += '<div class="info-panel">';
+            html += `<div class="info-box"><div class="info-label">Size</div><div class="info-value">${queue.length}</div></div>`;
+            if (step.enqueued !== undefined) html += `<div class="info-box"><div class="info-label">Enqueued</div><div class="info-value" style="color:#ffd700;">${step.enqueued}</div></div>`;
+            if (step.dequeued !== undefined) html += `<div class="info-box"><div class="info-label">Dequeued</div><div class="info-value" style="color:#ff3333;">${step.dequeued}</div></div>`;
+            if (step.peeked !== undefined) html += `<div class="info-box"><div class="info-label">Peek</div><div class="info-value" style="color:#00ff00;">${step.peeked}</div></div>`;
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function renderCircularQueue(container, step) {
+            const queue = step.queue || [];
+            const front = step.front;
+            const rear = step.rear;
+
+            let html = '<div class="queue-container">';
+            html += '<div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">';
+            
+            queue.forEach((val, i) => {
+                const isFront = i === front;
+                const isRear = i === rear;
+                const isEmpty = val === null;
+                html += `
+                    <div style="text-align: center;">
+                        <div class="queue-item ${isFront && !isEmpty ? 'front' : ''} ${isRear && !isEmpty ? 'rear' : ''}" style="${isEmpty ? 'opacity: 0.3;' : ''}">
+                            ${isEmpty ? '-' : val}
+                        </div>
+                        <div style="color: #888; font-size: 0.8em; margin-top: 5px;">[${i}]</div>
+                        ${isFront && front !== -1 ? '<div style="color: #00ff00; font-size: 0.7em;">FRONT</div>' : ''}
+                        ${isRear && rear !== -1 ? '<div style="color: #ff00ff; font-size: 0.7em;">REAR</div>' : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            
+            html += '<div class="info-panel">';
+            html += `<div class="info-box"><div class="info-label">Front Index</div><div class="info-value">${front}</div></div>`;
+            html += `<div class="info-box"><div class="info-label">Rear Index</div><div class="info-value">${rear}</div></div>`;
+            if (step.wrapped) html += `<div class="info-box"><div class="info-label">Status</div><div class="info-value" style="color:#ff00ff;">WRAPPED!</div></div>`;
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
+        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
+        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
+        function startPlay() {
+            if (!currentAlgo) return;
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Pause';
+            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
+        }
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (playInterval) { clearInterval(playInterval); playInterval = null; }
+        }
+        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
+            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
+        }
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphs & Traversals - 3D Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: #888; font-size: 1.1em; }
+        .algorithm-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .algo-btn {
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .algo-btn:hover, .algo-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 500px;
+        }
+        .step-description {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            border: none;
+            color: #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
+
+        /* Graph Visualization */
+        .graph-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .graph-svg {
+            width: 100%;
+            max-width: 700px;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+        .graph-svg line {
+            stroke: #00ffff;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        .graph-svg line.visited {
+            stroke: #ff00ff;
+            stroke-width: 3;
+        }
+        .graph-svg line.current-edge {
+            stroke: #00ff00;
+            stroke-width: 4;
+            filter: drop-shadow(0 0 5px #00ff00);
+        }
+        .graph-svg circle {
+            fill: #1a1a3a;
+            stroke: #00ffff;
+            stroke-width: 3;
+            transition: all 0.3s ease;
+        }
+        .graph-svg circle.visited {
+            fill: #ff00ff33;
+            stroke: #ff00ff;
+        }
+        .graph-svg circle.current {
+            fill: #00ff0033;
+            stroke: #00ff00;
+            filter: drop-shadow(0 0 15px #00ff00);
+        }
+        .graph-svg circle.in-queue {
+            fill: #ffd70033;
+            stroke: #ffd700;
+        }
+        .graph-svg circle.start {
+            stroke: #ffd700;
+            stroke-width: 4;
+        }
+        .graph-svg text {
+            fill: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+
+        /* Queue/Stack display */
+        .data-structure {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        .ds-label {
+            color: #888;
+            font-weight: bold;
+            min-width: 80px;
+        }
+        .ds-items {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .ds-item {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffd70033, #cc990033);
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Traversal output */
+        .traversal-output {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .output-item {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff00ff33, #88008833);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+        .info-label { color: #888; font-size: 0.9em; }
+        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .speed-label { color: #888; }
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Graphs & Traversals</h1>
+        <p class="subtitle">Interactive 3D Visualization</p>
+    </header>
+    <div class="container">
+        <div class="algorithm-selector" id="algoSelector"></div>
+        <div class="visualization-area">
+            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
+            <div id="vizContent"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="nextBtn" disabled>Next</button>
+            <button class="control-btn" id="resetBtn">Reset</button>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
+            <span class="speed-label" id="speedValue">800ms</span>
+        </div>
+    </div>
+
+    <script>
+        const graphNodes = [
+            {id: 'A', x: 350, y: 50},
+            {id: 'B', x: 150, y: 150},
+            {id: 'C', x: 550, y: 150},
+            {id: 'D', x: 100, y: 280},
+            {id: 'E', x: 300, y: 280},
+            {id: 'F', x: 450, y: 280},
+            {id: 'G', x: 600, y: 280}
+        ];
+        
+        const graphEdges = [
+            ['A', 'B'], ['A', 'C'],
+            ['B', 'D'], ['B', 'E'],
+            ['C', 'F'], ['C', 'G'],
+            ['E', 'F']
+        ];
+
+        const visualData = {
+            "world": "08_graphs_and_traversals",
+            "algorithms": [
+                {
+                    "algorithm": "bfs_traversal",
+                    "description": "Breadth-First Search - explore level by level",
+                    "start": "A",
+                    "steps": [
+                        {"step": 1, "description": "Start BFS from node A, add to queue", "current": "A", "queue": ["A"], "visited": [], "output": [], "action": "start"},
+                        {"step": 2, "description": "Dequeue A, visit A, add neighbors B, C to queue", "current": "A", "queue": ["B", "C"], "visited": ["A"], "output": ["A"], "action": "visit"},
+                        {"step": 3, "description": "Dequeue B, visit B, add neighbors D, E to queue", "current": "B", "queue": ["C", "D", "E"], "visited": ["A", "B"], "output": ["A", "B"], "action": "visit"},
+                        {"step": 4, "description": "Dequeue C, visit C, add neighbors F, G to queue", "current": "C", "queue": ["D", "E", "F", "G"], "visited": ["A", "B", "C"], "output": ["A", "B", "C"], "action": "visit"},
+                        {"step": 5, "description": "Dequeue D, visit D (no unvisited neighbors)", "current": "D", "queue": ["E", "F", "G"], "visited": ["A", "B", "C", "D"], "output": ["A", "B", "C", "D"], "action": "visit"},
+                        {"step": 6, "description": "Dequeue E, visit E (F already in queue)", "current": "E", "queue": ["F", "G"], "visited": ["A", "B", "C", "D", "E"], "output": ["A", "B", "C", "D", "E"], "action": "visit"},
+                        {"step": 7, "description": "Dequeue F, visit F", "current": "F", "queue": ["G"], "visited": ["A", "B", "C", "D", "E", "F"], "output": ["A", "B", "C", "D", "E", "F"], "action": "visit"},
+                        {"step": 8, "description": "Dequeue G, visit G", "current": "G", "queue": [], "visited": ["A", "B", "C", "D", "E", "F", "G"], "output": ["A", "B", "C", "D", "E", "F", "G"], "action": "visit"},
+                        {"step": 9, "description": "Queue empty - BFS complete!", "current": null, "queue": [], "visited": ["A", "B", "C", "D", "E", "F", "G"], "output": ["A", "B", "C", "D", "E", "F", "G"], "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "dfs_traversal",
+                    "description": "Depth-First Search - explore as deep as possible first",
+                    "start": "A",
+                    "steps": [
+                        {"step": 1, "description": "Start DFS from node A, push to stack", "current": "A", "stack": ["A"], "visited": [], "output": [], "action": "start"},
+                        {"step": 2, "description": "Pop A, visit A, push neighbors C, B", "current": "A", "stack": ["C", "B"], "visited": ["A"], "output": ["A"], "action": "visit"},
+                        {"step": 3, "description": "Pop B, visit B, push neighbors E, D", "current": "B", "stack": ["C", "E", "D"], "visited": ["A", "B"], "output": ["A", "B"], "action": "visit"},
+                        {"step": 4, "description": "Pop D, visit D (no unvisited neighbors)", "current": "D", "stack": ["C", "E"], "visited": ["A", "B", "D"], "output": ["A", "B", "D"], "action": "visit"},
+                        {"step": 5, "description": "Pop E, visit E, push neighbor F", "current": "E", "stack": ["C", "F"], "visited": ["A", "B", "D", "E"], "output": ["A", "B", "D", "E"], "action": "visit"},
+                        {"step": 6, "description": "Pop F, visit F (C not visited yet via this path)", "current": "F", "stack": ["C"], "visited": ["A", "B", "D", "E", "F"], "output": ["A", "B", "D", "E", "F"], "action": "visit"},
+                        {"step": 7, "description": "Pop C, visit C, push neighbor G", "current": "C", "stack": ["G"], "visited": ["A", "B", "D", "E", "F", "C"], "output": ["A", "B", "D", "E", "F", "C"], "action": "visit"},
+                        {"step": 8, "description": "Pop G, visit G", "current": "G", "stack": [], "visited": ["A", "B", "D", "E", "F", "C", "G"], "output": ["A", "B", "D", "E", "F", "C", "G"], "action": "visit"},
+                        {"step": 9, "description": "Stack empty - DFS complete!", "current": null, "stack": [], "visited": ["A", "B", "D", "E", "F", "C", "G"], "output": ["A", "B", "D", "E", "F", "C", "G"], "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "shortest_path_bfs",
+                    "description": "Find shortest path using BFS (unweighted graph)",
+                    "start": "A",
+                    "end": "F",
+                    "steps": [
+                        {"step": 1, "description": "Find shortest path from A to F", "current": "A", "queue": ["A"], "visited": ["A"], "parent": {"A": null}, "action": "start"},
+                        {"step": 2, "description": "From A: discover B (parent=A), C (parent=A)", "current": "A", "queue": ["B", "C"], "visited": ["A", "B", "C"], "parent": {"A": null, "B": "A", "C": "A"}, "action": "explore"},
+                        {"step": 3, "description": "From B: discover D (parent=B), E (parent=B)", "current": "B", "queue": ["C", "D", "E"], "visited": ["A", "B", "C", "D", "E"], "parent": {"A": null, "B": "A", "C": "A", "D": "B", "E": "B"}, "action": "explore"},
+                        {"step": 4, "description": "From C: discover F (parent=C), G (parent=C)", "current": "C", "queue": ["D", "E", "F", "G"], "visited": ["A", "B", "C", "D", "E", "F", "G"], "parent": {"A": null, "B": "A", "C": "A", "D": "B", "E": "B", "F": "C", "G": "C"}, "action": "explore"},
+                        {"step": 5, "description": "F found! Backtrack: F <- C <- A", "path": ["A", "C", "F"], "distance": 2, "action": "found"},
+                        {"step": 6, "description": "Shortest path: A -> C -> F (distance: 2)", "path": ["A", "C", "F"], "distance": 2, "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "connected_components",
+                    "description": "Find connected components in graph",
+                    "steps": [
+                        {"step": 1, "description": "Start finding connected components", "visited": [], "components": [], "action": "start"},
+                        {"step": 2, "description": "Start new component from unvisited node A", "current": "A", "visited": ["A"], "current_component": ["A"], "action": "new_component"},
+                        {"step": 3, "description": "BFS/DFS from A finds all connected nodes", "visited": ["A", "B", "C", "D", "E", "F", "G"], "current_component": ["A", "B", "C", "D", "E", "F", "G"], "action": "explore"},
+                        {"step": 4, "description": "Component 1 complete: {A, B, C, D, E, F, G}", "visited": ["A", "B", "C", "D", "E", "F", "G"], "components": [["A", "B", "C", "D", "E", "F", "G"]], "action": "component_done"},
+                        {"step": 5, "description": "All nodes visited - 1 connected component found", "components": [["A", "B", "C", "D", "E", "F", "G"]], "num_components": 1, "action": "complete"}
+                    ]
+                }
+            ]
+        };
+
+        let currentAlgo = null;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let speed = 800;
+
+        function init() {
+            const selector = document.getElementById('algoSelector');
+            visualData.algorithms.forEach((algo, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'algo-btn';
+                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => selectAlgorithm(index);
+                selector.appendChild(btn);
+            });
+            document.getElementById('prevBtn').onclick = prevStep;
+            document.getElementById('nextBtn').onclick = nextStep;
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('resetBtn').onclick = reset;
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = 2100 - e.target.value;
+                document.getElementById('speedValue').textContent = speed + 'ms';
+            };
+        }
+
+        function selectAlgorithm(index) {
+            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+            currentAlgo = visualData.algorithms[index];
+            currentStep = 0;
+            stopPlay();
+            renderStep();
+            updateControls();
+        }
+
+        function renderStep() {
+            if (!currentAlgo) return;
+            const step = currentAlgo.steps[currentStep];
+            document.getElementById('stepDesc').textContent = step.description;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
+            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+
+            const content = document.getElementById('vizContent');
+            renderGraph(content, step);
+        }
+
+        function renderGraph(container, step) {
+            const current = step.current;
+            const visited = step.visited || [];
+            const queue = step.queue || step.stack || [];
+            const output = step.output || [];
+            const path = step.path || [];
+
+            let html = '<div class="graph-container">';
+            html += '<svg class="graph-svg" viewBox="0 0 700 350">';
+            
+            // Draw edges
+            graphEdges.forEach(([from, to]) => {
+                const fromNode = graphNodes.find(n => n.id === from);
+                const toNode = graphNodes.find(n => n.id === to);
+                const isVisited = visited.includes(from) && visited.includes(to);
+                const isPath = path.includes(from) && path.includes(to) && 
+                              Math.abs(path.indexOf(from) - path.indexOf(to)) === 1;
+                
+                let edgeClass = '';
+                if (isPath) edgeClass = 'current-edge';
+                else if (isVisited) edgeClass = 'visited';
+                
+                html += `<line x1="${fromNode.x}" y1="${fromNode.y}" x2="${toNode.x}" y2="${toNode.y}" class="${edgeClass}"/>`;
+            });
+            
+            // Draw nodes
+            graphNodes.forEach(node => {
+                const isCurrent = node.id === current;
+                const isVisited = visited.includes(node.id);
+                const inQueue = queue.includes(node.id);
+                const isStart = node.id === currentAlgo.start;
+                const isPath = path.includes(node.id);
+                
+                let nodeClass = '';
+                if (isCurrent) nodeClass = 'current';
+                else if (isPath) nodeClass = 'current';
+                else if (isVisited) nodeClass = 'visited';
+                else if (inQueue) nodeClass = 'in-queue';
+                
+                if (isStart && !isCurrent) nodeClass += ' start';
+                
+                html += `<circle cx="${node.x}" cy="${node.y}" r="25" class="${nodeClass}"/>`;
+                html += `<text x="${node.x}" y="${node.y}">${node.id}</text>`;
+            });
+            
+            html += '</svg>';
+            
+            // Queue/Stack display
+            if (queue.length > 0 || step.action !== 'complete') {
+                const dsName = currentAlgo.algorithm.includes('bfs') ? 'Queue' : 'Stack';
+                html += `<div class="data-structure">
+                    <span class="ds-label">${dsName}:</span>
+                    <div class="ds-items">
+                        ${queue.map(item => `<div class="ds-item">${item}</div>`).join('')}
+                        ${queue.length === 0 ? '<span style="color: #666;">Empty</span>' : ''}
+                    </div>
+                </div>`;
+            }
+            
+            // Traversal output
+            if (output.length > 0) {
+                html += '<div style="text-align: center; color: #888; margin-top: 15px;">Traversal Order:</div>';
+                html += '<div class="traversal-output">';
+                output.forEach(item => {
+                    html += `<div class="output-item">${item}</div>`;
+                });
+                html += '</div>';
+            }
+            
+            // Path display
+            if (path.length > 0) {
+                html += `<div style="text-align: center; margin-top: 15px;">
+                    <span style="color: #888;">Path: </span>
+                    <span style="color: #00ff00; font-weight: bold;">${path.join(' → ')}</span>
+                </div>`;
+            }
+            
+            html += '</div>';
+            
+            // Info panel
+            html += '<div class="info-panel">';
+            if (step.distance !== undefined) html += `<div class="info-box"><div class="info-label">Distance</div><div class="info-value">${step.distance}</div></div>`;
+            if (step.num_components !== undefined) html += `<div class="info-box"><div class="info-label">Components</div><div class="info-value">${step.num_components}</div></div>`;
+            html += `<div class="info-box"><div class="info-label">Visited</div><div class="info-value">${visited.length}</div></div>`;
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
+        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
+        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
+        function startPlay() {
+            if (!currentAlgo) return;
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Pause';
+            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
+        }
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (playInterval) { clearInterval(playInterval); playInterval = null; }
+        }
+        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
+            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
+        }
+        init();
+    </script>
+</body>
+</html>

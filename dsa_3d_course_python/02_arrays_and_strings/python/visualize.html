@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrays & Strings - 3D Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: #888; font-size: 1.1em; }
+        .algorithm-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .algo-btn {
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .algo-btn:hover, .algo-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 450px;
+            position: relative;
+        }
+        .step-description {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            border: none;
+            color: #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-bottom: 20px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
+
+        /* Array Corridor */
+        .array-corridor {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 40px 20px;
+            perspective: 800px;
+            flex-wrap: wrap;
+        }
+        .array-tile {
+            width: 70px;
+            min-height: 80px;
+            background: linear-gradient(180deg, #1a1a3a 0%, #0a0a2a 100%);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .array-tile::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 10px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 50%;
+            filter: blur(5px);
+        }
+        .array-tile.highlight {
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            transform: translateY(-15px) scale(1.1);
+        }
+        .array-tile.swap-left {
+            animation: swapLeft 0.5s ease;
+            background: linear-gradient(180deg, #ff00ff33 0%, #88008833 100%);
+            border-color: #ff00ff;
+        }
+        .array-tile.swap-right {
+            animation: swapRight 0.5s ease;
+            background: linear-gradient(180deg, #ff00ff33 0%, #88008833 100%);
+            border-color: #ff00ff;
+        }
+        .array-tile.window {
+            background: linear-gradient(180deg, #00ff0033 0%, #00880033 100%);
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .array-tile.found {
+            background: linear-gradient(180deg, #ffd70066 0%, #cc990033 100%);
+            border-color: #ffd700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+            transform: translateY(-20px) scale(1.15);
+        }
+        .array-tile.checking {
+            background: linear-gradient(180deg, #ff660033 0%, #cc440033 100%);
+            border-color: #ff6600;
+        }
+        .array-tile.shifted {
+            opacity: 0.5;
+            transform: translateX(70px);
+        }
+        @keyframes swapLeft { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-40px) translateY(-20px); } }
+        @keyframes swapRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(40px) translateY(-20px); } }
+        .tile-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #fff;
+        }
+        .tile-index {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .pointer {
+            position: absolute;
+            top: -30px;
+            font-size: 1.5em;
+        }
+        .pointer.left { color: #00ffff; }
+        .pointer.right { color: #ff00ff; }
+
+        /* Hash Map Visualization */
+        .hash-map-view {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        .hash-bucket {
+            background: rgba(0, 100, 100, 0.2);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 150px;
+        }
+        .bucket-title {
+            color: #00ffff;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .bucket-entry {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        /* String View */
+        .string-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .string-container {
+            display: flex;
+            gap: 5px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .char-box {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #00ffff;
+        }
+        .memory-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+        .info-label { color: #888; font-size: 0.9em; }
+        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .speed-label { color: #888; }
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Arrays & Strings</h1>
+        <p class="subtitle">Interactive 3D Visualization</p>
+    </header>
+    <div class="container">
+        <div class="algorithm-selector" id="algoSelector"></div>
+        <div class="visualization-area">
+            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
+            <div id="vizContent"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="nextBtn" disabled>Next</button>
+            <button class="control-btn" id="resetBtn">Reset</button>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
+            <span class="speed-label" id="speedValue">800ms</span>
+        </div>
+    </div>
+
+    <script>
+        const visualData = {"world":"02_arrays_and_strings","algorithms":[{"algorithm":"array_access","description":"O(1) array index access demonstration","input":{"array":[10,20,30,40,50,60,70,80],"index":5},"steps":[{"step":1,"description":"Display array corridor with 8 tiles","array_state":[10,20,30,40,50,60,70,80],"action":"show_array"},{"step":2,"description":"User requests access to index 5","target_index":5,"action":"highlight_request"},{"step":3,"description":"Instant beam illuminates tile 5","focus_indices":[5],"action":"access_beam"},{"step":4,"description":"Display value 60 and O(1) label","value":60,"complexity":"O(1)","action":"show_result"}]},{"algorithm":"linear_search","description":"O(n) linear search through array","input":{"array":[5,2,8,1,9,3,7],"target":9},"steps":[{"step":1,"description":"Initialize search for target 9","array_state":[5,2,8,1,9,3,7],"target":9,"action":"initialize"},{"step":2,"description":"Check index 0: 5 != 9","focus_indices":[0],"comparison":"5 != 9","match":false,"action":"compare"},{"step":3,"description":"Check index 1: 2 != 9","focus_indices":[1],"comparison":"2 != 9","match":false,"action":"compare"},{"step":4,"description":"Check index 2: 8 != 9","focus_indices":[2],"comparison":"8 != 9","match":false,"action":"compare"},{"step":5,"description":"Check index 3: 1 != 9","focus_indices":[3],"comparison":"1 != 9","match":false,"action":"compare"},{"step":6,"description":"Check index 4: 9 == 9 FOUND!","focus_indices":[4],"comparison":"9 == 9","match":true,"action":"found"},{"step":7,"description":"Return index 4","result_index":4,"operations":5,"action":"complete"}]},{"algorithm":"two_pointer_reverse","description":"Reverse array in-place using two pointers","input":{"array":["R","E","V","E","R","S","E"]},"steps":[{"step":1,"description":"Initialize pointers at ends","array_state":["R","E","V","E","R","S","E"],"left":0,"right":6,"action":"initialize"},{"step":2,"description":"Swap indices 0 and 6: R <-> E","focus_indices":[0,6],"action":"swap"},{"step":3,"description":"After swap","array_state":["E","E","V","E","R","S","R"],"left":1,"right":5,"action":"move_pointers"},{"step":4,"description":"Swap indices 1 and 5: E <-> S","focus_indices":[1,5],"action":"swap"},{"step":5,"description":"After swap","array_state":["E","S","V","E","R","E","R"],"left":2,"right":4,"action":"move_pointers"},{"step":6,"description":"Swap indices 2 and 4: V <-> R","focus_indices":[2,4],"action":"swap"},{"step":7,"description":"After swap","array_state":["E","S","R","E","V","E","R"],"left":3,"right":3,"action":"move_pointers"},{"step":8,"description":"Pointers crossed - reversal complete","array_state":["E","S","R","E","V","E","R"],"action":"complete"}]},{"algorithm":"sliding_window_sum","description":"Calculate sum of sliding window of size k","input":{"array":[2,1,5,1,3,2],"k":3},"steps":[{"step":1,"description":"Initialize window [0:3]","array_state":[2,1,5,1,3,2],"window_start":0,"window_end":2,"window_sum":8,"action":"initial_window"},{"step":2,"description":"Slide window: remove 2, add 1","window_start":1,"window_end":3,"leaving":2,"entering":1,"window_sum":7,"action":"slide"},{"step":3,"description":"Slide window: remove 1, add 3","window_start":2,"window_end":4,"leaving":1,"entering":3,"window_sum":9,"max_so_far":9,"action":"slide"},{"step":4,"description":"Slide window: remove 5, add 2","window_start":3,"window_end":5,"leaving":5,"entering":2,"window_sum":6,"action":"slide"},{"step":5,"description":"Window reached end - maximum sum was 9","max_sum":9,"max_window":[5,1,3],"action":"complete"}]},{"algorithm":"two_sum","description":"Find two numbers that sum to target using hash map","input":{"array":[2,7,11,15],"target":9},"steps":[{"step":1,"description":"Initialize hash map, target = 9","array_state":[2,7,11,15],"hash_map":{},"action":"initialize"},{"step":2,"description":"Process index 0: value=2, complement=7, not in map","focus_indices":[0],"value":2,"complement":7,"found":false,"action":"check_and_store"},{"step":3,"description":"Store 2 -> 0 in hash map","hash_map":{"2":0},"action":"store"},{"step":4,"description":"Process index 1: value=7, complement=2, FOUND in map!","focus_indices":[0,1],"value":7,"complement":2,"found":true,"action":"found"},{"step":5,"description":"Return indices (0, 1): 2 + 7 = 9","result":[0,1],"action":"complete"}]},{"algorithm":"string_concatenation","description":"Demonstrate string immutability during concatenation","input":{"str_a":"HELLO","str_b":"WORLD"},"steps":[{"step":1,"description":"Create string A: 'HELLO'","string":"HELLO","memory_id":"A001","action":"create_string"},{"step":2,"description":"Create string B: 'WORLD'","string":"WORLD","memory_id":"B002","action":"create_string"},{"step":3,"description":"Concatenate A + B","operation":"concatenation","action":"start_concat"},{"step":4,"description":"NEW string created: 'HELLOWORLD'","string":"HELLOWORLD","memory_id":"C003","new_object":true,"action":"create_result"},{"step":5,"description":"Original strings unchanged","originals":[{"string":"HELLO","memory_id":"A001"},{"string":"WORLD","memory_id":"B002"}],"action":"verify_immutability"}]},{"algorithm":"array_insert","description":"Insert element in middle of array showing O(n) shift","input":{"array":[10,20,30,40,50,60,70,80],"index":3,"value":35},"steps":[{"step":1,"description":"Array before insertion","array_state":[10,20,30,40,50,60,70,80],"action":"show_initial"},{"step":2,"description":"Insert 35 at index 3","insert_index":3,"insert_value":35,"action":"start_insert"},{"step":3,"description":"Shift element at index 7 to index 8","shift_from":7,"shift_to":8,"value":80,"action":"shift"},{"step":4,"description":"Shift element at index 6 to index 7","shift_from":6,"shift_to":7,"value":70,"action":"shift"},{"step":5,"description":"Shift element at index 5 to index 6","shift_from":5,"shift_to":6,"value":60,"action":"shift"},{"step":6,"description":"Shift element at index 4 to index 5","shift_from":4,"shift_to":5,"value":50,"action":"shift"},{"step":7,"description":"Shift element at index 3 to index 4","shift_from":3,"shift_to":4,"value":40,"action":"shift"},{"step":8,"description":"Place 35 at index 3","place_index":3,"place_value":35,"action":"place"},{"step":9,"description":"Insertion complete - 5 elements shifted","array_state":[10,20,30,35,40,50,60,70,80],"elements_shifted":5,"complexity":"O(n)","action":"complete"}]}]};
+
+        let currentAlgo = null;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let speed = 800;
+        let arrayState = [];
+        let hashMapState = {};
+
+        function init() {
+            const selector = document.getElementById('algoSelector');
+            visualData.algorithms.forEach((algo, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'algo-btn';
+                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => selectAlgorithm(index);
+                selector.appendChild(btn);
+            });
+            document.getElementById('prevBtn').onclick = prevStep;
+            document.getElementById('nextBtn').onclick = nextStep;
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('resetBtn').onclick = reset;
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = 2100 - e.target.value;
+                document.getElementById('speedValue').textContent = speed + 'ms';
+            };
+        }
+
+        function selectAlgorithm(index) {
+            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+            currentAlgo = visualData.algorithms[index];
+            currentStep = 0;
+            arrayState = currentAlgo.input?.array ? [...currentAlgo.input.array] : [];
+            hashMapState = {};
+            stopPlay();
+            renderStep();
+            updateControls();
+        }
+
+        function renderStep() {
+            if (!currentAlgo) return;
+            const step = currentAlgo.steps[currentStep];
+            document.getElementById('stepDesc').textContent = step.description;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
+            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+
+            if (step.array_state) arrayState = [...step.array_state];
+            if (step.hash_map) hashMapState = {...step.hash_map};
+
+            const content = document.getElementById('vizContent');
+            switch(currentAlgo.algorithm) {
+                case 'array_access':
+                case 'linear_search':
+                case 'array_insert':
+                    renderArrayView(content, step);
+                    break;
+                case 'two_pointer_reverse':
+                    renderTwoPointerView(content, step);
+                    break;
+                case 'sliding_window_sum':
+                    renderSlidingWindow(content, step);
+                    break;
+                case 'two_sum':
+                    renderTwoSum(content, step);
+                    break;
+                case 'string_concatenation':
+                    renderStringConcat(content, step);
+                    break;
+            }
+        }
+
+        function renderArrayView(container, step) {
+            const arr = arrayState.length ? arrayState : currentAlgo.input.array;
+            const focus = step.focus_indices || [];
+            const isFound = step.action === 'found' || step.action === 'show_result';
+            const shiftFrom = step.shift_from;
+
+            container.innerHTML = `
+                <div class="array-corridor">
+                    ${arr.map((val, i) => {
+                        let cls = 'array-tile';
+                        if (isFound && focus.includes(i)) cls += ' found';
+                        else if (focus.includes(i)) cls += ' highlight';
+                        else if (step.action === 'compare' && focus.includes(i)) cls += ' checking';
+                        if (shiftFrom === i) cls += ' shifted';
+                        return `<div class="${cls}"><div class="tile-value">${val}</div><div class="tile-index">[${i}]</div></div>`;
+                    }).join('')}
+                </div>
+                <div class="info-panel">
+                    ${step.target !== undefined ? `<div class="info-box"><div class="info-label">Target</div><div class="info-value">${step.target}</div></div>` : ''}
+                    ${step.complexity ? `<div class="info-box"><div class="info-label">Complexity</div><div class="info-value">${step.complexity}</div></div>` : ''}
+                    ${step.value !== undefined ? `<div class="info-box"><div class="info-label">Value</div><div class="info-value">${step.value}</div></div>` : ''}
+                    ${step.operations ? `<div class="info-box"><div class="info-label">Operations</div><div class="info-value">${step.operations}</div></div>` : ''}
+                </div>
+            `;
+        }
+
+        function renderTwoPointerView(container, step) {
+            const arr = arrayState.length ? arrayState : currentAlgo.input.array;
+            const left = step.left;
+            const right = step.right;
+            const swapping = step.action === 'swap';
+
+            container.innerHTML = `
+                <div class="array-corridor">
+                    ${arr.map((val, i) => {
+                        let cls = 'array-tile';
+                        if (swapping && (i === left || i === right)) cls += i === left ? ' swap-left' : ' swap-right';
+                        else if (i === left || i === right) cls += ' highlight';
+                        return `
+                            <div class="${cls}">
+                                ${i === left ? '<div class="pointer left">L</div>' : ''}
+                                ${i === right ? '<div class="pointer right">R</div>' : ''}
+                                <div class="tile-value">${val}</div>
+                                <div class="tile-index">[${i}]</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderSlidingWindow(container, step) {
+            const arr = currentAlgo.input.array;
+            const start = step.window_start;
+            const end = step.window_end;
+
+            container.innerHTML = `
+                <div class="array-corridor">
+                    ${arr.map((val, i) => {
+                        let cls = 'array-tile';
+                        if (i >= start && i <= end) cls += ' window';
+                        return `<div class="${cls}"><div class="tile-value">${val}</div><div class="tile-index">[${i}]</div></div>`;
+                    }).join('')}
+                </div>
+                <div class="info-panel">
+                    <div class="info-box"><div class="info-label">Window Sum</div><div class="info-value">${step.window_sum || '-'}</div></div>
+                    ${step.max_sum ? `<div class="info-box"><div class="info-label">Max Sum</div><div class="info-value">${step.max_sum}</div></div>` : ''}
+                    ${step.leaving !== undefined ? `<div class="info-box"><div class="info-label">Leaving</div><div class="info-value">${step.leaving}</div></div>` : ''}
+                    ${step.entering !== undefined ? `<div class="info-box"><div class="info-label">Entering</div><div class="info-value">${step.entering}</div></div>` : ''}
+                </div>
+            `;
+        }
+
+        function renderTwoSum(container, step) {
+            const arr = currentAlgo.input.array;
+            const focus = step.focus_indices || [];
+            const isFound = step.found;
+
+            container.innerHTML = `
+                <div class="hash-map-view">
+                    <div>
+                        <h3 style="color: #00ffff; margin-bottom: 15px;">Array</h3>
+                        <div class="array-corridor" style="padding: 10px;">
+                            ${arr.map((val, i) => {
+                                let cls = 'array-tile';
+                                if (isFound && focus.includes(i)) cls += ' found';
+                                else if (focus.includes(i)) cls += ' highlight';
+                                return `<div class="${cls}"><div class="tile-value">${val}</div><div class="tile-index">[${i}]</div></div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                    <div class="hash-bucket">
+                        <div class="bucket-title">Hash Map</div>
+                        ${Object.keys(hashMapState).length ? Object.entries(hashMapState).map(([k, v]) => 
+                            `<div class="bucket-entry">${k} -> index ${v}</div>`
+                        ).join('') : '<div style="color: #888;">Empty</div>'}
+                    </div>
+                </div>
+                <div class="info-panel">
+                    <div class="info-box"><div class="info-label">Target</div><div class="info-value">${currentAlgo.input.target}</div></div>
+                    ${step.complement !== undefined ? `<div class="info-box"><div class="info-label">Looking for</div><div class="info-value">${step.complement}</div></div>` : ''}
+                    ${step.result ? `<div class="info-box"><div class="info-label">Result</div><div class="info-value">[${step.result.join(', ')}]</div></div>` : ''}
+                </div>
+            `;
+        }
+
+        function renderStringConcat(container, step) {
+            const renderString = (str, label) => `
+                <div style="text-align: center;">
+                    <div class="memory-label">${label}</div>
+                    <div class="string-container">
+                        ${str.split('').map(c => `<div class="char-box">${c}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            let html = '<div class="string-view">';
+            if (step.action === 'create_string') {
+                html += renderString(step.string, `String ${step.memory_id}`);
+            } else if (step.action === 'create_result') {
+                html += renderString(step.string, `NEW String ${step.memory_id}`);
+            } else if (step.action === 'verify_immutability') {
+                html += step.originals.map(o => renderString(o.string, `Original ${o.memory_id}`)).join('');
+            } else {
+                html += renderString(currentAlgo.input.str_a, 'String A');
+                html += '<div style="font-size: 2em; color: #ff00ff;">+</div>';
+                html += renderString(currentAlgo.input.str_b, 'String B');
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
+        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
+        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
+        function startPlay() {
+            if (!currentAlgo) return;
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Pause';
+            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
+        }
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (playInterval) { clearInterval(playInterval); playInterval = null; }
+        }
+        function reset() { stopPlay(); currentStep = 0; if (currentAlgo?.input?.array) arrayState = [...currentAlgo.input.array]; hashMapState = {}; renderStep(); updateControls(); }
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
+            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
+        }
+        init();
+    </script>
+</body>
+</html>

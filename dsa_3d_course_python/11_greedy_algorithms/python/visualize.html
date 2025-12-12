@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greedy Algorithms - 3D Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: #888; font-size: 1.1em; }
+        .algorithm-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .algo-btn {
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .algo-btn:hover, .algo-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 450px;
+        }
+        .step-description {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            border: none;
+            color: #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
+
+        /* Coin Change Visualization */
+        .coins-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            padding: 20px;
+        }
+        .coins-available {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .coin {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .coin.gold { background: linear-gradient(135deg, #ffd700, #cc9900); color: #000; border: 3px solid #ffaa00; }
+        .coin.silver { background: linear-gradient(135deg, #c0c0c0, #808080); color: #000; border: 3px solid #a0a0a0; }
+        .coin.bronze { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; border: 3px solid #a0522d; }
+        .coin.selected {
+            transform: scale(1.2);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+            border-color: #00ff00;
+        }
+        .coin.considering {
+            animation: pulse 0.5s infinite;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .coin-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #00ffff;
+            color: #000;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+        }
+        .selected-coins {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 15px;
+            min-height: 100px;
+            min-width: 300px;
+        }
+
+        /* Activity Selection */
+        .timeline-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+        .timeline {
+            position: relative;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .time-axis {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #666;
+        }
+        .time-label {
+            position: absolute;
+            bottom: 5px;
+            transform: translateX(-50%);
+            color: #888;
+            font-size: 0.8em;
+        }
+        .activity {
+            position: absolute;
+            height: 30px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .activity.available {
+            background: linear-gradient(90deg, #00ffff33, #00888833);
+            border: 2px solid #00ffff;
+        }
+        .activity.selected {
+            background: linear-gradient(90deg, #00ff0033, #00880033);
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+        }
+        .activity.considering {
+            background: linear-gradient(90deg, #ffd70033, #cc990033);
+            border: 2px solid #ffd700;
+            animation: pulse 0.5s infinite;
+        }
+        .activity.rejected {
+            background: linear-gradient(90deg, #ff333333, #cc000033);
+            border: 2px solid #ff3333;
+            opacity: 0.5;
+        }
+
+        /* Fractional Knapsack */
+        .knapsack-container {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 2px solid #00ffff;
+            transition: all 0.3s ease;
+        }
+        .item.selected {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+        .item.partial {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+        .item-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff00ff, #880088);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .knapsack {
+            width: 150px;
+            height: 200px;
+            background: linear-gradient(180deg, #1a1a3a, #0a0a2a);
+            border: 3px solid #00ffff;
+            border-radius: 10px 10px 20px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .knapsack-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, #00ff00, #008800);
+            transition: height 0.5s ease;
+        }
+        .knapsack-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+        .info-label { color: #888; font-size: 0.9em; }
+        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .speed-label { color: #888; }
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Greedy Algorithms</h1>
+        <p class="subtitle">Interactive 3D Visualization</p>
+    </header>
+    <div class="container">
+        <div class="algorithm-selector" id="algoSelector"></div>
+        <div class="visualization-area">
+            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
+            <div id="vizContent"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="nextBtn" disabled>Next</button>
+            <button class="control-btn" id="resetBtn">Reset</button>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
+            <span class="speed-label" id="speedValue">800ms</span>
+        </div>
+    </div>
+
+    <script>
+        const visualData = {
+            "world": "11_greedy_algorithms",
+            "algorithms": [
+                {
+                    "algorithm": "coin_change_greedy",
+                    "description": "Coin Change - make change using fewest coins",
+                    "coins": [25, 10, 5, 1],
+                    "amount": 63,
+                    "steps": [
+                        {"step": 1, "description": "Make change for 63 cents using coins [25, 10, 5, 1]", "remaining": 63, "selected": [], "action": "init"},
+                        {"step": 2, "description": "Greedy: try largest coin first (25)", "remaining": 63, "considering": 25, "selected": [], "action": "consider"},
+                        {"step": 3, "description": "25 <= 63, use it! Remaining: 63-25=38", "remaining": 38, "selected": [25], "action": "select"},
+                        {"step": 4, "description": "Try 25 again: 25 <= 38, use it! Remaining: 13", "remaining": 13, "selected": [25, 25], "action": "select"},
+                        {"step": 5, "description": "Try 25: 25 > 13, too big. Try 10", "remaining": 13, "considering": 10, "selected": [25, 25], "action": "consider"},
+                        {"step": 6, "description": "10 <= 13, use it! Remaining: 3", "remaining": 3, "selected": [25, 25, 10], "action": "select"},
+                        {"step": 7, "description": "Try 10: 10 > 3. Try 5: 5 > 3. Try 1", "remaining": 3, "considering": 1, "selected": [25, 25, 10], "action": "consider"},
+                        {"step": 8, "description": "Use three 1-cent coins", "remaining": 0, "selected": [25, 25, 10, 1, 1, 1], "action": "select"},
+                        {"step": 9, "description": "Done! 6 coins total: 2x25 + 1x10 + 3x1 = 63", "remaining": 0, "selected": [25, 25, 10, 1, 1, 1], "total_coins": 6, "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "activity_selection",
+                    "description": "Activity Selection - maximize non-overlapping activities",
+                    "activities": [
+                        {"id": "A", "start": 1, "end": 4},
+                        {"id": "B", "start": 3, "end": 5},
+                        {"id": "C", "start": 0, "end": 6},
+                        {"id": "D", "start": 5, "end": 7},
+                        {"id": "E", "start": 3, "end": 9},
+                        {"id": "F", "start": 5, "end": 9},
+                        {"id": "G", "start": 6, "end": 10},
+                        {"id": "H", "start": 8, "end": 11}
+                    ],
+                    "steps": [
+                        {"step": 1, "description": "Select maximum non-overlapping activities", "selected": [], "action": "init"},
+                        {"step": 2, "description": "Sort by end time: A(1-4), B(3-5), C(0-6), D(5-7), E(3-9), F(5-9), G(6-10), H(8-11)", "selected": [], "sorted": true, "action": "sort"},
+                        {"step": 3, "description": "Greedy: always pick activity with earliest end time", "selected": [], "considering": "A", "action": "consider"},
+                        {"step": 4, "description": "Select A (ends at 4)", "selected": ["A"], "last_end": 4, "action": "select"},
+                        {"step": 5, "description": "B starts at 3 < 4, overlaps with A. Skip.", "selected": ["A"], "considering": "B", "rejected": "B", "action": "reject"},
+                        {"step": 6, "description": "C starts at 0 < 4, overlaps. Skip.", "selected": ["A"], "rejected": "C", "action": "reject"},
+                        {"step": 7, "description": "D starts at 5 >= 4, no overlap. Select D!", "selected": ["A", "D"], "considering": "D", "last_end": 7, "action": "select"},
+                        {"step": 8, "description": "E starts at 3 < 7, overlaps. F starts at 5 < 7, overlaps. Skip both.", "selected": ["A", "D"], "rejected": ["E", "F"], "action": "reject"},
+                        {"step": 9, "description": "G starts at 6 < 7, overlaps. Skip.", "selected": ["A", "D"], "rejected": "G", "action": "reject"},
+                        {"step": 10, "description": "H starts at 8 >= 7, no overlap. Select H!", "selected": ["A", "D", "H"], "considering": "H", "action": "select"},
+                        {"step": 11, "description": "Done! Maximum 3 activities: A, D, H", "selected": ["A", "D", "H"], "total": 3, "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "fractional_knapsack",
+                    "description": "Fractional Knapsack - maximize value with weight limit",
+                    "capacity": 50,
+                    "items": [
+                        {"id": 1, "weight": 10, "value": 60, "ratio": 6.0},
+                        {"id": 2, "weight": 20, "value": 100, "ratio": 5.0},
+                        {"id": 3, "weight": 30, "value": 120, "ratio": 4.0}
+                    ],
+                    "steps": [
+                        {"step": 1, "description": "Knapsack capacity: 50kg. Maximize value.", "capacity": 50, "used": 0, "value": 0, "selected": [], "action": "init"},
+                        {"step": 2, "description": "Sort by value/weight ratio: Item1(6.0) > Item2(5.0) > Item3(4.0)", "sorted": true, "action": "sort"},
+                        {"step": 3, "description": "Greedy: pick highest ratio first. Item1: 10kg, $60", "considering": 1, "action": "consider"},
+                        {"step": 4, "description": "Take all of Item1 (10kg). Remaining: 40kg, Value: $60", "used": 10, "value": 60, "selected": [{"id": 1, "fraction": 1.0}], "action": "select"},
+                        {"step": 5, "description": "Item2: 20kg, $100. Take all.", "considering": 2, "action": "consider"},
+                        {"step": 6, "description": "Take all of Item2 (20kg). Remaining: 20kg, Value: $160", "used": 30, "value": 160, "selected": [{"id": 1, "fraction": 1.0}, {"id": 2, "fraction": 1.0}], "action": "select"},
+                        {"step": 7, "description": "Item3: 30kg, but only 20kg space. Take fraction!", "considering": 3, "action": "consider"},
+                        {"step": 8, "description": "Take 20/30 = 66.7% of Item3. Value: $80", "used": 50, "value": 240, "selected": [{"id": 1, "fraction": 1.0}, {"id": 2, "fraction": 1.0}, {"id": 3, "fraction": 0.667}], "action": "select_partial"},
+                        {"step": 9, "description": "Knapsack full! Total value: $240", "used": 50, "value": 240, "action": "complete"}
+                    ]
+                }
+            ]
+        };
+
+        let currentAlgo = null;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let speed = 800;
+
+        function init() {
+            const selector = document.getElementById('algoSelector');
+            visualData.algorithms.forEach((algo, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'algo-btn';
+                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => selectAlgorithm(index);
+                selector.appendChild(btn);
+            });
+            document.getElementById('prevBtn').onclick = prevStep;
+            document.getElementById('nextBtn').onclick = nextStep;
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('resetBtn').onclick = reset;
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = 2100 - e.target.value;
+                document.getElementById('speedValue').textContent = speed + 'ms';
+            };
+        }
+
+        function selectAlgorithm(index) {
+            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+            currentAlgo = visualData.algorithms[index];
+            currentStep = 0;
+            stopPlay();
+            renderStep();
+            updateControls();
+        }
+
+        function renderStep() {
+            if (!currentAlgo) return;
+            const step = currentAlgo.steps[currentStep];
+            document.getElementById('stepDesc').textContent = step.description;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
+            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+
+            const content = document.getElementById('vizContent');
+            
+            switch(currentAlgo.algorithm) {
+                case 'coin_change_greedy':
+                    renderCoinChange(content, step);
+                    break;
+                case 'activity_selection':
+                    renderActivitySelection(content, step);
+                    break;
+                case 'fractional_knapsack':
+                    renderKnapsack(content, step);
+                    break;
+            }
+        }
+
+        function renderCoinChange(container, step) {
+            const coins = currentAlgo.coins;
+            const selected = step.selected || [];
+            const considering = step.considering;
+            const remaining = step.remaining;
+
+            let html = '<div class="coins-container">';
+            
+            html += '<div style="color: #888; margin-bottom: 10px;">Available Coins:</div>';
+            html += '<div class="coins-available">';
+            coins.forEach(coin => {
+                const coinClass = coin === considering ? 'considering' : '';
+                const style = coin >= 25 ? 'gold' : coin >= 10 ? 'silver' : 'bronze';
+                html += `<div class="coin ${style} ${coinClass}">${coin}c</div>`;
+            });
+            html += '</div>';
+            
+            html += '<div style="color: #888; margin: 20px 0 10px;">Selected Coins:</div>';
+            html += '<div class="selected-coins">';
+            if (selected.length === 0) {
+                html += '<span style="color: #666;">None yet</span>';
+            } else {
+                selected.forEach(coin => {
+                    const style = coin >= 25 ? 'gold' : coin >= 10 ? 'silver' : 'bronze';
+                    html += `<div class="coin ${style} selected" style="width: 50px; height: 50px; font-size: 0.9em;">${coin}c</div>`;
+                });
+            }
+            html += '</div>';
+            
+            html += '</div>';
+            
+            html += '<div class="info-panel">';
+            html += `<div class="info-box"><div class="info-label">Target</div><div class="info-value">${currentAlgo.amount}c</div></div>`;
+            html += `<div class="info-box"><div class="info-label">Remaining</div><div class="info-value">${remaining}c</div></div>`;
+            html += `<div class="info-box"><div class="info-label">Coins Used</div><div class="info-value">${selected.length}</div></div>`;
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function renderActivitySelection(container, step) {
+            const activities = currentAlgo.activities;
+            const selected = step.selected || [];
+            const considering = step.considering;
+            const rejected = step.rejected;
+
+            let html = '<div class="timeline-container">';
+            html += '<div class="timeline">';
+            
+            // Time axis labels
+            for (let i = 0; i <= 12; i += 2) {
+                html += `<div class="time-label" style="left: ${(i/12)*100}%">${i}</div>`;
+            }
+            html += '<div class="time-axis"></div>';
+            
+            // Activities
+            activities.forEach((act, i) => {
+                const left = (act.start / 12) * 100;
+                const width = ((act.end - act.start) / 12) * 100;
+                const top = 40 + (i % 4) * 35;
+                
+                let actClass = 'available';
+                if (selected.includes(act.id)) actClass = 'selected';
+                else if (act.id === considering) actClass = 'considering';
+                else if (rejected === act.id || (Array.isArray(rejected) && rejected.includes(act.id))) actClass = 'rejected';
+                
+                html += `<div class="activity ${actClass}" style="left: ${left}%; width: ${width}%; top: ${top}px;">${act.id} (${act.start}-${act.end})</div>`;
+            });
+            
+            html += '</div></div>';
+            
+            html += '<div class="info-panel">';
+            html += `<div class="info-box"><div class="info-label">Selected</div><div class="info-value">${selected.join(', ') || 'None'}</div></div>`;
+            html += `<div class="info-box"><div class="info-label">Count</div><div class="info-value">${selected.length}</div></div>`;
+            if (step.last_end) html += `<div class="info-box"><div class="info-label">Last End Time</div><div class="info-value">${step.last_end}</div></div>`;
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function renderKnapsack(container, step) {
+            const items = currentAlgo.items;
+            const capacity = currentAlgo.capacity;
+            const used = step.used || 0;
+            const value = step.value || 0;
+            const selected = step.selected || [];
+            const considering = step.considering;
+
+            let html = '<div class="knapsack-container">';
+            
+            html += '<div class="items-list">';
+            html += '<div style="color: #888; margin-bottom: 10px;">Items (sorted by value/weight):</div>';
+            items.forEach(item => {
+                const sel = selected.find(s => s.id === item.id);
+                let itemClass = '';
+                if (sel && sel.fraction === 1) itemClass = 'selected';
+                else if (sel && sel.fraction < 1) itemClass = 'partial';
+                
+                html += `<div class="item ${itemClass}" ${item.id === considering ? 'style="border-color: #ffd700;"' : ''}>
+                    <div class="item-icon">${item.id}</div>
+                    <div>
+                        <div>Weight: ${item.weight}kg</div>
+                        <div>Value: $${item.value}</div>
+                        <div style="color: #00ffff;">Ratio: ${item.ratio}</div>
+                        ${sel ? `<div style="color: #00ff00;">Taking: ${(sel.fraction * 100).toFixed(0)}%</div>` : ''}
+                    </div>
+                </div>`;
+            });
+            html += '</div>';
+            
+            html += '<div style="text-align: center;">';
+            html += '<div style="color: #888; margin-bottom: 10px;">Knapsack</div>';
+            html += `<div class="knapsack">
+                <div class="knapsack-fill" style="height: ${(used/capacity)*100}%;"></div>
+                <div class="knapsack-label">${used}/${capacity}kg</div>
+            </div>`;
+            html += '</div>';
+            
+            html += '</div>';
+            
+            html += '<div class="info-panel">';
+            html += `<div class="info-box"><div class="info-label">Capacity</div><div class="info-value">${capacity}kg</div></div>`;
+            html += `<div class="info-box"><div class="info-label">Used</div><div class="info-value">${used}kg</div></div>`;
+            html += `<div class="info-box"><div class="info-label">Total Value</div><div class="info-value" style="color:#00ff00;">$${value}</div></div>`;
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
+        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
+        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
+        function startPlay() {
+            if (!currentAlgo) return;
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Pause';
+            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
+        }
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (playInterval) { clearInterval(playInterval); playInterval = null; }
+        }
+        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
+            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
+        }
+        init();
+    </script>
+</body>
+</html>

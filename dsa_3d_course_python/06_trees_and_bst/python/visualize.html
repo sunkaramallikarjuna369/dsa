@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trees & BST - 3D Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: #888; font-size: 1.1em; }
+        .algorithm-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .algo-btn {
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .algo-btn:hover, .algo-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 500px;
+        }
+        .step-description {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            border: none;
+            color: #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
+
+        /* Tree Visualization */
+        .tree-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 400px;
+        }
+        .tree-level {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        .tree-node {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.2);
+        }
+        .tree-node.root {
+            border-color: #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+        .tree-node.current {
+            border-color: #00ff00;
+            background: linear-gradient(135deg, #00ff0033, #00880033);
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.5);
+            transform: scale(1.15);
+        }
+        .tree-node.visited {
+            border-color: #ff00ff;
+            background: linear-gradient(135deg, #ff00ff33, #88008833);
+        }
+        .tree-node.comparing {
+            border-color: #ff6600;
+            box-shadow: 0 0 30px rgba(255, 102, 0, 0.5);
+        }
+        .tree-node.inserting {
+            border-color: #ffd700;
+            animation: pulse 0.5s infinite;
+        }
+        .tree-node.found {
+            border-color: #00ff00;
+            background: linear-gradient(135deg, #00ff00, #008800);
+            color: #000;
+        }
+        .tree-node.null-node {
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: 2px dashed #666;
+            font-size: 0.8em;
+            color: #666;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .tree-edge {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #00ffff, #0088aa);
+            transform-origin: left center;
+        }
+        .tree-edge.visited {
+            background: linear-gradient(90deg, #ff00ff, #880088);
+        }
+
+        /* SVG Tree */
+        .tree-svg {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+        }
+        .tree-svg line {
+            stroke: #00ffff;
+            stroke-width: 2;
+            transition: stroke 0.3s ease;
+        }
+        .tree-svg line.visited {
+            stroke: #ff00ff;
+            stroke-width: 3;
+        }
+        .tree-svg circle {
+            fill: #1a1a3a;
+            stroke: #00ffff;
+            stroke-width: 3;
+            transition: all 0.3s ease;
+        }
+        .tree-svg circle.current {
+            fill: #00ff0033;
+            stroke: #00ff00;
+            filter: drop-shadow(0 0 10px #00ff00);
+        }
+        .tree-svg circle.visited {
+            fill: #ff00ff33;
+            stroke: #ff00ff;
+        }
+        .tree-svg circle.root {
+            stroke: #ffd700;
+            filter: drop-shadow(0 0 10px #ffd700);
+        }
+        .tree-svg text {
+            fill: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+
+        /* Traversal Output */
+        .traversal-output {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .output-item {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff00ff33, #88008833);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+        .info-label { color: #888; font-size: 0.9em; }
+        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .speed-label { color: #888; }
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Trees & Binary Search Trees</h1>
+        <p class="subtitle">Interactive 3D Visualization</p>
+    </header>
+    <div class="container">
+        <div class="algorithm-selector" id="algoSelector"></div>
+        <div class="visualization-area">
+            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
+            <div id="vizContent"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="nextBtn" disabled>Next</button>
+            <button class="control-btn" id="resetBtn">Reset</button>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
+            <span class="speed-label" id="speedValue">800ms</span>
+        </div>
+    </div>
+
+    <script>
+        const visualData = {
+            "world": "06_trees_and_bst",
+            "algorithms": [
+                {
+                    "algorithm": "bst_insert",
+                    "description": "Insert elements into Binary Search Tree",
+                    "steps": [
+                        {"step": 1, "description": "Start with empty BST, insert 50", "tree": {50: {left: null, right: null}}, "current": 50, "action": "insert_root"},
+                        {"step": 2, "description": "Insert 30: 30 < 50, go left", "tree": {50: {left: 30, right: null}}, "current": 30, "comparing": 50, "action": "insert"},
+                        {"step": 3, "description": "Insert 70: 70 > 50, go right", "tree": {50: {left: 30, right: 70}}, "current": 70, "comparing": 50, "action": "insert"},
+                        {"step": 4, "description": "Insert 20: 20 < 50, 20 < 30, go left", "tree": {50: {left: 30, right: 70}, 30: {left: 20, right: null}}, "current": 20, "path": [50, 30], "action": "insert"},
+                        {"step": 5, "description": "Insert 40: 40 < 50, 40 > 30, go right", "tree": {50: {left: 30, right: 70}, 30: {left: 20, right: 40}}, "current": 40, "path": [50, 30], "action": "insert"},
+                        {"step": 6, "description": "Insert 60: 60 > 50, 60 < 70, go left", "tree": {50: {left: 30, right: 70}, 30: {left: 20, right: 40}, 70: {left: 60, right: null}}, "current": 60, "path": [50, 70], "action": "insert"},
+                        {"step": 7, "description": "Insert 80: 80 > 50, 80 > 70, go right", "tree": {50: {left: 30, right: 70}, 30: {left: 20, right: 40}, 70: {left: 60, right: 80}}, "current": 80, "path": [50, 70], "action": "insert"},
+                        {"step": 8, "description": "BST construction complete", "tree": {50: {left: 30, right: 70}, 30: {left: 20, right: 40}, 70: {left: 60, right: 80}}, "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "bst_search",
+                    "description": "Search for element in BST",
+                    "target": 40,
+                    "steps": [
+                        {"step": 1, "description": "Search for 40 in BST, start at root 50", "current": 50, "target": 40, "action": "compare"},
+                        {"step": 2, "description": "40 < 50, go to left child", "current": 50, "direction": "left", "action": "move"},
+                        {"step": 3, "description": "At node 30, compare with 40", "current": 30, "target": 40, "action": "compare"},
+                        {"step": 4, "description": "40 > 30, go to right child", "current": 30, "direction": "right", "action": "move"},
+                        {"step": 5, "description": "At node 40, compare with 40", "current": 40, "target": 40, "action": "compare"},
+                        {"step": 6, "description": "FOUND! 40 == 40", "current": 40, "found": true, "action": "found"}
+                    ]
+                },
+                {
+                    "algorithm": "inorder_traversal",
+                    "description": "In-order traversal (Left, Root, Right) - produces sorted output",
+                    "steps": [
+                        {"step": 1, "description": "Start in-order traversal at root 50", "current": 50, "output": [], "action": "visit"},
+                        {"step": 2, "description": "Go to left subtree first", "current": 30, "output": [], "action": "visit"},
+                        {"step": 3, "description": "Go to left of 30", "current": 20, "output": [], "action": "visit"},
+                        {"step": 4, "description": "20 has no left child, visit 20", "current": 20, "output": [20], "visited": [20], "action": "output"},
+                        {"step": 5, "description": "Back to 30, visit 30", "current": 30, "output": [20, 30], "visited": [20, 30], "action": "output"},
+                        {"step": 6, "description": "Go to right of 30, visit 40", "current": 40, "output": [20, 30, 40], "visited": [20, 30, 40], "action": "output"},
+                        {"step": 7, "description": "Back to root 50, visit 50", "current": 50, "output": [20, 30, 40, 50], "visited": [20, 30, 40, 50], "action": "output"},
+                        {"step": 8, "description": "Go to right subtree, then left to 60", "current": 60, "output": [20, 30, 40, 50, 60], "visited": [20, 30, 40, 50, 60], "action": "output"},
+                        {"step": 9, "description": "Visit 70", "current": 70, "output": [20, 30, 40, 50, 60, 70], "visited": [20, 30, 40, 50, 60, 70], "action": "output"},
+                        {"step": 10, "description": "Visit 80, traversal complete", "current": 80, "output": [20, 30, 40, 50, 60, 70, 80], "visited": [20, 30, 40, 50, 60, 70, 80], "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "preorder_traversal",
+                    "description": "Pre-order traversal (Root, Left, Right)",
+                    "steps": [
+                        {"step": 1, "description": "Start pre-order: visit root 50 first", "current": 50, "output": [50], "visited": [50], "action": "output"},
+                        {"step": 2, "description": "Go left, visit 30", "current": 30, "output": [50, 30], "visited": [50, 30], "action": "output"},
+                        {"step": 3, "description": "Go left, visit 20", "current": 20, "output": [50, 30, 20], "visited": [50, 30, 20], "action": "output"},
+                        {"step": 4, "description": "Back up, go right of 30, visit 40", "current": 40, "output": [50, 30, 20, 40], "visited": [50, 30, 20, 40], "action": "output"},
+                        {"step": 5, "description": "Back to root, go right, visit 70", "current": 70, "output": [50, 30, 20, 40, 70], "visited": [50, 30, 20, 40, 70], "action": "output"},
+                        {"step": 6, "description": "Go left, visit 60", "current": 60, "output": [50, 30, 20, 40, 70, 60], "visited": [50, 30, 20, 40, 70, 60], "action": "output"},
+                        {"step": 7, "description": "Go right, visit 80, complete", "current": 80, "output": [50, 30, 20, 40, 70, 60, 80], "visited": [50, 30, 20, 40, 70, 60, 80], "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "postorder_traversal",
+                    "description": "Post-order traversal (Left, Right, Root)",
+                    "steps": [
+                        {"step": 1, "description": "Start post-order: go to leftmost leaf first", "current": 20, "output": [], "action": "visit"},
+                        {"step": 2, "description": "Visit 20 (leaf)", "current": 20, "output": [20], "visited": [20], "action": "output"},
+                        {"step": 3, "description": "Visit 40 (right sibling)", "current": 40, "output": [20, 40], "visited": [20, 40], "action": "output"},
+                        {"step": 4, "description": "Visit 30 (parent after both children)", "current": 30, "output": [20, 40, 30], "visited": [20, 40, 30], "action": "output"},
+                        {"step": 5, "description": "Go to right subtree, visit 60", "current": 60, "output": [20, 40, 30, 60], "visited": [20, 40, 30, 60], "action": "output"},
+                        {"step": 6, "description": "Visit 80", "current": 80, "output": [20, 40, 30, 60, 80], "visited": [20, 40, 30, 60, 80], "action": "output"},
+                        {"step": 7, "description": "Visit 70 (after both children)", "current": 70, "output": [20, 40, 30, 60, 80, 70], "visited": [20, 40, 30, 60, 80, 70], "action": "output"},
+                        {"step": 8, "description": "Visit root 50 last, complete", "current": 50, "output": [20, 40, 30, 60, 80, 70, 50], "visited": [20, 40, 30, 60, 80, 70, 50], "action": "complete"}
+                    ]
+                }
+            ]
+        };
+
+        const treeStructure = [
+            {val: 50, x: 400, y: 50, left: 1, right: 2},
+            {val: 30, x: 200, y: 130, left: 3, right: 4},
+            {val: 70, x: 600, y: 130, left: 5, right: 6},
+            {val: 20, x: 100, y: 210, left: null, right: null},
+            {val: 40, x: 300, y: 210, left: null, right: null},
+            {val: 60, x: 500, y: 210, left: null, right: null},
+            {val: 80, x: 700, y: 210, left: null, right: null}
+        ];
+
+        let currentAlgo = null;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let speed = 800;
+
+        function init() {
+            const selector = document.getElementById('algoSelector');
+            visualData.algorithms.forEach((algo, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'algo-btn';
+                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => selectAlgorithm(index);
+                selector.appendChild(btn);
+            });
+            document.getElementById('prevBtn').onclick = prevStep;
+            document.getElementById('nextBtn').onclick = nextStep;
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('resetBtn').onclick = reset;
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = 2100 - e.target.value;
+                document.getElementById('speedValue').textContent = speed + 'ms';
+            };
+        }
+
+        function selectAlgorithm(index) {
+            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+            currentAlgo = visualData.algorithms[index];
+            currentStep = 0;
+            stopPlay();
+            renderStep();
+            updateControls();
+        }
+
+        function renderStep() {
+            if (!currentAlgo) return;
+            const step = currentAlgo.steps[currentStep];
+            document.getElementById('stepDesc').textContent = step.description;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
+            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+
+            const content = document.getElementById('vizContent');
+            renderTree(content, step);
+        }
+
+        function renderTree(container, step) {
+            const current = step.current;
+            const visited = step.visited || [];
+            const output = step.output || [];
+            const found = step.found;
+            const path = step.path || [];
+
+            let html = '<div class="tree-container">';
+            html += '<svg class="tree-svg" viewBox="0 0 800 280">';
+            
+            // Draw edges
+            treeStructure.forEach((node, i) => {
+                if (node.left !== null) {
+                    const child = treeStructure[node.left];
+                    const isVisited = visited.includes(node.val) && visited.includes(child.val);
+                    html += `<line x1="${node.x}" y1="${node.y}" x2="${child.x}" y2="${child.y}" class="${isVisited ? 'visited' : ''}"/>`;
+                }
+                if (node.right !== null) {
+                    const child = treeStructure[node.right];
+                    const isVisited = visited.includes(node.val) && visited.includes(child.val);
+                    html += `<line x1="${node.x}" y1="${node.y}" x2="${child.x}" y2="${child.y}" class="${isVisited ? 'visited' : ''}"/>`;
+                }
+            });
+            
+            // Draw nodes
+            treeStructure.forEach((node, i) => {
+                const isCurrent = node.val === current;
+                const isVisited = visited.includes(node.val);
+                const isRoot = i === 0;
+                const isFound = found && node.val === current;
+                const isPath = path.includes(node.val);
+                
+                let nodeClass = '';
+                if (isFound) nodeClass = 'found';
+                else if (isCurrent) nodeClass = 'current';
+                else if (isVisited) nodeClass = 'visited';
+                else if (isRoot) nodeClass = 'root';
+                else if (isPath) nodeClass = 'visited';
+                
+                html += `<circle cx="${node.x}" cy="${node.y}" r="25" class="${nodeClass}"/>`;
+                html += `<text x="${node.x}" y="${node.y}">${node.val}</text>`;
+            });
+            
+            html += '</svg>';
+            
+            // Traversal output
+            if (output.length > 0) {
+                html += '<div style="text-align: center; margin-top: 20px; color: #888;">Output:</div>';
+                html += '<div class="traversal-output">';
+                output.forEach(val => {
+                    html += `<div class="output-item">${val}</div>`;
+                });
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            // Info panel
+            html += '<div class="info-panel">';
+            if (step.target !== undefined) html += `<div class="info-box"><div class="info-label">Target</div><div class="info-value">${step.target}</div></div>`;
+            if (current !== undefined) html += `<div class="info-box"><div class="info-label">Current Node</div><div class="info-value">${current}</div></div>`;
+            if (step.direction) html += `<div class="info-box"><div class="info-label">Direction</div><div class="info-value">${step.direction.toUpperCase()}</div></div>`;
+            if (found) html += `<div class="info-box"><div class="info-label">Status</div><div class="info-value" style="color:#00ff00;">FOUND!</div></div>`;
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
+        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
+        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
+        function startPlay() {
+            if (!currentAlgo) return;
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Pause';
+            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
+        }
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (playInterval) { clearInterval(playInterval); playInterval = null; }
+        }
+        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
+            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
+        }
+        init();
+    </script>
+</body>
+</html>

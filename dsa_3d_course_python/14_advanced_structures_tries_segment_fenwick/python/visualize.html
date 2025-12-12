@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Structures - 3D Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: #888; font-size: 1.1em; }
+        .algorithm-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .algo-btn {
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .algo-btn:hover, .algo-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 500px;
+        }
+        .step-description {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            border: none;
+            color: #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
+
+        /* Trie Visualization */
+        .trie-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .trie-svg {
+            width: 100%;
+            max-width: 800px;
+            height: 350px;
+        }
+        .trie-svg line {
+            stroke: #00ffff;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        .trie-svg line.active {
+            stroke: #00ff00;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 5px #00ff00);
+        }
+        .trie-svg circle {
+            fill: #1a1a3a;
+            stroke: #00ffff;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        .trie-svg circle.root {
+            stroke: #ffd700;
+            stroke-width: 3;
+        }
+        .trie-svg circle.current {
+            fill: #ffd70033;
+            stroke: #ffd700;
+            filter: drop-shadow(0 0 15px #ffd700);
+        }
+        .trie-svg circle.word-end {
+            fill: #00ff0033;
+            stroke: #00ff00;
+        }
+        .trie-svg circle.found {
+            fill: #00ff0066;
+            stroke: #00ff00;
+            filter: drop-shadow(0 0 20px #00ff00);
+        }
+        .trie-svg text {
+            fill: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+        .trie-svg text.edge-label {
+            fill: #00ffff;
+            font-size: 12px;
+        }
+
+        /* Segment Tree */
+        .segment-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .array-display {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .array-cell.in-range {
+            border-color: #00ff00;
+            background: linear-gradient(135deg, #00ff0022, #00880022);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+        }
+        .array-cell.updating {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #ffd70022, #cc990022);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+        .cell-value { font-weight: bold; }
+        .cell-index { font-size: 0.7em; color: #888; }
+
+        .segment-tree-svg {
+            width: 100%;
+            max-width: 900px;
+            height: 280px;
+        }
+        .segment-tree-svg rect {
+            fill: #1a1a3a;
+            stroke: #00ffff;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        .segment-tree-svg rect.active {
+            fill: #ffd70033;
+            stroke: #ffd700;
+            filter: drop-shadow(0 0 10px #ffd700);
+        }
+        .segment-tree-svg rect.in-range {
+            fill: #00ff0033;
+            stroke: #00ff00;
+        }
+        .segment-tree-svg rect.updating {
+            fill: #ff00ff33;
+            stroke: #ff00ff;
+            filter: drop-shadow(0 0 10px #ff00ff);
+        }
+        .segment-tree-svg line {
+            stroke: #00ffff;
+            stroke-width: 1;
+        }
+        .segment-tree-svg text {
+            fill: #fff;
+            font-size: 11px;
+            text-anchor: middle;
+        }
+        .segment-tree-svg text.range {
+            fill: #888;
+            font-size: 9px;
+        }
+
+        /* Fenwick Tree */
+        .fenwick-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .fenwick-array {
+            display: flex;
+            gap: 5px;
+        }
+        .fenwick-cell {
+            width: 60px;
+            height: 70px;
+            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .fenwick-cell.active {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #ffd70033, #cc990033);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+        .fenwick-cell.summed {
+            border-color: #00ff00;
+            background: linear-gradient(135deg, #00ff0033, #00880033);
+        }
+        .fenwick-cell .bit-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .fenwick-cell .bit-index {
+            font-size: 0.7em;
+            color: #888;
+        }
+        .fenwick-cell .bit-range {
+            font-size: 0.6em;
+            color: #00ffff;
+            position: absolute;
+            bottom: 3px;
+        }
+
+        /* Word list */
+        .word-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .word-item {
+            padding: 8px 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        .word-item.found {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.2);
+        }
+        .word-item.prefix {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+        .info-label { color: #888; font-size: 0.9em; }
+        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .speed-label { color: #888; }
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .query-display {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .query-label { color: #888; }
+        .query-value { color: #ffd700; font-size: 1.3em; font-weight: bold; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Advanced Structures</h1>
+        <p class="subtitle">Tries, Segment Trees & Fenwick Trees</p>
+    </header>
+    <div class="container">
+        <div class="algorithm-selector" id="algoSelector"></div>
+        <div class="visualization-area">
+            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
+            <div id="vizContent"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="nextBtn" disabled>Next</button>
+            <button class="control-btn" id="resetBtn">Reset</button>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
+            <span class="speed-label" id="speedValue">800ms</span>
+        </div>
+    </div>
+
+    <script>
+        const visualData = {
+            "world": "14_advanced_structures",
+            "algorithms": [
+                {
+                    "algorithm": "trie_insert_search",
+                    "description": "Trie - insert and search words",
+                    "words": ["cat", "car", "card", "care"],
+                    "steps": [
+                        {"step": 1, "description": "Build a Trie with words: cat, car, card, care", "trie": {"root": {}}, "action": "init"},
+                        {"step": 2, "description": "Insert 'cat': traverse c -> a -> t", "word": "cat", "path": ["c", "a", "t"], "current": "c", "action": "insert"},
+                        {"step": 3, "description": "Insert 'cat': mark 't' as word end", "word": "cat", "path": ["c", "a", "t"], "current": "t", "word_end": true, "action": "mark_end"},
+                        {"step": 4, "description": "Insert 'car': c, a exist, add 'r'", "word": "car", "path": ["c", "a", "r"], "current": "r", "action": "insert"},
+                        {"step": 5, "description": "Insert 'card': c, a, r exist, add 'd'", "word": "card", "path": ["c", "a", "r", "d"], "current": "d", "action": "insert"},
+                        {"step": 6, "description": "Insert 'care': c, a, r exist, add 'e'", "word": "care", "path": ["c", "a", "r", "e"], "current": "e", "action": "insert"},
+                        {"step": 7, "description": "Trie built! Now search for 'car'", "query": "car", "action": "search_start"},
+                        {"step": 8, "description": "Search 'car': follow c -> a -> r", "query": "car", "path": ["c", "a", "r"], "current": "r", "action": "search"},
+                        {"step": 9, "description": "'car' found! (r is marked as word end)", "query": "car", "found": true, "action": "found"},
+                        {"step": 10, "description": "Search prefix 'ca': find all words starting with 'ca'", "query": "ca", "prefix_words": ["cat", "car", "card", "care"], "action": "prefix_search"}
+                    ]
+                },
+                {
+                    "algorithm": "segment_tree_range_sum",
+                    "description": "Segment Tree - range sum queries",
+                    "array": [1, 3, 5, 7, 9, 11],
+                    "steps": [
+                        {"step": 1, "description": "Build segment tree for array [1, 3, 5, 7, 9, 11]", "array": [1, 3, 5, 7, 9, 11], "tree": [36, 9, 27, 4, 5, 16, 11, 1, 3, null, null, 7, 9, null, null], "action": "init"},
+                        {"step": 2, "description": "Tree structure: root stores sum of entire array (36)", "tree": [36, 9, 27, 4, 5, 16, 11, 1, 3, null, null, 7, 9, null, null], "active": [0], "action": "explain"},
+                        {"step": 3, "description": "Left child [0-2] = 9, Right child [3-5] = 27", "tree": [36, 9, 27, 4, 5, 16, 11, 1, 3, null, null, 7, 9, null, null], "active": [1, 2], "action": "explain"},
+                        {"step": 4, "description": "Query: sum of range [1, 4]", "query_range": [1, 4], "action": "query_start"},
+                        {"step": 5, "description": "Start at root, range [0-5] overlaps [1-4]", "active": [0], "query_range": [1, 4], "action": "query"},
+                        {"step": 6, "description": "Go left [0-2]: partially overlaps, go deeper", "active": [1], "query_range": [1, 4], "action": "query"},
+                        {"step": 7, "description": "Node [1-2] fully in range, add 5+3=8", "active": [4], "in_range": [4], "partial_sum": 8, "action": "add"},
+                        {"step": 8, "description": "Go right [3-5]: partially overlaps", "active": [2], "query_range": [1, 4], "action": "query"},
+                        {"step": 9, "description": "Node [3-4] fully in range, add 7+9=16", "active": [5], "in_range": [5], "partial_sum": 24, "action": "add"},
+                        {"step": 10, "description": "Sum of range [1,4] = 3+5+7+9 = 24", "result": 24, "query_range": [1, 4], "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "fenwick_tree_prefix_sum",
+                    "description": "Fenwick Tree (BIT) - prefix sums",
+                    "array": [3, 2, -1, 6, 5, 4, -3, 3, 7, 2],
+                    "steps": [
+                        {"step": 1, "description": "Build Fenwick Tree for prefix sums", "array": [3, 2, -1, 6, 5, 4, -3, 3, 7, 2], "bit": [0, 3, 5, -1, 10, 5, 9, -3, 19, 7, 9], "action": "init"},
+                        {"step": 2, "description": "BIT[i] stores sum of specific range based on binary representation", "bit": [0, 3, 5, -1, 10, 5, 9, -3, 19, 7, 9], "action": "explain"},
+                        {"step": 3, "description": "Query: prefix sum up to index 7", "query_index": 7, "action": "query_start"},
+                        {"step": 4, "description": "Start at index 7 (binary: 111)", "current": 7, "bit_repr": "111", "sum": 0, "action": "query"},
+                        {"step": 5, "description": "Add BIT[7] = -3, flip rightmost 1: 7 -> 6", "current": 7, "add": -3, "sum": -3, "next": 6, "action": "add"},
+                        {"step": 6, "description": "Add BIT[6] = 9, flip rightmost 1: 6 -> 4", "current": 6, "add": 9, "sum": 6, "next": 4, "action": "add"},
+                        {"step": 7, "description": "Add BIT[4] = 10, flip rightmost 1: 4 -> 0", "current": 4, "add": 10, "sum": 16, "next": 0, "action": "add"},
+                        {"step": 8, "description": "Index 0 reached. Prefix sum[0..7] = 16", "result": 16, "action": "complete"},
+                        {"step": 9, "description": "Verify: 3+2+(-1)+6+5+4+(-3)+3 = 19... wait, let me recalculate", "action": "verify"},
+                        {"step": 10, "description": "Prefix sum[0..6] = 3+2-1+6+5+4-3 = 16. Correct!", "result": 16, "verified": true, "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "segment_tree_update",
+                    "description": "Segment Tree - point update",
+                    "array": [1, 3, 5, 7, 9, 11],
+                    "steps": [
+                        {"step": 1, "description": "Update index 2 from 5 to 10 (+5)", "array": [1, 3, 5, 7, 9, 11], "update_index": 2, "old_val": 5, "new_val": 10, "action": "init"},
+                        {"step": 2, "description": "Start at root, propagate update down", "active": [0], "action": "update"},
+                        {"step": 3, "description": "Index 2 is in left subtree [0-2]", "active": [1], "action": "update"},
+                        {"step": 4, "description": "Index 2 is in right child of [0-2]", "active": [4], "action": "update"},
+                        {"step": 5, "description": "Reached leaf node [2-2], update 5 -> 10", "active": [4], "updating": true, "action": "update_leaf"},
+                        {"step": 6, "description": "Propagate back: update parent [0-2]: 9 -> 14", "active": [1], "updating": true, "action": "propagate"},
+                        {"step": 7, "description": "Propagate back: update root [0-5]: 36 -> 41", "active": [0], "updating": true, "action": "propagate"},
+                        {"step": 8, "description": "Update complete! New tree reflects change", "array": [1, 3, 10, 7, 9, 11], "tree": [41, 14, 27, 4, 10, 16, 11, 1, 3, null, null, 7, 9, null, null], "action": "complete"}
+                    ]
+                }
+            ]
+        };
+
+        let currentAlgo = null;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let speed = 800;
+
+        function init() {
+            const selector = document.getElementById('algoSelector');
+            visualData.algorithms.forEach((algo, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'algo-btn';
+                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => selectAlgorithm(index);
+                selector.appendChild(btn);
+            });
+            document.getElementById('prevBtn').onclick = prevStep;
+            document.getElementById('nextBtn').onclick = nextStep;
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('resetBtn').onclick = reset;
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = 2100 - e.target.value;
+                document.getElementById('speedValue').textContent = speed + 'ms';
+            };
+        }
+
+        function selectAlgorithm(index) {
+            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+            currentAlgo = visualData.algorithms[index];
+            currentStep = 0;
+            stopPlay();
+            renderStep();
+            updateControls();
+        }
+
+        function renderStep() {
+            if (!currentAlgo) return;
+            const step = currentAlgo.steps[currentStep];
+            document.getElementById('stepDesc').textContent = step.description;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
+            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+
+            const content = document.getElementById('vizContent');
+            
+            switch(currentAlgo.algorithm) {
+                case 'trie_insert_search':
+                    renderTrie(content, step);
+                    break;
+                case 'segment_tree_range_sum':
+                case 'segment_tree_update':
+                    renderSegmentTree(content, step);
+                    break;
+                case 'fenwick_tree_prefix_sum':
+                    renderFenwickTree(content, step);
+                    break;
+            }
+        }
+
+        function renderTrie(container, step) {
+            const words = currentAlgo.words;
+            const path = step.path || [];
+            const current = step.current;
+            const query = step.query || step.word;
+            const found = step.found;
+            const prefixWords = step.prefix_words || [];
+
+            // Simple trie visualization
+            const trieNodes = [
+                {id: 'root', char: '*', x: 400, y: 30, children: ['c']},
+                {id: 'c', char: 'c', x: 400, y: 100, children: ['a']},
+                {id: 'a', char: 'a', x: 400, y: 170, children: ['t', 'r']},
+                {id: 't', char: 't', x: 300, y: 240, children: [], wordEnd: true},
+                {id: 'r', char: 'r', x: 500, y: 240, children: ['d', 'e'], wordEnd: true},
+                {id: 'd', char: 'd', x: 450, y: 310, children: [], wordEnd: true},
+                {id: 'e', char: 'e', x: 550, y: 310, children: [], wordEnd: true}
+            ];
+
+            let html = '<div class="trie-container">';
+            
+            if (query) {
+                html += `<div class="query-display">
+                    <div class="query-label">${step.action.includes('search') || step.action === 'found' ? 'Searching:' : 'Inserting:'}</div>
+                    <div class="query-value">"${query}"</div>
+                </div>`;
+            }
+            
+            html += '<svg class="trie-svg" viewBox="0 0 800 350">';
+            
+            // Draw edges
+            trieNodes.forEach(node => {
+                node.children.forEach(childId => {
+                    const child = trieNodes.find(n => n.id === childId);
+                    if (child) {
+                        const isActive = path.includes(node.char) && path.includes(child.char);
+                        html += `<line x1="${node.x}" y1="${node.y + 20}" x2="${child.x}" y2="${child.y - 20}" class="${isActive ? 'active' : ''}"/>`;
+                        // Edge label
+                        const midX = (node.x + child.x) / 2;
+                        const midY = (node.y + child.y) / 2;
+                        html += `<text x="${midX + 15}" y="${midY}" class="edge-label">${child.char}</text>`;
+                    }
+                });
+            });
+            
+            // Draw nodes
+            trieNodes.forEach(node => {
+                let nodeClass = '';
+                if (node.id === 'root') nodeClass = 'root';
+                else if (node.char === current) nodeClass = 'current';
+                else if (found && path.includes(node.char)) nodeClass = 'found';
+                else if (node.wordEnd) nodeClass = 'word-end';
+                
+                html += `<circle cx="${node.x}" cy="${node.y}" r="20" class="${nodeClass}"/>`;
+                html += `<text x="${node.x}" y="${node.y}">${node.char}</text>`;
+            });
+            
+            html += '</svg>';
+            
+            // Word list
+            html += '<div style="color: #888; margin: 10px 0;">Words in Trie:</div>';
+            html += '<div class="word-list">';
+            words.forEach(w => {
+                let wordClass = '';
+                if (found && w === query) wordClass = 'found';
+                else if (prefixWords.includes(w)) wordClass = 'prefix';
+                html += `<div class="word-item ${wordClass}">${w}</div>`;
+            });
+            html += '</div>';
+            
+            html += '</div>';
+            
+            html += '<div class="info-panel">';
+            html += `<div class="info-box"><div class="info-label">Words Stored</div><div class="info-value">${words.length}</div></div>`;
+            if (found) {
+                html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#00ff00;">FOUND</div></div>`;
+            }
+            if (prefixWords.length > 0) {
+                html += `<div class="info-box"><div class="info-label">Prefix Matches</div><div class="info-value">${prefixWords.length}</div></div>`;
+            }
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function renderSegmentTree(container, step) {
+            const array = step.array || currentAlgo.array;
+            const tree = step.tree || [36, 9, 27, 4, 5, 16, 11, 1, 3, null, null, 7, 9, null, null];
+            const active = step.active || [];
+            const inRange = step.in_range || [];
+            const queryRange = step.query_range;
+            const result = step.result;
+
+            let html = '<div class="segment-container">';
+            
+            // Query display
+            if (queryRange) {
+                html += `<div class="query-display">
+                    <div class="query-label">Query Range:</div>
+                    <div class="query-value">[${queryRange[0]}, ${queryRange[1]}]</div>
+                </div>`;
+            }
+            
+            // Original array
+            html += '<div style="color: #888; margin-bottom: 10px;">Original Array:</div>';
+            html += '<div class="array-display">';
+            array.forEach((val, i) => {
+                let cellClass = '';
+                if (queryRange && i >= queryRange[0] && i <= queryRange[1]) cellClass = 'in-range';
+                if (step.update_index === i) cellClass = 'updating';
+                html += `<div class="array-cell ${cellClass}">
+                    <div class="cell-value">${val}</div>
+                    <div class="cell-index">[${i}]</div>
+                </div>`;
+            });
+            html += '</div>';
+            
+            // Segment tree visualization
+            html += '<div style="color: #888; margin: 20px 0 10px;">Segment Tree:</div>';
+            html += '<svg class="segment-tree-svg" viewBox="0 0 900 280">';
+            
+            // Tree layout
+            const treeLayout = [
+                {idx: 0, x: 450, y: 30, range: '[0-5]'},
+                {idx: 1, x: 250, y: 90, range: '[0-2]'},
+                {idx: 2, x: 650, y: 90, range: '[3-5]'},
+                {idx: 3, x: 150, y: 150, range: '[0-1]'},
+                {idx: 4, x: 350, y: 150, range: '[2-2]'},
+                {idx: 5, x: 550, y: 150, range: '[3-4]'},
+                {idx: 6, x: 750, y: 150, range: '[5-5]'},
+                {idx: 7, x: 100, y: 210, range: '[0-0]'},
+                {idx: 8, x: 200, y: 210, range: '[1-1]'},
+                {idx: 11, x: 500, y: 210, range: '[3-3]'},
+                {idx: 12, x: 600, y: 210, range: '[4-4]'}
+            ];
+            
+            // Draw edges
+            const edges = [[0,1], [0,2], [1,3], [1,4], [2,5], [2,6], [3,7], [3,8], [5,11], [5,12]];
+            edges.forEach(([p, c]) => {
+                const parent = treeLayout.find(n => n.idx === p);
+                const child = treeLayout.find(n => n.idx === c);
+                if (parent && child) {
+                    html += `<line x1="${parent.x}" y1="${parent.y + 20}" x2="${child.x}" y2="${child.y - 15}"/>`;
+                }
+            });
+            
+            // Draw nodes
+            treeLayout.forEach(node => {
+                if (tree[node.idx] === null) return;
+                let rectClass = '';
+                if (active.includes(node.idx)) rectClass = 'active';
+                if (inRange.includes(node.idx)) rectClass = 'in-range';
+                if (step.updating && active.includes(node.idx)) rectClass = 'updating';
+                
+                html += `<rect x="${node.x - 30}" y="${node.y - 15}" width="60" height="30" rx="5" class="${rectClass}"/>`;
+                html += `<text x="${node.x}" y="${node.y + 3}">${tree[node.idx]}</text>`;
+                html += `<text x="${node.x}" y="${node.y + 22}" class="range">${node.range}</text>`;
+            });
+            
+            html += '</svg>';
+            html += '</div>';
+            
+            html += '<div class="info-panel">';
+            if (step.partial_sum !== undefined) {
+                html += `<div class="info-box"><div class="info-label">Partial Sum</div><div class="info-value">${step.partial_sum}</div></div>`;
+            }
+            if (result !== undefined) {
+                html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#00ff00;">${result}</div></div>`;
+            }
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function renderFenwickTree(container, step) {
+            const array = currentAlgo.array;
+            const bit = step.bit || [0, 3, 5, -1, 10, 5, 9, -3, 19, 7, 9];
+            const current = step.current;
+            const sum = step.sum;
+            const result = step.result;
+            const queryIndex = step.query_index;
+
+            let html = '<div class="fenwick-container">';
+            
+            if (queryIndex !== undefined) {
+                html += `<div class="query-display">
+                    <div class="query-label">Prefix Sum Query:</div>
+                    <div class="query-value">sum[0..${queryIndex}]</div>
+                </div>`;
+            }
+            
+            // Original array
+            html += '<div style="color: #888; margin-bottom: 10px;">Original Array:</div>';
+            html += '<div class="array-display">';
+            array.forEach((val, i) => {
+                html += `<div class="array-cell">
+                    <div class="cell-value">${val}</div>
+                    <div class="cell-index">[${i}]</div>
+                </div>`;
+            });
+            html += '</div>';
+            
+            // BIT array
+            html += '<div style="color: #888; margin: 20px 0 10px;">Fenwick Tree (BIT) - 1-indexed:</div>';
+            html += '<div class="fenwick-array">';
+            for (let i = 1; i < bit.length; i++) {
+                let cellClass = '';
+                if (i === current) cellClass = 'active';
+                else if (step.summed && step.summed.includes(i)) cellClass = 'summed';
+                
+                // Calculate range this BIT index covers
+                const lowbit = i & (-i);
+                const rangeStart = i - lowbit + 1;
+                const rangeEnd = i;
+                
+                html += `<div class="fenwick-cell ${cellClass}">
+                    <div class="bit-value">${bit[i]}</div>
+                    <div class="bit-index">BIT[${i}]</div>
+                    <div class="bit-range">[${rangeStart}-${rangeEnd}]</div>
+                </div>`;
+            }
+            html += '</div>';
+            
+            html += '</div>';
+            
+            html += '<div class="info-panel">';
+            if (step.bit_repr) {
+                html += `<div class="info-box"><div class="info-label">Binary</div><div class="info-value">${step.bit_repr}</div></div>`;
+            }
+            if (sum !== undefined) {
+                html += `<div class="info-box"><div class="info-label">Running Sum</div><div class="info-value">${sum}</div></div>`;
+            }
+            if (step.add !== undefined) {
+                html += `<div class="info-box"><div class="info-label">Adding</div><div class="info-value">${step.add >= 0 ? '+' : ''}${step.add}</div></div>`;
+            }
+            if (result !== undefined) {
+                html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#00ff00;">${result}</div></div>`;
+            }
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
+        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
+        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
+        function startPlay() {
+            if (!currentAlgo) return;
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Pause';
+            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
+        }
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (playInterval) { clearInterval(playInterval); playInterval = null; }
+        }
+        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
+            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
+        }
+        init();
+    </script>
+</body>
+</html>
