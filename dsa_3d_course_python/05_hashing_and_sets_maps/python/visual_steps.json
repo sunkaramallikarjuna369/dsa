@@ -1,0 +1,410 @@
+{
+  "world": "05_hashing_and_sets_maps",
+  "description": "Visualization steps for hash table operations",
+  "algorithms": [
+    {
+      "algorithm": "hash_insert_chaining",
+      "name": "Hash Table Insert with Separate Chaining",
+      "complexity": "O(1) average",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize empty hash table with 8 buckets",
+          "action": "init",
+          "bucket_count": 8,
+          "buckets": [[], [], [], [], [], [], [], []],
+          "visual_note": "Honeycomb grid with 8 empty hexagonal cells"
+        },
+        {
+          "step": 2,
+          "description": "Insert key 'apple' - compute hash",
+          "action": "hash_compute",
+          "key": "apple",
+          "hash_value": 12345,
+          "bucket_index": 1,
+          "visual_note": "Key enters prism, beam shoots to bucket 1"
+        },
+        {
+          "step": 3,
+          "description": "Insert 'apple' into bucket 1",
+          "action": "insert",
+          "key": "apple",
+          "value": 10,
+          "bucket_index": 1,
+          "buckets": [[], [["apple", 10]], [], [], [], [], [], []],
+          "visual_note": "Orb settles into bucket 1"
+        },
+        {
+          "step": 4,
+          "description": "Insert key 'banana' - compute hash",
+          "action": "hash_compute",
+          "key": "banana",
+          "hash_value": 67890,
+          "bucket_index": 2,
+          "visual_note": "Key enters prism, beam shoots to bucket 2"
+        },
+        {
+          "step": 5,
+          "description": "Insert 'banana' into bucket 2",
+          "action": "insert",
+          "key": "banana",
+          "value": 20,
+          "bucket_index": 2,
+          "buckets": [[], [["apple", 10]], [["banana", 20]], [], [], [], [], []],
+          "visual_note": "Orb settles into bucket 2"
+        },
+        {
+          "step": 6,
+          "description": "Insert key 'apricot' - compute hash (same as apple!)",
+          "action": "hash_compute",
+          "key": "apricot",
+          "hash_value": 12345,
+          "bucket_index": 1,
+          "collision": true,
+          "visual_note": "Key enters prism, beam shoots to bucket 1 - COLLISION!"
+        },
+        {
+          "step": 7,
+          "description": "Collision detected at bucket 1",
+          "action": "collision",
+          "bucket_index": 1,
+          "existing_keys": ["apple"],
+          "visual_note": "Bucket 1 flashes amber, collision alert"
+        },
+        {
+          "step": 8,
+          "description": "Add 'apricot' to chain in bucket 1",
+          "action": "chain_append",
+          "key": "apricot",
+          "value": 30,
+          "bucket_index": 1,
+          "chain_length": 2,
+          "buckets": [[], [["apple", 10], ["apricot", 30]], [["banana", 20]], [], [], [], [], []],
+          "visual_note": "New orb attaches to existing orb, forming chain"
+        }
+      ]
+    },
+    {
+      "algorithm": "hash_lookup_chaining",
+      "name": "Hash Table Lookup with Chain Traversal",
+      "complexity": "O(1) average, O(n) worst",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Lookup key 'apricot'",
+          "action": "lookup_start",
+          "key": "apricot",
+          "visual_note": "Search beam enters prism"
+        },
+        {
+          "step": 2,
+          "description": "Compute hash for 'apricot'",
+          "action": "hash_compute",
+          "key": "apricot",
+          "hash_value": 12345,
+          "bucket_index": 1,
+          "visual_note": "Beam shoots to bucket 1"
+        },
+        {
+          "step": 3,
+          "description": "Check first element in chain: 'apple'",
+          "action": "chain_check",
+          "chain_position": 0,
+          "key_checked": "apple",
+          "match": false,
+          "visual_note": "First orb lights up - not a match"
+        },
+        {
+          "step": 4,
+          "description": "Check second element in chain: 'apricot'",
+          "action": "chain_check",
+          "chain_position": 1,
+          "key_checked": "apricot",
+          "match": true,
+          "visual_note": "Second orb lights up green - MATCH FOUND!"
+        },
+        {
+          "step": 5,
+          "description": "Return value 30",
+          "action": "found",
+          "key": "apricot",
+          "value": 30,
+          "visual_note": "Value displayed, success animation"
+        }
+      ]
+    },
+    {
+      "algorithm": "hash_insert_linear_probing",
+      "name": "Hash Table Insert with Linear Probing",
+      "complexity": "O(1) average",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize empty hash table with 8 buckets",
+          "action": "init",
+          "bucket_count": 8,
+          "buckets": [null, null, null, null, null, null, null, null],
+          "visual_note": "8 empty single-slot buckets"
+        },
+        {
+          "step": 2,
+          "description": "Insert 'A' - hash to bucket 3",
+          "action": "insert",
+          "key": "A",
+          "bucket_index": 3,
+          "probe_sequence": [3],
+          "buckets": [null, null, null, "A", null, null, null, null],
+          "visual_note": "Beam lands on bucket 3, element settles"
+        },
+        {
+          "step": 3,
+          "description": "Insert 'B' - hash to bucket 3 (collision!)",
+          "action": "hash_compute",
+          "key": "B",
+          "bucket_index": 3,
+          "collision": true,
+          "visual_note": "Beam lands on bucket 3 - occupied!"
+        },
+        {
+          "step": 4,
+          "description": "Linear probe: check bucket 4",
+          "action": "probe",
+          "key": "B",
+          "probe_sequence": [3, 4],
+          "current_bucket": 4,
+          "bucket_status": "empty",
+          "visual_note": "Beam bounces to bucket 4 - empty!"
+        },
+        {
+          "step": 5,
+          "description": "Insert 'B' at bucket 4",
+          "action": "insert",
+          "key": "B",
+          "bucket_index": 4,
+          "probe_sequence": [3, 4],
+          "buckets": [null, null, null, "A", "B", null, null, null],
+          "visual_note": "Element settles in bucket 4, trail shows 3->4"
+        },
+        {
+          "step": 6,
+          "description": "Insert 'C' - hash to bucket 3 (collision!)",
+          "action": "hash_compute",
+          "key": "C",
+          "bucket_index": 3,
+          "collision": true,
+          "visual_note": "Beam lands on bucket 3 - occupied!"
+        },
+        {
+          "step": 7,
+          "description": "Linear probe: 3->4->5",
+          "action": "probe",
+          "key": "C",
+          "probe_sequence": [3, 4, 5],
+          "current_bucket": 5,
+          "bucket_status": "empty",
+          "visual_note": "Beam bounces 3->4->5, trail visible"
+        },
+        {
+          "step": 8,
+          "description": "Insert 'C' at bucket 5",
+          "action": "insert",
+          "key": "C",
+          "bucket_index": 5,
+          "probe_sequence": [3, 4, 5],
+          "buckets": [null, null, null, "A", "B", "C", null, null],
+          "visual_note": "Cluster forming at buckets 3-4-5"
+        }
+      ]
+    },
+    {
+      "algorithm": "hash_resize",
+      "name": "Hash Table Resize Operation",
+      "complexity": "O(n)",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Current state: 6 elements in 8 buckets",
+          "action": "state",
+          "size": 6,
+          "capacity": 8,
+          "load_factor": 0.75,
+          "visual_note": "Load factor meter at 0.75 - threshold reached!"
+        },
+        {
+          "step": 2,
+          "description": "Trigger resize - double capacity",
+          "action": "resize_start",
+          "old_capacity": 8,
+          "new_capacity": 16,
+          "visual_note": "New 16-bucket honeycomb materializes"
+        },
+        {
+          "step": 3,
+          "description": "Rehash element 1: 'apple'",
+          "action": "rehash",
+          "key": "apple",
+          "old_bucket": 1,
+          "new_bucket": 9,
+          "visual_note": "Beam from old bucket 1 to new bucket 9"
+        },
+        {
+          "step": 4,
+          "description": "Rehash element 2: 'banana'",
+          "action": "rehash",
+          "key": "banana",
+          "old_bucket": 2,
+          "new_bucket": 2,
+          "visual_note": "Beam from old bucket 2 to new bucket 2"
+        },
+        {
+          "step": 5,
+          "description": "Continue rehashing all elements...",
+          "action": "rehash_continue",
+          "elements_moved": 6,
+          "visual_note": "Multiple beams showing rehash paths"
+        },
+        {
+          "step": 6,
+          "description": "Resize complete",
+          "action": "resize_complete",
+          "new_capacity": 16,
+          "new_load_factor": 0.375,
+          "visual_note": "Old honeycomb fades, new one centered"
+        }
+      ]
+    },
+    {
+      "algorithm": "two_sum_hashmap",
+      "name": "Two Sum Problem Using Hash Map",
+      "complexity": "O(n)",
+      "input": {
+        "array": [2, 7, 11, 15],
+        "target": 9
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize empty hash map, target = 9",
+          "action": "init",
+          "array": [2, 7, 11, 15],
+          "target": 9,
+          "hashmap": {},
+          "visual_note": "Array displayed, empty honeycomb below"
+        },
+        {
+          "step": 2,
+          "description": "Process element 2 at index 0",
+          "action": "process",
+          "current_index": 0,
+          "current_value": 2,
+          "complement": 7,
+          "complement_found": false,
+          "visual_note": "Highlight 2, need 7 to sum to 9"
+        },
+        {
+          "step": 3,
+          "description": "Check if complement 7 exists in map",
+          "action": "lookup",
+          "key": 7,
+          "found": false,
+          "visual_note": "Search beam - 7 not found"
+        },
+        {
+          "step": 4,
+          "description": "Store {2: 0} in hash map",
+          "action": "insert",
+          "key": 2,
+          "value": 0,
+          "hashmap": {"2": 0},
+          "visual_note": "Orb with '2->0' enters honeycomb"
+        },
+        {
+          "step": 5,
+          "description": "Process element 7 at index 1",
+          "action": "process",
+          "current_index": 1,
+          "current_value": 7,
+          "complement": 2,
+          "complement_found": true,
+          "visual_note": "Highlight 7, need 2 to sum to 9"
+        },
+        {
+          "step": 6,
+          "description": "Check if complement 2 exists in map - FOUND!",
+          "action": "lookup",
+          "key": 2,
+          "found": true,
+          "found_index": 0,
+          "visual_note": "Search beam finds 2 at index 0!"
+        },
+        {
+          "step": 7,
+          "description": "Solution found: indices [0, 1]",
+          "action": "solution",
+          "indices": [0, 1],
+          "values": [2, 7],
+          "sum": 9,
+          "visual_note": "Celebration! Elements 2 and 7 highlighted"
+        }
+      ]
+    },
+    {
+      "algorithm": "set_operations",
+      "name": "Set Union, Intersection, Difference",
+      "complexity": "O(n + m)",
+      "input": {
+        "set_a": [1, 2, 3, 4],
+        "set_b": [3, 4, 5, 6]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize two sets",
+          "action": "init",
+          "set_a": [1, 2, 3, 4],
+          "set_b": [3, 4, 5, 6],
+          "visual_note": "Two honeycombs side by side"
+        },
+        {
+          "step": 2,
+          "description": "Compute Union: A | B",
+          "action": "union_start",
+          "visual_note": "New honeycomb appears for result"
+        },
+        {
+          "step": 3,
+          "description": "Union result: all unique elements",
+          "action": "union_result",
+          "result": [1, 2, 3, 4, 5, 6],
+          "visual_note": "All orbs merge into result honeycomb"
+        },
+        {
+          "step": 4,
+          "description": "Compute Intersection: A & B",
+          "action": "intersection_start",
+          "visual_note": "Venn diagram overlay appears"
+        },
+        {
+          "step": 5,
+          "description": "Intersection result: elements in both",
+          "action": "intersection_result",
+          "result": [3, 4],
+          "visual_note": "Only shared orbs (3, 4) transfer"
+        },
+        {
+          "step": 6,
+          "description": "Compute Difference: A - B",
+          "action": "difference_start",
+          "visual_note": "Highlight A's unique elements"
+        },
+        {
+          "step": 7,
+          "description": "Difference result: elements in A but not B",
+          "action": "difference_result",
+          "result": [1, 2],
+          "visual_note": "Orbs 1 and 2 transfer (A's unique)"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,518 @@
+{
+  "world": "04_stacks_and_queues",
+  "description": "Visualization steps for stack and queue operations",
+  "algorithms": [
+    {
+      "algorithm": "stack_push_pop",
+      "name": "Stack Push and Pop Operations",
+      "complexity": "O(1)",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize empty stack",
+          "action": "init",
+          "stack_state": [],
+          "top_index": -1,
+          "visual_note": "Empty plate tower, TOP arrow points to base"
+        },
+        {
+          "step": 2,
+          "description": "Push 10 onto stack",
+          "action": "push",
+          "element": 10,
+          "stack_state": [10],
+          "top_index": 0,
+          "visual_note": "Plate with '10' descends onto tower"
+        },
+        {
+          "step": 3,
+          "description": "Push 20 onto stack",
+          "action": "push",
+          "element": 20,
+          "stack_state": [10, 20],
+          "top_index": 1,
+          "visual_note": "Plate with '20' descends onto top"
+        },
+        {
+          "step": 4,
+          "description": "Push 30 onto stack",
+          "action": "push",
+          "element": 30,
+          "stack_state": [10, 20, 30],
+          "top_index": 2,
+          "visual_note": "Plate with '30' descends onto top"
+        },
+        {
+          "step": 5,
+          "description": "Pop from stack - removes 30 (LIFO)",
+          "action": "pop",
+          "element": 30,
+          "stack_state": [10, 20],
+          "top_index": 1,
+          "visual_note": "Top plate '30' lifts off and dissolves"
+        },
+        {
+          "step": 6,
+          "description": "Pop from stack - removes 20",
+          "action": "pop",
+          "element": 20,
+          "stack_state": [10],
+          "top_index": 0,
+          "visual_note": "Top plate '20' lifts off and dissolves"
+        }
+      ]
+    },
+    {
+      "algorithm": "queue_enqueue_dequeue",
+      "name": "Queue Enqueue and Dequeue Operations",
+      "complexity": "O(1)",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize empty queue",
+          "action": "init",
+          "queue_state": [],
+          "front_index": 0,
+          "rear_index": -1,
+          "visual_note": "Empty lobby, no figures waiting"
+        },
+        {
+          "step": 2,
+          "description": "Enqueue 10",
+          "action": "enqueue",
+          "element": 10,
+          "queue_state": [10],
+          "front_index": 0,
+          "rear_index": 0,
+          "visual_note": "Figure '10' enters and stands at front"
+        },
+        {
+          "step": 3,
+          "description": "Enqueue 20",
+          "action": "enqueue",
+          "element": 20,
+          "queue_state": [10, 20],
+          "front_index": 0,
+          "rear_index": 1,
+          "visual_note": "Figure '20' enters and joins at rear"
+        },
+        {
+          "step": 4,
+          "description": "Enqueue 30",
+          "action": "enqueue",
+          "element": 30,
+          "queue_state": [10, 20, 30],
+          "front_index": 0,
+          "rear_index": 2,
+          "visual_note": "Figure '30' enters and joins at rear"
+        },
+        {
+          "step": 5,
+          "description": "Dequeue - removes 10 (FIFO)",
+          "action": "dequeue",
+          "element": 10,
+          "queue_state": [20, 30],
+          "front_index": 0,
+          "rear_index": 1,
+          "visual_note": "Figure '10' enters elevator, others step forward"
+        },
+        {
+          "step": 6,
+          "description": "Dequeue - removes 20",
+          "action": "dequeue",
+          "element": 20,
+          "queue_state": [30],
+          "front_index": 0,
+          "rear_index": 0,
+          "visual_note": "Figure '20' enters elevator, '30' steps forward"
+        }
+      ]
+    },
+    {
+      "algorithm": "valid_parentheses",
+      "name": "Valid Parentheses Check",
+      "complexity": "O(n)",
+      "input": "({[]})",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start checking string '({[]})'",
+          "action": "init",
+          "char_index": -1,
+          "stack_state": [],
+          "visual_note": "Expression displayed, stack empty"
+        },
+        {
+          "step": 2,
+          "description": "Read '(' - opening bracket, push",
+          "action": "push",
+          "char_index": 0,
+          "current_char": "(",
+          "stack_state": ["("],
+          "visual_note": "Plate '(' descends onto stack"
+        },
+        {
+          "step": 3,
+          "description": "Read '{' - opening bracket, push",
+          "action": "push",
+          "char_index": 1,
+          "current_char": "{",
+          "stack_state": ["(", "{"],
+          "visual_note": "Plate '{' descends onto stack"
+        },
+        {
+          "step": 4,
+          "description": "Read '[' - opening bracket, push",
+          "action": "push",
+          "char_index": 2,
+          "current_char": "[",
+          "stack_state": ["(", "{", "["],
+          "visual_note": "Plate '[' descends onto stack"
+        },
+        {
+          "step": 5,
+          "description": "Read ']' - matches '[', pop",
+          "action": "pop_match",
+          "char_index": 3,
+          "current_char": "]",
+          "matched_char": "[",
+          "stack_state": ["(", "{"],
+          "visual_note": "Plate '[' lifts off - match found!"
+        },
+        {
+          "step": 6,
+          "description": "Read '}' - matches '{', pop",
+          "action": "pop_match",
+          "char_index": 4,
+          "current_char": "}",
+          "matched_char": "{",
+          "stack_state": ["("],
+          "visual_note": "Plate '{' lifts off - match found!"
+        },
+        {
+          "step": 7,
+          "description": "Read ')' - matches '(', pop",
+          "action": "pop_match",
+          "char_index": 5,
+          "current_char": ")",
+          "matched_char": "(",
+          "stack_state": [],
+          "visual_note": "Plate '(' lifts off - match found!"
+        },
+        {
+          "step": 8,
+          "description": "End of string, stack empty - VALID",
+          "action": "result",
+          "result": true,
+          "stack_state": [],
+          "visual_note": "Green success glow - balanced!"
+        }
+      ]
+    },
+    {
+      "algorithm": "postfix_evaluation",
+      "name": "Postfix Expression Evaluation",
+      "complexity": "O(n)",
+      "input": "3 4 + 2 *",
+      "expected_result": 14,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start evaluating '3 4 + 2 *'",
+          "action": "init",
+          "stack_state": [],
+          "visual_note": "Conveyor belt shows tokens: 3, 4, +, 2, *"
+        },
+        {
+          "step": 2,
+          "description": "Read '3' - operand, push",
+          "action": "push_operand",
+          "token": "3",
+          "stack_state": [3],
+          "visual_note": "Cube '3' transforms to plate, pushes onto stack"
+        },
+        {
+          "step": 3,
+          "description": "Read '4' - operand, push",
+          "action": "push_operand",
+          "token": "4",
+          "stack_state": [3, 4],
+          "visual_note": "Cube '4' transforms to plate, pushes onto stack"
+        },
+        {
+          "step": 4,
+          "description": "Read '+' - operator, pop two operands",
+          "action": "pop_operands",
+          "token": "+",
+          "operand_a": 3,
+          "operand_b": 4,
+          "stack_state": [],
+          "visual_note": "Plates '3' and '4' lift off for operation"
+        },
+        {
+          "step": 5,
+          "description": "Calculate 3 + 4 = 7, push result",
+          "action": "push_result",
+          "operation": "3 + 4",
+          "result": 7,
+          "stack_state": [7],
+          "visual_note": "Calculation animation, plate '7' descends"
+        },
+        {
+          "step": 6,
+          "description": "Read '2' - operand, push",
+          "action": "push_operand",
+          "token": "2",
+          "stack_state": [7, 2],
+          "visual_note": "Cube '2' transforms to plate, pushes onto stack"
+        },
+        {
+          "step": 7,
+          "description": "Read '*' - operator, pop two operands",
+          "action": "pop_operands",
+          "token": "*",
+          "operand_a": 7,
+          "operand_b": 2,
+          "stack_state": [],
+          "visual_note": "Plates '7' and '2' lift off for operation"
+        },
+        {
+          "step": 8,
+          "description": "Calculate 7 * 2 = 14, push result",
+          "action": "push_result",
+          "operation": "7 * 2",
+          "result": 14,
+          "stack_state": [14],
+          "visual_note": "Calculation animation, plate '14' descends"
+        },
+        {
+          "step": 9,
+          "description": "End of expression, final result: 14",
+          "action": "final_result",
+          "result": 14,
+          "stack_state": [14],
+          "visual_note": "Celebration effect, '14' highlighted"
+        }
+      ]
+    },
+    {
+      "algorithm": "call_stack_recursion",
+      "name": "Call Stack During Factorial Recursion",
+      "complexity": "O(n)",
+      "input": "factorial(4)",
+      "expected_result": 24,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Call factorial(4)",
+          "action": "push_frame",
+          "function": "factorial",
+          "parameter": 4,
+          "stack_depth": 1,
+          "visual_note": "Frame 'factorial(4)' descends onto call stack"
+        },
+        {
+          "step": 2,
+          "description": "4 != 0, recursive call factorial(3)",
+          "action": "push_frame",
+          "function": "factorial",
+          "parameter": 3,
+          "stack_depth": 2,
+          "visual_note": "Frame 'factorial(3)' descends onto call stack"
+        },
+        {
+          "step": 3,
+          "description": "3 != 0, recursive call factorial(2)",
+          "action": "push_frame",
+          "function": "factorial",
+          "parameter": 2,
+          "stack_depth": 3,
+          "visual_note": "Frame 'factorial(2)' descends onto call stack"
+        },
+        {
+          "step": 4,
+          "description": "2 != 0, recursive call factorial(1)",
+          "action": "push_frame",
+          "function": "factorial",
+          "parameter": 1,
+          "stack_depth": 4,
+          "visual_note": "Frame 'factorial(1)' descends onto call stack"
+        },
+        {
+          "step": 5,
+          "description": "1 != 0, recursive call factorial(0)",
+          "action": "push_frame",
+          "function": "factorial",
+          "parameter": 0,
+          "stack_depth": 5,
+          "visual_note": "Frame 'factorial(0)' descends - BASE CASE"
+        },
+        {
+          "step": 6,
+          "description": "Base case: factorial(0) returns 1",
+          "action": "pop_frame",
+          "function": "factorial",
+          "parameter": 0,
+          "return_value": 1,
+          "stack_depth": 4,
+          "visual_note": "Frame pops, return value '1' floats up"
+        },
+        {
+          "step": 7,
+          "description": "factorial(1) computes 1 * 1 = 1, returns",
+          "action": "pop_frame",
+          "function": "factorial",
+          "parameter": 1,
+          "computation": "1 * 1",
+          "return_value": 1,
+          "stack_depth": 3,
+          "visual_note": "Frame pops, return value '1' floats up"
+        },
+        {
+          "step": 8,
+          "description": "factorial(2) computes 2 * 1 = 2, returns",
+          "action": "pop_frame",
+          "function": "factorial",
+          "parameter": 2,
+          "computation": "2 * 1",
+          "return_value": 2,
+          "stack_depth": 2,
+          "visual_note": "Frame pops, return value '2' floats up"
+        },
+        {
+          "step": 9,
+          "description": "factorial(3) computes 3 * 2 = 6, returns",
+          "action": "pop_frame",
+          "function": "factorial",
+          "parameter": 3,
+          "computation": "3 * 2",
+          "return_value": 6,
+          "stack_depth": 1,
+          "visual_note": "Frame pops, return value '6' floats up"
+        },
+        {
+          "step": 10,
+          "description": "factorial(4) computes 4 * 6 = 24, returns",
+          "action": "pop_frame",
+          "function": "factorial",
+          "parameter": 4,
+          "computation": "4 * 6",
+          "return_value": 24,
+          "stack_depth": 0,
+          "visual_note": "Final frame pops, result '24' displayed"
+        }
+      ]
+    },
+    {
+      "algorithm": "bfs_with_queue",
+      "name": "BFS Graph Traversal Using Queue",
+      "complexity": "O(V + E)",
+      "graph": {
+        "A": ["B", "C"],
+        "B": ["D", "E"],
+        "C": ["F"],
+        "D": ["G"],
+        "E": [],
+        "F": [],
+        "G": []
+      },
+      "start": "A",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start BFS from node A",
+          "action": "init",
+          "queue_state": [],
+          "visited": [],
+          "visual_note": "Graph displayed, queue lobby empty"
+        },
+        {
+          "step": 2,
+          "description": "Enqueue start node A",
+          "action": "enqueue",
+          "node": "A",
+          "queue_state": ["A"],
+          "visited": [],
+          "visual_note": "Node A joins queue, highlighted in graph"
+        },
+        {
+          "step": 3,
+          "description": "Dequeue A, mark visited, enqueue neighbors B, C",
+          "action": "process",
+          "node": "A",
+          "queue_state": ["B", "C"],
+          "visited": ["A"],
+          "level": 0,
+          "visual_note": "A enters elevator, B and C join queue"
+        },
+        {
+          "step": 4,
+          "description": "Dequeue B, mark visited, enqueue neighbors D, E",
+          "action": "process",
+          "node": "B",
+          "queue_state": ["C", "D", "E"],
+          "visited": ["A", "B"],
+          "level": 1,
+          "visual_note": "B enters elevator, D and E join queue"
+        },
+        {
+          "step": 5,
+          "description": "Dequeue C, mark visited, enqueue neighbor F",
+          "action": "process",
+          "node": "C",
+          "queue_state": ["D", "E", "F"],
+          "visited": ["A", "B", "C"],
+          "level": 1,
+          "visual_note": "C enters elevator, F joins queue"
+        },
+        {
+          "step": 6,
+          "description": "Dequeue D, mark visited, enqueue neighbor G",
+          "action": "process",
+          "node": "D",
+          "queue_state": ["E", "F", "G"],
+          "visited": ["A", "B", "C", "D"],
+          "level": 2,
+          "visual_note": "D enters elevator, G joins queue"
+        },
+        {
+          "step": 7,
+          "description": "Dequeue E, mark visited, no unvisited neighbors",
+          "action": "process",
+          "node": "E",
+          "queue_state": ["F", "G"],
+          "visited": ["A", "B", "C", "D", "E"],
+          "level": 2,
+          "visual_note": "E enters elevator, no new nodes"
+        },
+        {
+          "step": 8,
+          "description": "Dequeue F, mark visited, no unvisited neighbors",
+          "action": "process",
+          "node": "F",
+          "queue_state": ["G"],
+          "visited": ["A", "B", "C", "D", "E", "F"],
+          "level": 2,
+          "visual_note": "F enters elevator, no new nodes"
+        },
+        {
+          "step": 9,
+          "description": "Dequeue G, mark visited, no unvisited neighbors",
+          "action": "process",
+          "node": "G",
+          "queue_state": [],
+          "visited": ["A", "B", "C", "D", "E", "F", "G"],
+          "level": 3,
+          "visual_note": "G enters elevator, queue empty"
+        },
+        {
+          "step": 10,
+          "description": "Queue empty, BFS complete",
+          "action": "complete",
+          "traversal_order": ["A", "B", "C", "D", "E", "F", "G"],
+          "visual_note": "All nodes green, traversal order displayed"
+        }
+      ]
+    }
+  ]
+}

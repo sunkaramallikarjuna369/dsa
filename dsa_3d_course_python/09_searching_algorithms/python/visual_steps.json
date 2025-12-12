@@ -1,0 +1,496 @@
+{
+  "world": "09_searching_algorithms",
+  "description": "Visualization steps for searching algorithms",
+  "algorithms": [
+    {
+      "algorithm": "linear_search",
+      "name": "Linear Search",
+      "complexity": "O(n)",
+      "array": [23, 45, 12, 67, 34, 89, 56, 78, 90, 11],
+      "target": 89,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize linear search for 89",
+          "action": "init",
+          "target": 89,
+          "array_size": 10,
+          "visual_note": "Spotlight at start of corridor"
+        },
+        {
+          "step": 2,
+          "description": "Check index 0: value 23",
+          "action": "check",
+          "index": 0,
+          "value": 23,
+          "comparison": "23 == 89? NO",
+          "visual_note": "Spotlight illuminates tile 0"
+        },
+        {
+          "step": 3,
+          "description": "Check index 1: value 45",
+          "action": "check",
+          "index": 1,
+          "value": 45,
+          "comparison": "45 == 89? NO",
+          "visual_note": "Spotlight moves to tile 1"
+        },
+        {
+          "step": 4,
+          "description": "Check index 2: value 12",
+          "action": "check",
+          "index": 2,
+          "value": 12,
+          "comparison": "12 == 89? NO",
+          "visual_note": "Spotlight moves to tile 2"
+        },
+        {
+          "step": 5,
+          "description": "Check index 3: value 67",
+          "action": "check",
+          "index": 3,
+          "value": 67,
+          "comparison": "67 == 89? NO",
+          "visual_note": "Spotlight moves to tile 3"
+        },
+        {
+          "step": 6,
+          "description": "Check index 4: value 34",
+          "action": "check",
+          "index": 4,
+          "value": 34,
+          "comparison": "34 == 89? NO",
+          "visual_note": "Spotlight moves to tile 4"
+        },
+        {
+          "step": 7,
+          "description": "Check index 5: value 89 - FOUND!",
+          "action": "found",
+          "index": 5,
+          "value": 89,
+          "comparison": "89 == 89? YES",
+          "comparisons_made": 6,
+          "visual_note": "Tile 5 glows green, target found!"
+        }
+      ]
+    },
+    {
+      "algorithm": "binary_search",
+      "name": "Binary Search",
+      "complexity": "O(log n)",
+      "array": [11, 23, 34, 45, 56, 67, 78, 89, 90, 95],
+      "target": 78,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize binary search for 78",
+          "action": "init",
+          "target": 78,
+          "low": 0,
+          "high": 9,
+          "search_space": [0, 9],
+          "visual_note": "Entire sorted corridor lit"
+        },
+        {
+          "step": 2,
+          "description": "Calculate mid: (0+9)/2 = 4",
+          "action": "calculate_mid",
+          "low": 0,
+          "high": 9,
+          "mid": 4,
+          "mid_value": 56,
+          "visual_note": "Mid pointer at index 4"
+        },
+        {
+          "step": 3,
+          "description": "Compare mid value 56 with target 78",
+          "action": "compare",
+          "mid": 4,
+          "mid_value": 56,
+          "target": 78,
+          "comparison": "56 < 78",
+          "result": "Target in right half",
+          "visual_note": "56 < 78, eliminate left half"
+        },
+        {
+          "step": 4,
+          "description": "Eliminate left half, new search space [5, 9]",
+          "action": "eliminate",
+          "eliminated": [0, 4],
+          "new_low": 5,
+          "new_high": 9,
+          "search_space": [5, 9],
+          "visual_note": "Tiles 0-4 dim significantly"
+        },
+        {
+          "step": 5,
+          "description": "Calculate mid: (5+9)/2 = 7",
+          "action": "calculate_mid",
+          "low": 5,
+          "high": 9,
+          "mid": 7,
+          "mid_value": 89,
+          "visual_note": "Mid pointer at index 7"
+        },
+        {
+          "step": 6,
+          "description": "Compare mid value 89 with target 78",
+          "action": "compare",
+          "mid": 7,
+          "mid_value": 89,
+          "target": 78,
+          "comparison": "89 > 78",
+          "result": "Target in left half",
+          "visual_note": "89 > 78, eliminate right half"
+        },
+        {
+          "step": 7,
+          "description": "Eliminate right half, new search space [5, 6]",
+          "action": "eliminate",
+          "eliminated": [7, 9],
+          "new_low": 5,
+          "new_high": 6,
+          "search_space": [5, 6],
+          "visual_note": "Tiles 7-9 dim"
+        },
+        {
+          "step": 8,
+          "description": "Calculate mid: (5+6)/2 = 5",
+          "action": "calculate_mid",
+          "low": 5,
+          "high": 6,
+          "mid": 5,
+          "mid_value": 67,
+          "visual_note": "Mid pointer at index 5"
+        },
+        {
+          "step": 9,
+          "description": "Compare mid value 67 with target 78",
+          "action": "compare",
+          "mid": 5,
+          "mid_value": 67,
+          "target": 78,
+          "comparison": "67 < 78",
+          "result": "Target in right half",
+          "visual_note": "67 < 78, move low pointer"
+        },
+        {
+          "step": 10,
+          "description": "New search space [6, 6]",
+          "action": "eliminate",
+          "new_low": 6,
+          "new_high": 6,
+          "search_space": [6, 6],
+          "visual_note": "Only tile 6 remains"
+        },
+        {
+          "step": 11,
+          "description": "Check index 6: value 78 - FOUND!",
+          "action": "found",
+          "index": 6,
+          "value": 78,
+          "comparisons_made": 4,
+          "visual_note": "Tile 6 glows green, target found!"
+        }
+      ]
+    },
+    {
+      "algorithm": "binary_search_not_found",
+      "name": "Binary Search - Not Found",
+      "complexity": "O(log n)",
+      "array": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+      "target": 55,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Search for 55 (not in array)",
+          "action": "init",
+          "target": 55,
+          "low": 0,
+          "high": 9,
+          "visual_note": "Target 55 not in array"
+        },
+        {
+          "step": 2,
+          "description": "Mid = 4, value 50 < 55, go right",
+          "action": "compare",
+          "mid": 4,
+          "mid_value": 50,
+          "comparison": "50 < 55",
+          "new_low": 5,
+          "visual_note": "Eliminate left half"
+        },
+        {
+          "step": 3,
+          "description": "Mid = 7, value 80 > 55, go left",
+          "action": "compare",
+          "mid": 7,
+          "mid_value": 80,
+          "comparison": "80 > 55",
+          "new_high": 6,
+          "visual_note": "Eliminate right portion"
+        },
+        {
+          "step": 4,
+          "description": "Mid = 5, value 60 > 55, go left",
+          "action": "compare",
+          "mid": 5,
+          "mid_value": 60,
+          "comparison": "60 > 55",
+          "new_high": 4,
+          "visual_note": "Eliminate more"
+        },
+        {
+          "step": 5,
+          "description": "low (5) > high (4), search space empty",
+          "action": "not_found",
+          "low": 5,
+          "high": 4,
+          "insert_position": 5,
+          "visual_note": "Search space empty, 55 not found"
+        }
+      ]
+    },
+    {
+      "algorithm": "first_last_occurrence",
+      "name": "Find First and Last Occurrence",
+      "complexity": "O(log n)",
+      "array": [1, 2, 3, 5, 5, 5, 5, 8, 9, 10],
+      "target": 5,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Find first and last occurrence of 5",
+          "action": "init",
+          "target": 5,
+          "occurrences_indices": [3, 4, 5, 6],
+          "visual_note": "All 5's highlighted in yellow"
+        },
+        {
+          "step": 2,
+          "description": "Find first: mid=4, value=5, continue left",
+          "action": "find_first",
+          "mid": 4,
+          "value": 5,
+          "candidate": 4,
+          "direction": "left",
+          "visual_note": "Found 5 at index 4, search left for earlier"
+        },
+        {
+          "step": 3,
+          "description": "Find first: mid=1, value=2, go right",
+          "action": "find_first",
+          "mid": 1,
+          "value": 2,
+          "direction": "right",
+          "visual_note": "2 < 5, search right"
+        },
+        {
+          "step": 4,
+          "description": "Find first: mid=3, value=5, continue left",
+          "action": "find_first",
+          "mid": 3,
+          "value": 5,
+          "candidate": 3,
+          "direction": "left",
+          "visual_note": "Found 5 at index 3, search left"
+        },
+        {
+          "step": 5,
+          "description": "First occurrence at index 3",
+          "action": "first_found",
+          "index": 3,
+          "visual_note": "First 5 at index 3"
+        },
+        {
+          "step": 6,
+          "description": "Find last: mid=4, value=5, continue right",
+          "action": "find_last",
+          "mid": 4,
+          "value": 5,
+          "candidate": 4,
+          "direction": "right",
+          "visual_note": "Found 5, search right for later"
+        },
+        {
+          "step": 7,
+          "description": "Find last: mid=6, value=5, continue right",
+          "action": "find_last",
+          "mid": 6,
+          "value": 5,
+          "candidate": 6,
+          "direction": "right",
+          "visual_note": "Found 5 at index 6"
+        },
+        {
+          "step": 8,
+          "description": "Last occurrence at index 6",
+          "action": "last_found",
+          "index": 6,
+          "visual_note": "Last 5 at index 6"
+        },
+        {
+          "step": 9,
+          "description": "Result: 5 appears from index 3 to 6",
+          "action": "complete",
+          "first": 3,
+          "last": 6,
+          "count": 4,
+          "visual_note": "Range [3, 6] highlighted"
+        }
+      ]
+    },
+    {
+      "algorithm": "search_rotated_array",
+      "name": "Search in Rotated Sorted Array",
+      "complexity": "O(log n)",
+      "original_array": [0, 1, 2, 4, 5, 6, 7],
+      "rotated_array": [4, 5, 6, 7, 0, 1, 2],
+      "rotation_index": 4,
+      "target": 0,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Search for 0 in rotated array",
+          "action": "init",
+          "array": [4, 5, 6, 7, 0, 1, 2],
+          "target": 0,
+          "pivot_index": 4,
+          "visual_note": "Corridor bent at rotation point"
+        },
+        {
+          "step": 2,
+          "description": "Mid = 3, value = 7",
+          "action": "calculate_mid",
+          "low": 0,
+          "high": 6,
+          "mid": 3,
+          "mid_value": 7,
+          "visual_note": "Check mid element"
+        },
+        {
+          "step": 3,
+          "description": "Left half [4,5,6,7] is sorted",
+          "action": "identify_sorted",
+          "sorted_half": "left",
+          "sorted_range": [0, 3],
+          "values": [4, 5, 6, 7],
+          "visual_note": "Left segment is sorted"
+        },
+        {
+          "step": 4,
+          "description": "Is 0 in sorted left half [4,7]? No",
+          "action": "check_range",
+          "target": 0,
+          "range": [4, 7],
+          "in_range": false,
+          "decision": "Search right half",
+          "visual_note": "0 not in [4,7], search right"
+        },
+        {
+          "step": 5,
+          "description": "New search space [4, 6]",
+          "action": "narrow",
+          "new_low": 4,
+          "new_high": 6,
+          "visual_note": "Left half eliminated"
+        },
+        {
+          "step": 6,
+          "description": "Mid = 5, value = 1",
+          "action": "calculate_mid",
+          "low": 4,
+          "high": 6,
+          "mid": 5,
+          "mid_value": 1,
+          "visual_note": "Check new mid"
+        },
+        {
+          "step": 7,
+          "description": "Left half [0,1] is sorted, 0 is in range",
+          "action": "check_range",
+          "target": 0,
+          "range": [0, 1],
+          "in_range": true,
+          "decision": "Search left half",
+          "visual_note": "0 in [0,1], search left"
+        },
+        {
+          "step": 8,
+          "description": "Found 0 at index 4",
+          "action": "found",
+          "index": 4,
+          "value": 0,
+          "visual_note": "Target found at index 4!"
+        }
+      ]
+    },
+    {
+      "algorithm": "bst_search",
+      "name": "BST Search",
+      "complexity": "O(log n) average",
+      "tree": {
+        "root": 50,
+        "structure": "50(30(20,40),70(60,80))"
+      },
+      "target": 40,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Search for 40 in BST",
+          "action": "init",
+          "target": 40,
+          "current": 50,
+          "visual_note": "Start at root 50"
+        },
+        {
+          "step": 2,
+          "description": "Compare 40 with root 50",
+          "action": "compare",
+          "current": 50,
+          "target": 40,
+          "comparison": "40 < 50",
+          "direction": "left",
+          "visual_note": "40 < 50, go left"
+        },
+        {
+          "step": 3,
+          "description": "Move to left child 30",
+          "action": "move",
+          "from": 50,
+          "to": 30,
+          "path": [50, 30],
+          "visual_note": "Path 50->30 glows"
+        },
+        {
+          "step": 4,
+          "description": "Compare 40 with node 30",
+          "action": "compare",
+          "current": 30,
+          "target": 40,
+          "comparison": "40 > 30",
+          "direction": "right",
+          "visual_note": "40 > 30, go right"
+        },
+        {
+          "step": 5,
+          "description": "Move to right child 40",
+          "action": "move",
+          "from": 30,
+          "to": 40,
+          "path": [50, 30, 40],
+          "visual_note": "Path 30->40 glows"
+        },
+        {
+          "step": 6,
+          "description": "Found 40!",
+          "action": "found",
+          "node": 40,
+          "path_length": 3,
+          "comparisons": 3,
+          "visual_note": "Node 40 pulses green"
+        }
+      ]
+    }
+  ]
+}

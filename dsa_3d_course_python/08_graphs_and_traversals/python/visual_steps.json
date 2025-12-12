@@ -1,0 +1,441 @@
+{
+  "world": "08_graphs_and_traversals",
+  "description": "Visualization steps for graph traversal algorithms",
+  "algorithms": [
+    {
+      "algorithm": "bfs",
+      "name": "Breadth-First Search",
+      "complexity": "O(V + E)",
+      "graph": {
+        "nodes": ["A", "B", "C", "D", "E", "F"],
+        "edges": [["A", "B"], ["A", "C"], ["B", "D"], ["B", "E"], ["C", "E"], ["C", "F"], ["E", "F"]]
+      },
+      "start": "A",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize BFS from node A",
+          "action": "init",
+          "current": "A",
+          "queue": ["A"],
+          "visited": ["A"],
+          "level": 0,
+          "visual_note": "Source node A glows cyan, added to queue"
+        },
+        {
+          "step": 2,
+          "description": "Process node A, discover neighbors B and C",
+          "action": "process",
+          "current": "A",
+          "discovered": ["B", "C"],
+          "queue": ["B", "C"],
+          "visited": ["A", "B", "C"],
+          "level": 0,
+          "visual_note": "Wave expands to B and C, edges A-B and A-C glow"
+        },
+        {
+          "step": 3,
+          "description": "Process node B (level 1), discover D and E",
+          "action": "process",
+          "current": "B",
+          "discovered": ["D", "E"],
+          "queue": ["C", "D", "E"],
+          "visited": ["A", "B", "C", "D", "E"],
+          "level": 1,
+          "visual_note": "B processed, D and E discovered"
+        },
+        {
+          "step": 4,
+          "description": "Process node C (level 1), discover F (E already visited)",
+          "action": "process",
+          "current": "C",
+          "discovered": ["F"],
+          "queue": ["D", "E", "F"],
+          "visited": ["A", "B", "C", "D", "E", "F"],
+          "level": 1,
+          "visual_note": "C processed, F discovered, E already visited"
+        },
+        {
+          "step": 5,
+          "description": "Process nodes D, E, F (level 2)",
+          "action": "process_level",
+          "nodes": ["D", "E", "F"],
+          "queue": [],
+          "visited": ["A", "B", "C", "D", "E", "F"],
+          "level": 2,
+          "visual_note": "Level 2 nodes processed, no new discoveries"
+        },
+        {
+          "step": 6,
+          "description": "BFS complete",
+          "action": "complete",
+          "traversal_order": ["A", "B", "C", "D", "E", "F"],
+          "visual_note": "All nodes visited, BFS traversal complete"
+        }
+      ]
+    },
+    {
+      "algorithm": "dfs",
+      "name": "Depth-First Search",
+      "complexity": "O(V + E)",
+      "graph": {
+        "nodes": ["A", "B", "C", "D", "E", "F"],
+        "edges": [["A", "B"], ["A", "C"], ["B", "D"], ["B", "E"], ["C", "E"], ["C", "F"], ["E", "F"]]
+      },
+      "start": "A",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start DFS from node A",
+          "action": "visit",
+          "current": "A",
+          "stack": ["A"],
+          "visited": ["A"],
+          "path": ["A"],
+          "visual_note": "Exploration beam starts at A"
+        },
+        {
+          "step": 2,
+          "description": "Go deeper to first neighbor B",
+          "action": "visit",
+          "current": "B",
+          "stack": ["A", "B"],
+          "visited": ["A", "B"],
+          "path": ["A", "B"],
+          "visual_note": "Beam travels A to B"
+        },
+        {
+          "step": 3,
+          "description": "Go deeper to D",
+          "action": "visit",
+          "current": "D",
+          "stack": ["A", "B", "D"],
+          "visited": ["A", "B", "D"],
+          "path": ["A", "B", "D"],
+          "visual_note": "Beam travels B to D"
+        },
+        {
+          "step": 4,
+          "description": "D has no unvisited neighbors, backtrack to B",
+          "action": "backtrack",
+          "from": "D",
+          "to": "B",
+          "stack": ["A", "B"],
+          "visited": ["A", "B", "D"],
+          "visual_note": "Dead end at D, beam retraces to B"
+        },
+        {
+          "step": 5,
+          "description": "From B, go to E",
+          "action": "visit",
+          "current": "E",
+          "stack": ["A", "B", "E"],
+          "visited": ["A", "B", "D", "E"],
+          "path": ["A", "B", "E"],
+          "visual_note": "Beam travels B to E"
+        },
+        {
+          "step": 6,
+          "description": "From E, go to F",
+          "action": "visit",
+          "current": "F",
+          "stack": ["A", "B", "E", "F"],
+          "visited": ["A", "B", "D", "E", "F"],
+          "path": ["A", "B", "E", "F"],
+          "visual_note": "Beam travels E to F"
+        },
+        {
+          "step": 7,
+          "description": "F's neighbor C not yet visited, go to C",
+          "action": "visit",
+          "current": "C",
+          "stack": ["A", "B", "E", "F", "C"],
+          "visited": ["A", "B", "D", "E", "F", "C"],
+          "path": ["A", "B", "E", "F", "C"],
+          "visual_note": "Beam travels F to C"
+        },
+        {
+          "step": 8,
+          "description": "All nodes visited, DFS complete",
+          "action": "complete",
+          "traversal_order": ["A", "B", "D", "E", "F", "C"],
+          "visual_note": "DFS traversal complete"
+        }
+      ]
+    },
+    {
+      "algorithm": "shortest_path_bfs",
+      "name": "Shortest Path using BFS",
+      "complexity": "O(V + E)",
+      "graph": {
+        "nodes": [1, 2, 3, 4, 5, 6],
+        "edges": [[1, 2], [1, 3], [2, 4], [3, 4], [3, 5], [4, 6], [5, 6]]
+      },
+      "start": 1,
+      "end": 6,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Find shortest path from 1 to 6",
+          "action": "init",
+          "source": 1,
+          "target": 6,
+          "visual_note": "Source 1 green, target 6 red"
+        },
+        {
+          "step": 2,
+          "description": "BFS level 0: node 1",
+          "action": "bfs_level",
+          "level": 0,
+          "nodes": [1],
+          "distances": {1: 0},
+          "visual_note": "Distance 0 ring around node 1"
+        },
+        {
+          "step": 3,
+          "description": "BFS level 1: nodes 2, 3",
+          "action": "bfs_level",
+          "level": 1,
+          "nodes": [2, 3],
+          "distances": {1: 0, 2: 1, 3: 1},
+          "parents": {2: 1, 3: 1},
+          "visual_note": "Distance 1 ring, parent pointers shown"
+        },
+        {
+          "step": 4,
+          "description": "BFS level 2: nodes 4, 5",
+          "action": "bfs_level",
+          "level": 2,
+          "nodes": [4, 5],
+          "distances": {1: 0, 2: 1, 3: 1, 4: 2, 5: 2},
+          "parents": {2: 1, 3: 1, 4: 2, 5: 3},
+          "visual_note": "Distance 2 ring"
+        },
+        {
+          "step": 5,
+          "description": "BFS level 3: node 6 found!",
+          "action": "target_found",
+          "level": 3,
+          "node": 6,
+          "distance": 3,
+          "parent": 4,
+          "visual_note": "Target 6 reached at distance 3"
+        },
+        {
+          "step": 6,
+          "description": "Trace back shortest path",
+          "action": "trace_path",
+          "path": [1, 2, 4, 6],
+          "length": 3,
+          "visual_note": "Golden path: 1 -> 2 -> 4 -> 6"
+        }
+      ]
+    },
+    {
+      "algorithm": "connected_components",
+      "name": "Find Connected Components",
+      "complexity": "O(V + E)",
+      "graph": {
+        "nodes": ["A", "B", "C", "D", "E", "F", "G", "H"],
+        "edges": [["A", "B"], ["B", "C"], ["D", "E"], ["E", "F"], ["F", "D"]]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start finding connected components",
+          "action": "init",
+          "unvisited": ["A", "B", "C", "D", "E", "F", "G", "H"],
+          "components": [],
+          "visual_note": "All nodes gray, unvisited"
+        },
+        {
+          "step": 2,
+          "description": "Start BFS from A, discover component 1",
+          "action": "discover_component",
+          "start": "A",
+          "component_id": 1,
+          "nodes_found": ["A", "B", "C"],
+          "color": "#ff6b6b",
+          "visual_note": "Component 1 (coral): A, B, C"
+        },
+        {
+          "step": 3,
+          "description": "Start BFS from D, discover component 2",
+          "action": "discover_component",
+          "start": "D",
+          "component_id": 2,
+          "nodes_found": ["D", "E", "F"],
+          "color": "#4ecdc4",
+          "visual_note": "Component 2 (teal): D, E, F"
+        },
+        {
+          "step": 4,
+          "description": "G is isolated, component 3",
+          "action": "discover_component",
+          "start": "G",
+          "component_id": 3,
+          "nodes_found": ["G"],
+          "color": "#a29bfe",
+          "visual_note": "Component 3 (lavender): G"
+        },
+        {
+          "step": 5,
+          "description": "H is isolated, component 4",
+          "action": "discover_component",
+          "start": "H",
+          "component_id": 4,
+          "nodes_found": ["H"],
+          "color": "#ffeaa7",
+          "visual_note": "Component 4 (yellow): H"
+        },
+        {
+          "step": 6,
+          "description": "All components found",
+          "action": "complete",
+          "total_components": 4,
+          "component_sizes": [3, 3, 1, 1],
+          "visual_note": "4 components found, largest has 3 nodes"
+        }
+      ]
+    },
+    {
+      "algorithm": "cycle_detection",
+      "name": "Cycle Detection in Directed Graph",
+      "complexity": "O(V + E)",
+      "graph": {
+        "nodes": [1, 2, 3, 4],
+        "directed_edges": [[1, 2], [2, 3], [3, 4], [4, 2]]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start DFS cycle detection from node 1",
+          "action": "init",
+          "colors": {1: "WHITE", 2: "WHITE", 3: "WHITE", 4: "WHITE"},
+          "visual_note": "All nodes white (unvisited)"
+        },
+        {
+          "step": 2,
+          "description": "Visit node 1, mark GRAY (in progress)",
+          "action": "visit",
+          "node": 1,
+          "color": "GRAY",
+          "path": [1],
+          "visual_note": "Node 1 turns yellow (in progress)"
+        },
+        {
+          "step": 3,
+          "description": "Visit node 2, mark GRAY",
+          "action": "visit",
+          "node": 2,
+          "color": "GRAY",
+          "path": [1, 2],
+          "visual_note": "Node 2 turns yellow"
+        },
+        {
+          "step": 4,
+          "description": "Visit node 3, mark GRAY",
+          "action": "visit",
+          "node": 3,
+          "color": "GRAY",
+          "path": [1, 2, 3],
+          "visual_note": "Node 3 turns yellow"
+        },
+        {
+          "step": 5,
+          "description": "Visit node 4, mark GRAY",
+          "action": "visit",
+          "node": 4,
+          "color": "GRAY",
+          "path": [1, 2, 3, 4],
+          "visual_note": "Node 4 turns yellow"
+        },
+        {
+          "step": 6,
+          "description": "Edge 4->2 leads to GRAY node - CYCLE DETECTED!",
+          "action": "cycle_found",
+          "back_edge": [4, 2],
+          "cycle": [2, 3, 4, 2],
+          "visual_note": "Back edge 4->2 highlighted red, cycle found!"
+        },
+        {
+          "step": 7,
+          "description": "Cycle path highlighted",
+          "action": "highlight_cycle",
+          "cycle_nodes": [2, 3, 4],
+          "cycle_edges": [[2, 3], [3, 4], [4, 2]],
+          "visual_note": "Cycle 2->3->4->2 glows red"
+        }
+      ]
+    },
+    {
+      "algorithm": "topological_sort",
+      "name": "Topological Sort (DAG)",
+      "complexity": "O(V + E)",
+      "graph": {
+        "nodes": ["A", "B", "C", "D", "E"],
+        "directed_edges": [["A", "B"], ["A", "C"], ["B", "D"], ["C", "D"], ["D", "E"]]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start topological sort on DAG",
+          "action": "init",
+          "in_degrees": {"A": 0, "B": 1, "C": 1, "D": 2, "E": 1},
+          "visual_note": "In-degree shown on each node"
+        },
+        {
+          "step": 2,
+          "description": "Process node A (in-degree 0)",
+          "action": "process",
+          "node": "A",
+          "result": ["A"],
+          "updated_degrees": {"B": 0, "C": 0, "D": 2, "E": 1},
+          "visual_note": "A added to result, B and C degrees decrease"
+        },
+        {
+          "step": 3,
+          "description": "Process node B (in-degree 0)",
+          "action": "process",
+          "node": "B",
+          "result": ["A", "B"],
+          "updated_degrees": {"C": 0, "D": 1, "E": 1},
+          "visual_note": "B added to result"
+        },
+        {
+          "step": 4,
+          "description": "Process node C (in-degree 0)",
+          "action": "process",
+          "node": "C",
+          "result": ["A", "B", "C"],
+          "updated_degrees": {"D": 0, "E": 1},
+          "visual_note": "C added to result"
+        },
+        {
+          "step": 5,
+          "description": "Process node D (in-degree 0)",
+          "action": "process",
+          "node": "D",
+          "result": ["A", "B", "C", "D"],
+          "updated_degrees": {"E": 0},
+          "visual_note": "D added to result"
+        },
+        {
+          "step": 6,
+          "description": "Process node E (in-degree 0)",
+          "action": "process",
+          "node": "E",
+          "result": ["A", "B", "C", "D", "E"],
+          "visual_note": "E added to result"
+        },
+        {
+          "step": 7,
+          "description": "Topological sort complete",
+          "action": "complete",
+          "order": ["A", "B", "C", "D", "E"],
+          "visual_note": "Valid topological order, all edges point right"
+        }
+      ]
+    }
+  ]
+}

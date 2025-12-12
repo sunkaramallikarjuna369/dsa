@@ -1,0 +1,462 @@
+{
+  "world": "11_greedy_algorithms",
+  "description": "Visualization steps for greedy algorithms",
+  "algorithms": [
+    {
+      "algorithm": "activity_selection",
+      "name": "Activity Selection",
+      "complexity": "O(n log n)",
+      "activities": [
+        {"name": "A1", "start": 1, "end": 4},
+        {"name": "A2", "start": 3, "end": 5},
+        {"name": "A3", "start": 0, "end": 6},
+        {"name": "A4", "start": 5, "end": 7},
+        {"name": "A5", "start": 3, "end": 9},
+        {"name": "A6", "start": 5, "end": 9}
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize activity selection",
+          "action": "init",
+          "activities": ["A1[1,4]", "A2[3,5]", "A3[0,6]", "A4[5,7]", "A5[3,9]", "A6[5,9]"],
+          "visual_note": "6 activity bars on timeline"
+        },
+        {
+          "step": 2,
+          "description": "Sort activities by end time",
+          "action": "sort",
+          "sorted_order": ["A1[1,4]", "A2[3,5]", "A3[0,6]", "A4[5,7]", "A5[3,9]", "A6[5,9]"],
+          "visual_note": "Bars reorder by end time"
+        },
+        {
+          "step": 3,
+          "description": "Select A1 (first activity, ends at 4)",
+          "action": "select",
+          "activity": "A1",
+          "last_end": 4,
+          "selected": ["A1"],
+          "visual_note": "A1 glows green"
+        },
+        {
+          "step": 4,
+          "description": "Check A2: start 3 < last_end 4, overlaps",
+          "action": "reject",
+          "activity": "A2",
+          "reason": "3 < 4 (overlaps)",
+          "visual_note": "A2 fades to gray"
+        },
+        {
+          "step": 5,
+          "description": "Check A3: start 0 < last_end 4, overlaps",
+          "action": "reject",
+          "activity": "A3",
+          "reason": "0 < 4 (overlaps)",
+          "visual_note": "A3 fades to gray"
+        },
+        {
+          "step": 6,
+          "description": "Select A4: start 5 >= last_end 4",
+          "action": "select",
+          "activity": "A4",
+          "last_end": 7,
+          "selected": ["A1", "A4"],
+          "visual_note": "A4 glows green"
+        },
+        {
+          "step": 7,
+          "description": "Check A5: start 3 < last_end 7, overlaps",
+          "action": "reject",
+          "activity": "A5",
+          "reason": "3 < 7 (overlaps)",
+          "visual_note": "A5 fades to gray"
+        },
+        {
+          "step": 8,
+          "description": "Check A6: start 5 < last_end 7, overlaps",
+          "action": "reject",
+          "activity": "A6",
+          "reason": "5 < 7 (overlaps)",
+          "visual_note": "A6 fades to gray"
+        },
+        {
+          "step": 9,
+          "description": "Complete: 2 activities selected",
+          "action": "complete",
+          "selected": ["A1", "A4"],
+          "count": 2,
+          "visual_note": "Selected activities highlighted"
+        }
+      ]
+    },
+    {
+      "algorithm": "coin_change_greedy",
+      "name": "Coin Change (Greedy)",
+      "complexity": "O(n)",
+      "amount": 67,
+      "coins": [25, 10, 5, 1],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Make change for 67 cents",
+          "action": "init",
+          "amount": 67,
+          "coins": [25, 10, 5, 1],
+          "visual_note": "Coin cloud with denominations"
+        },
+        {
+          "step": 2,
+          "description": "Select quarter (25), remaining: 42",
+          "action": "select",
+          "coin": 25,
+          "remaining": 42,
+          "result": [25],
+          "visual_note": "Quarter floats to solution pile"
+        },
+        {
+          "step": 3,
+          "description": "Select quarter (25), remaining: 17",
+          "action": "select",
+          "coin": 25,
+          "remaining": 17,
+          "result": [25, 25],
+          "visual_note": "Second quarter added"
+        },
+        {
+          "step": 4,
+          "description": "Select dime (10), remaining: 7",
+          "action": "select",
+          "coin": 10,
+          "remaining": 7,
+          "result": [25, 25, 10],
+          "visual_note": "Dime floats down"
+        },
+        {
+          "step": 5,
+          "description": "Select nickel (5), remaining: 2",
+          "action": "select",
+          "coin": 5,
+          "remaining": 2,
+          "result": [25, 25, 10, 5],
+          "visual_note": "Nickel added"
+        },
+        {
+          "step": 6,
+          "description": "Select penny (1), remaining: 1",
+          "action": "select",
+          "coin": 1,
+          "remaining": 1,
+          "result": [25, 25, 10, 5, 1],
+          "visual_note": "First penny"
+        },
+        {
+          "step": 7,
+          "description": "Select penny (1), remaining: 0",
+          "action": "select",
+          "coin": 1,
+          "remaining": 0,
+          "result": [25, 25, 10, 5, 1, 1],
+          "visual_note": "Second penny"
+        },
+        {
+          "step": 8,
+          "description": "Complete: 6 coins used",
+          "action": "complete",
+          "result": [25, 25, 10, 5, 1, 1],
+          "count": 6,
+          "visual_note": "Solution pile complete"
+        }
+      ]
+    },
+    {
+      "algorithm": "huffman_encoding",
+      "name": "Huffman Encoding",
+      "complexity": "O(n log n)",
+      "frequencies": {"A": 5, "B": 9, "C": 12, "D": 13, "E": 16, "F": 45},
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize with character frequencies",
+          "action": "init",
+          "nodes": [
+            {"char": "A", "freq": 5},
+            {"char": "B", "freq": 9},
+            {"char": "C", "freq": 12},
+            {"char": "D", "freq": 13},
+            {"char": "E", "freq": 16},
+            {"char": "F", "freq": 45}
+          ],
+          "visual_note": "6 weighted spheres on platform"
+        },
+        {
+          "step": 2,
+          "description": "Merge A(5) and B(9) into AB(14)",
+          "action": "merge",
+          "left": {"char": "A", "freq": 5},
+          "right": {"char": "B", "freq": 9},
+          "merged": {"label": "AB", "freq": 14},
+          "visual_note": "A and B rise and combine"
+        },
+        {
+          "step": 3,
+          "description": "Merge C(12) and D(13) into CD(25)",
+          "action": "merge",
+          "left": {"char": "C", "freq": 12},
+          "right": {"char": "D", "freq": 13},
+          "merged": {"label": "CD", "freq": 25},
+          "visual_note": "C and D combine"
+        },
+        {
+          "step": 4,
+          "description": "Merge AB(14) and E(16) into ABE(30)",
+          "action": "merge",
+          "left": {"label": "AB", "freq": 14},
+          "right": {"char": "E", "freq": 16},
+          "merged": {"label": "ABE", "freq": 30},
+          "visual_note": "AB and E combine"
+        },
+        {
+          "step": 5,
+          "description": "Merge CD(25) and ABE(30) into ABCDE(55)",
+          "action": "merge",
+          "left": {"label": "CD", "freq": 25},
+          "right": {"label": "ABE", "freq": 30},
+          "merged": {"label": "ABCDE", "freq": 55},
+          "visual_note": "CD and ABE combine"
+        },
+        {
+          "step": 6,
+          "description": "Merge F(45) and ABCDE(55) into root(100)",
+          "action": "merge",
+          "left": {"char": "F", "freq": 45},
+          "right": {"label": "ABCDE", "freq": 55},
+          "merged": {"label": "root", "freq": 100},
+          "visual_note": "Final merge creates root"
+        },
+        {
+          "step": 7,
+          "description": "Generate codes from tree",
+          "action": "generate_codes",
+          "codes": {
+            "F": "0",
+            "C": "100",
+            "D": "101",
+            "A": "1100",
+            "B": "1101",
+            "E": "111"
+          },
+          "visual_note": "Paths labeled with 0/1"
+        },
+        {
+          "step": 8,
+          "description": "Complete: Huffman tree built",
+          "action": "complete",
+          "codes": {"F": "0", "C": "100", "D": "101", "A": "1100", "B": "1101", "E": "111"},
+          "visual_note": "Encoding table displayed"
+        }
+      ]
+    },
+    {
+      "algorithm": "jump_game",
+      "name": "Jump Game",
+      "complexity": "O(n)",
+      "array": [2, 3, 1, 1, 4],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize jump game",
+          "action": "init",
+          "array": [2, 3, 1, 1, 4],
+          "target": 4,
+          "visual_note": "5 platforms with jump powers"
+        },
+        {
+          "step": 2,
+          "description": "Position 0: jump=2, farthest=2",
+          "action": "update",
+          "position": 0,
+          "jump": 2,
+          "farthest": 2,
+          "visual_note": "Can reach up to index 2"
+        },
+        {
+          "step": 3,
+          "description": "Position 1: jump=3, farthest=max(2, 1+3)=4",
+          "action": "update",
+          "position": 1,
+          "jump": 3,
+          "farthest": 4,
+          "visual_note": "Can now reach index 4!"
+        },
+        {
+          "step": 4,
+          "description": "Farthest (4) >= target (4), success!",
+          "action": "success",
+          "farthest": 4,
+          "target": 4,
+          "visual_note": "Path to end highlighted"
+        }
+      ]
+    },
+    {
+      "algorithm": "gas_station",
+      "name": "Gas Station",
+      "complexity": "O(n)",
+      "gas": [1, 2, 3, 4, 5],
+      "cost": [3, 4, 5, 1, 2],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize gas station problem",
+          "action": "init",
+          "gas": [1, 2, 3, 4, 5],
+          "cost": [3, 4, 5, 1, 2],
+          "visual_note": "5 stations in circular route"
+        },
+        {
+          "step": 2,
+          "description": "Station 0: gas=1, cost=3, tank=-2",
+          "action": "visit",
+          "station": 0,
+          "tank": -2,
+          "visual_note": "Tank goes negative"
+        },
+        {
+          "step": 3,
+          "description": "Tank < 0, reset start to station 1",
+          "action": "reset",
+          "new_start": 1,
+          "visual_note": "Try starting from station 1"
+        },
+        {
+          "step": 4,
+          "description": "Station 1: gas=2, cost=4, tank=-2",
+          "action": "visit",
+          "station": 1,
+          "tank": -2,
+          "visual_note": "Tank negative again"
+        },
+        {
+          "step": 5,
+          "description": "Reset start to station 2",
+          "action": "reset",
+          "new_start": 2,
+          "visual_note": "Try station 2"
+        },
+        {
+          "step": 6,
+          "description": "Station 2: gas=3, cost=5, tank=-2",
+          "action": "visit",
+          "station": 2,
+          "tank": -2,
+          "visual_note": "Still negative"
+        },
+        {
+          "step": 7,
+          "description": "Reset start to station 3",
+          "action": "reset",
+          "new_start": 3,
+          "visual_note": "Try station 3"
+        },
+        {
+          "step": 8,
+          "description": "Station 3: gas=4, cost=1, tank=3",
+          "action": "visit",
+          "station": 3,
+          "tank": 3,
+          "visual_note": "Positive tank!"
+        },
+        {
+          "step": 9,
+          "description": "Station 4: gas=5, cost=2, tank=6",
+          "action": "visit",
+          "station": 4,
+          "tank": 6,
+          "visual_note": "Tank increases"
+        },
+        {
+          "step": 10,
+          "description": "Total gas (15) >= total cost (15), solution exists",
+          "action": "complete",
+          "start_station": 3,
+          "total_gas": 15,
+          "total_cost": 15,
+          "visual_note": "Start from station 3"
+        }
+      ]
+    },
+    {
+      "algorithm": "fractional_knapsack",
+      "name": "Fractional Knapsack",
+      "complexity": "O(n log n)",
+      "capacity": 50,
+      "items": [
+        {"value": 60, "weight": 10},
+        {"value": 100, "weight": 20},
+        {"value": 120, "weight": 30}
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize fractional knapsack",
+          "action": "init",
+          "capacity": 50,
+          "items": [
+            {"value": 60, "weight": 10, "ratio": 6.0},
+            {"value": 100, "weight": 20, "ratio": 5.0},
+            {"value": 120, "weight": 30, "ratio": 4.0}
+          ],
+          "visual_note": "3 items with value/weight ratios"
+        },
+        {
+          "step": 2,
+          "description": "Sort by ratio: item0(6.0), item1(5.0), item2(4.0)",
+          "action": "sort",
+          "sorted_items": ["item0 (ratio 6.0)", "item1 (ratio 5.0)", "item2 (ratio 4.0)"],
+          "visual_note": "Items reorder by ratio"
+        },
+        {
+          "step": 3,
+          "description": "Take full item0: value=60, weight=10",
+          "action": "take_full",
+          "item": 0,
+          "value": 60,
+          "weight": 10,
+          "remaining_capacity": 40,
+          "total_value": 60,
+          "visual_note": "Item 0 added to knapsack"
+        },
+        {
+          "step": 4,
+          "description": "Take full item1: value=100, weight=20",
+          "action": "take_full",
+          "item": 1,
+          "value": 100,
+          "weight": 20,
+          "remaining_capacity": 20,
+          "total_value": 160,
+          "visual_note": "Item 1 added"
+        },
+        {
+          "step": 5,
+          "description": "Take 2/3 of item2: value=80, weight=20",
+          "action": "take_fraction",
+          "item": 2,
+          "fraction": 0.667,
+          "value": 80,
+          "weight": 20,
+          "remaining_capacity": 0,
+          "total_value": 240,
+          "visual_note": "Partial item 2 added"
+        },
+        {
+          "step": 6,
+          "description": "Complete: maximum value = 240",
+          "action": "complete",
+          "total_value": 240,
+          "visual_note": "Knapsack full, optimal value achieved"
+        }
+      ]
+    }
+  ]
+}

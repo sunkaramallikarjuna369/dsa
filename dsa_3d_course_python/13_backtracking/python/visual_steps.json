@@ -1,0 +1,492 @@
+{
+  "world": "13_backtracking",
+  "description": "Visualization steps for backtracking algorithms",
+  "algorithms": [
+    {
+      "algorithm": "n_queens_4",
+      "name": "4-Queens Problem",
+      "complexity": "O(N!)",
+      "n": 4,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start solving 4-Queens",
+          "action": "init",
+          "board": [],
+          "visual_note": "Empty 4x4 chessboard"
+        },
+        {
+          "step": 2,
+          "description": "Place Q1 at (0, 0)",
+          "action": "place",
+          "row": 0,
+          "col": 0,
+          "board": [0],
+          "visual_note": "Queen on a1"
+        },
+        {
+          "step": 3,
+          "description": "Try Q2 at (1, 0) - column conflict",
+          "action": "conflict",
+          "row": 1,
+          "col": 0,
+          "conflict_type": "column",
+          "visual_note": "Red beam on column 0"
+        },
+        {
+          "step": 4,
+          "description": "Try Q2 at (1, 1) - diagonal conflict",
+          "action": "conflict",
+          "row": 1,
+          "col": 1,
+          "conflict_type": "diagonal",
+          "visual_note": "Red beam on diagonal"
+        },
+        {
+          "step": 5,
+          "description": "Place Q2 at (1, 2)",
+          "action": "place",
+          "row": 1,
+          "col": 2,
+          "board": [0, 2],
+          "visual_note": "Queen on b3"
+        },
+        {
+          "step": 6,
+          "description": "Try Q3 - all positions conflict",
+          "action": "conflict_all",
+          "row": 2,
+          "visual_note": "All row 2 positions have conflicts"
+        },
+        {
+          "step": 7,
+          "description": "Backtrack: remove Q2 from (1, 2)",
+          "action": "backtrack",
+          "row": 1,
+          "col": 2,
+          "board": [0],
+          "visual_note": "Queen fades from b3"
+        },
+        {
+          "step": 8,
+          "description": "Place Q2 at (1, 3)",
+          "action": "place",
+          "row": 1,
+          "col": 3,
+          "board": [0, 3],
+          "visual_note": "Queen on b4"
+        },
+        {
+          "step": 9,
+          "description": "Place Q3 at (2, 1)",
+          "action": "place",
+          "row": 2,
+          "col": 1,
+          "board": [0, 3, 1],
+          "visual_note": "Queen on c2"
+        },
+        {
+          "step": 10,
+          "description": "Try Q4 - all positions conflict, backtrack",
+          "action": "backtrack_chain",
+          "visual_note": "Multiple backtracks needed"
+        },
+        {
+          "step": 11,
+          "description": "Eventually find solution: [1, 3, 0, 2]",
+          "action": "solution",
+          "board": [1, 3, 0, 2],
+          "visual_note": "All queens glow gold"
+        },
+        {
+          "step": 12,
+          "description": "Continue to find second solution: [2, 0, 3, 1]",
+          "action": "solution",
+          "board": [2, 0, 3, 1],
+          "visual_note": "Second valid configuration"
+        },
+        {
+          "step": 13,
+          "description": "Complete: 2 solutions found",
+          "action": "complete",
+          "solutions": [[1, 3, 0, 2], [2, 0, 3, 1]],
+          "visual_note": "Both solutions displayed"
+        }
+      ]
+    },
+    {
+      "algorithm": "subsets",
+      "name": "Subset Generation",
+      "complexity": "O(2^n)",
+      "set": [1, 2, 3],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start generating subsets of {1, 2, 3}",
+          "action": "init",
+          "current": [],
+          "visual_note": "Binary tree root"
+        },
+        {
+          "step": 2,
+          "description": "Add empty subset []",
+          "action": "add_subset",
+          "subset": [],
+          "visual_note": "First leaf: {}"
+        },
+        {
+          "step": 3,
+          "description": "Include 1",
+          "action": "include",
+          "element": 1,
+          "current": [1],
+          "visual_note": "Go left, include 1"
+        },
+        {
+          "step": 4,
+          "description": "Add subset [1]",
+          "action": "add_subset",
+          "subset": [1],
+          "visual_note": "Leaf: {1}"
+        },
+        {
+          "step": 5,
+          "description": "Include 2",
+          "action": "include",
+          "element": 2,
+          "current": [1, 2],
+          "visual_note": "Include 2"
+        },
+        {
+          "step": 6,
+          "description": "Add subset [1, 2]",
+          "action": "add_subset",
+          "subset": [1, 2],
+          "visual_note": "Leaf: {1, 2}"
+        },
+        {
+          "step": 7,
+          "description": "Include 3",
+          "action": "include",
+          "element": 3,
+          "current": [1, 2, 3],
+          "visual_note": "Include 3"
+        },
+        {
+          "step": 8,
+          "description": "Add subset [1, 2, 3]",
+          "action": "add_subset",
+          "subset": [1, 2, 3],
+          "visual_note": "Leaf: {1, 2, 3}"
+        },
+        {
+          "step": 9,
+          "description": "Backtrack: exclude 3",
+          "action": "exclude",
+          "element": 3,
+          "current": [1, 2],
+          "visual_note": "Go right, exclude 3"
+        },
+        {
+          "step": 10,
+          "description": "Continue generating remaining subsets...",
+          "action": "continue",
+          "visual_note": "DFS continues"
+        },
+        {
+          "step": 11,
+          "description": "Complete: 8 subsets generated",
+          "action": "complete",
+          "subsets": [[], [1], [1, 2], [1, 2, 3], [1, 3], [2], [2, 3], [3]],
+          "count": 8,
+          "visual_note": "All leaves collected"
+        }
+      ]
+    },
+    {
+      "algorithm": "permutations",
+      "name": "Permutation Generation",
+      "complexity": "O(n!)",
+      "elements": [1, 2, 3],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start generating permutations of [1, 2, 3]",
+          "action": "init",
+          "current": [],
+          "available": [1, 2, 3],
+          "visual_note": "Three slots to fill"
+        },
+        {
+          "step": 2,
+          "description": "Choose 1 for position 0",
+          "action": "choose",
+          "element": 1,
+          "position": 0,
+          "current": [1],
+          "available": [2, 3],
+          "visual_note": "1 moves to slot 0"
+        },
+        {
+          "step": 3,
+          "description": "Choose 2 for position 1",
+          "action": "choose",
+          "element": 2,
+          "position": 1,
+          "current": [1, 2],
+          "available": [3],
+          "visual_note": "2 moves to slot 1"
+        },
+        {
+          "step": 4,
+          "description": "Choose 3 for position 2",
+          "action": "choose",
+          "element": 3,
+          "position": 2,
+          "current": [1, 2, 3],
+          "available": [],
+          "visual_note": "3 moves to slot 2"
+        },
+        {
+          "step": 5,
+          "description": "Add permutation [1, 2, 3]",
+          "action": "add_perm",
+          "permutation": [1, 2, 3],
+          "visual_note": "First permutation complete"
+        },
+        {
+          "step": 6,
+          "description": "Backtrack: unchoose 3",
+          "action": "unchoose",
+          "element": 3,
+          "current": [1, 2],
+          "visual_note": "3 returns to pool"
+        },
+        {
+          "step": 7,
+          "description": "Backtrack: unchoose 2",
+          "action": "unchoose",
+          "element": 2,
+          "current": [1],
+          "visual_note": "2 returns to pool"
+        },
+        {
+          "step": 8,
+          "description": "Choose 3 for position 1",
+          "action": "choose",
+          "element": 3,
+          "position": 1,
+          "current": [1, 3],
+          "available": [2],
+          "visual_note": "Try 3 in slot 1"
+        },
+        {
+          "step": 9,
+          "description": "Choose 2 for position 2",
+          "action": "choose",
+          "element": 2,
+          "position": 2,
+          "current": [1, 3, 2],
+          "visual_note": "2 in slot 2"
+        },
+        {
+          "step": 10,
+          "description": "Add permutation [1, 3, 2]",
+          "action": "add_perm",
+          "permutation": [1, 3, 2],
+          "visual_note": "Second permutation"
+        },
+        {
+          "step": 11,
+          "description": "Continue for remaining permutations...",
+          "action": "continue",
+          "visual_note": "Tree exploration continues"
+        },
+        {
+          "step": 12,
+          "description": "Complete: 6 permutations generated",
+          "action": "complete",
+          "permutations": [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]],
+          "count": 6,
+          "visual_note": "All permutations listed"
+        }
+      ]
+    },
+    {
+      "algorithm": "maze_solving",
+      "name": "Maze Solving",
+      "complexity": "O(4^(m*n))",
+      "maze": [
+        [0, 0, 1, 0],
+        [1, 0, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 0]
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start at (0, 0)",
+          "action": "init",
+          "position": [0, 0],
+          "path": [[0, 0]],
+          "visual_note": "Explorer at start (green)"
+        },
+        {
+          "step": 2,
+          "description": "Move right to (0, 1)",
+          "action": "visit",
+          "position": [0, 1],
+          "path": [[0, 0], [0, 1]],
+          "visual_note": "Path extends right"
+        },
+        {
+          "step": 3,
+          "description": "Try right: (0, 2) is wall",
+          "action": "wall",
+          "position": [0, 2],
+          "visual_note": "Red flash on wall"
+        },
+        {
+          "step": 4,
+          "description": "Move down to (1, 1)",
+          "action": "visit",
+          "position": [1, 1],
+          "path": [[0, 0], [0, 1], [1, 1]],
+          "visual_note": "Path extends down"
+        },
+        {
+          "step": 5,
+          "description": "Move right to (1, 2)",
+          "action": "visit",
+          "position": [1, 2],
+          "path": [[0, 0], [0, 1], [1, 1], [1, 2]],
+          "visual_note": "Continue right"
+        },
+        {
+          "step": 6,
+          "description": "Move right to (1, 3)",
+          "action": "visit",
+          "position": [1, 3],
+          "path": [[0, 0], [0, 1], [1, 1], [1, 2], [1, 3]],
+          "visual_note": "Continue right"
+        },
+        {
+          "step": 7,
+          "description": "Move down to (2, 3)",
+          "action": "visit",
+          "position": [2, 3],
+          "path": [[0, 0], [0, 1], [1, 1], [1, 2], [1, 3], [2, 3]],
+          "visual_note": "Move down"
+        },
+        {
+          "step": 8,
+          "description": "Move down to (3, 3) - GOAL!",
+          "action": "goal",
+          "position": [3, 3],
+          "path": [[0, 0], [0, 1], [1, 1], [1, 2], [1, 3], [2, 3], [3, 3]],
+          "visual_note": "Reached goal (gold)"
+        },
+        {
+          "step": 9,
+          "description": "Complete: Path found with 7 steps",
+          "action": "complete",
+          "path": [[0, 0], [0, 1], [1, 1], [1, 2], [1, 3], [2, 3], [3, 3]],
+          "length": 7,
+          "visual_note": "Entire path glows gold"
+        }
+      ]
+    },
+    {
+      "algorithm": "combination_sum",
+      "name": "Combination Sum",
+      "complexity": "O(n^(target/min))",
+      "candidates": [2, 3, 6, 7],
+      "target": 7,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Find combinations summing to 7",
+          "action": "init",
+          "current": [],
+          "sum": 0,
+          "remaining": 7,
+          "visual_note": "Target: 7"
+        },
+        {
+          "step": 2,
+          "description": "Add 2, sum = 2",
+          "action": "add",
+          "element": 2,
+          "current": [2],
+          "sum": 2,
+          "remaining": 5,
+          "visual_note": "Branch with 2"
+        },
+        {
+          "step": 3,
+          "description": "Add 2, sum = 4",
+          "action": "add",
+          "element": 2,
+          "current": [2, 2],
+          "sum": 4,
+          "remaining": 3,
+          "visual_note": "Add another 2"
+        },
+        {
+          "step": 4,
+          "description": "Add 2, sum = 6",
+          "action": "add",
+          "element": 2,
+          "current": [2, 2, 2],
+          "sum": 6,
+          "remaining": 1,
+          "visual_note": "Third 2"
+        },
+        {
+          "step": 5,
+          "description": "Add 2, sum = 8 > 7, prune!",
+          "action": "prune",
+          "current": [2, 2, 2, 2],
+          "sum": 8,
+          "visual_note": "Branch turns red"
+        },
+        {
+          "step": 6,
+          "description": "Backtrack, try 3: sum = 6 + 3 = 9 > 7, prune",
+          "action": "prune",
+          "visual_note": "3 also exceeds"
+        },
+        {
+          "step": 7,
+          "description": "Backtrack to [2, 2], try 3: sum = 4 + 3 = 7",
+          "action": "found",
+          "current": [2, 2, 3],
+          "sum": 7,
+          "visual_note": "Solution found!"
+        },
+        {
+          "step": 8,
+          "description": "Continue searching...",
+          "action": "continue",
+          "visual_note": "More branches to explore"
+        },
+        {
+          "step": 9,
+          "description": "Try 7 directly: sum = 7",
+          "action": "found",
+          "current": [7],
+          "sum": 7,
+          "visual_note": "Second solution!"
+        },
+        {
+          "step": 10,
+          "description": "Complete: 2 combinations found",
+          "action": "complete",
+          "solutions": [[2, 2, 3], [7]],
+          "count": 2,
+          "visual_note": "Both solutions highlighted"
+        }
+      ]
+    }
+  ]
+}

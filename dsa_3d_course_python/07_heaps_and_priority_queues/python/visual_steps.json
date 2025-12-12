@@ -1,0 +1,439 @@
+{
+  "world": "07_heaps_and_priority_queues",
+  "description": "Visualization steps for heap and priority queue operations",
+  "algorithms": [
+    {
+      "algorithm": "heap_insert",
+      "name": "Heap Insert with Bubble-Up",
+      "complexity": "O(log n)",
+      "initial_heap": [90, 80, 70, 60, 50],
+      "insert_value": 85,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Insert 85 into max-heap",
+          "action": "insert_start",
+          "value": 85,
+          "heap_state": [90, 80, 70, 60, 50],
+          "visual_note": "New value 85 appears above array ring"
+        },
+        {
+          "step": 2,
+          "description": "Place 85 at next available position (index 5)",
+          "action": "place_at_end",
+          "value": 85,
+          "index": 5,
+          "heap_state": [90, 80, 70, 60, 50, 85],
+          "visual_note": "85 materializes at bottom of pyramid"
+        },
+        {
+          "step": 3,
+          "description": "Compare 85 with parent at index 2 (value 70)",
+          "action": "compare",
+          "current_index": 5,
+          "parent_index": 2,
+          "comparison": "85 > 70",
+          "result": "SWAP",
+          "visual_note": "Comparison line glows between 85 and 70"
+        },
+        {
+          "step": 4,
+          "description": "Swap 85 and 70",
+          "action": "swap",
+          "index_a": 5,
+          "index_b": 2,
+          "heap_state": [90, 80, 85, 60, 50, 70],
+          "visual_note": "85 rises, 70 descends with swap animation"
+        },
+        {
+          "step": 5,
+          "description": "Compare 85 with parent at index 0 (value 90)",
+          "action": "compare",
+          "current_index": 2,
+          "parent_index": 0,
+          "comparison": "85 > 90",
+          "result": "NO SWAP",
+          "visual_note": "85 < 90, heap property satisfied"
+        },
+        {
+          "step": 6,
+          "description": "Insert complete",
+          "action": "complete",
+          "heap_state": [90, 80, 85, 60, 50, 70],
+          "visual_note": "85 settles in final position, success glow"
+        }
+      ]
+    },
+    {
+      "algorithm": "heap_extract_max",
+      "name": "Extract Maximum with Bubble-Down",
+      "complexity": "O(log n)",
+      "initial_heap": [90, 80, 70, 60, 50, 40, 30],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Extract maximum (root = 90)",
+          "action": "extract_start",
+          "value": 90,
+          "index": 0,
+          "heap_state": [90, 80, 70, 60, 50, 40, 30],
+          "visual_note": "Root 90 highlighted for extraction"
+        },
+        {
+          "step": 2,
+          "description": "Remove root, lift off pyramid",
+          "action": "remove_root",
+          "value": 90,
+          "heap_state": [null, 80, 70, 60, 50, 40, 30],
+          "visual_note": "90 lifts off apex with particle trail"
+        },
+        {
+          "step": 3,
+          "description": "Move last element (30) to root",
+          "action": "move_last_to_root",
+          "value": 30,
+          "from_index": 6,
+          "to_index": 0,
+          "heap_state": [30, 80, 70, 60, 50, 40],
+          "visual_note": "30 teleports from bottom to apex"
+        },
+        {
+          "step": 4,
+          "description": "Compare 30 with children (80, 70)",
+          "action": "compare_children",
+          "current_index": 0,
+          "left_child": {"index": 1, "value": 80},
+          "right_child": {"index": 2, "value": 70},
+          "larger_child": 80,
+          "comparison": "30 < 80",
+          "result": "SWAP with left child",
+          "visual_note": "Both children highlighted, 80 is larger"
+        },
+        {
+          "step": 5,
+          "description": "Swap 30 and 80",
+          "action": "swap",
+          "index_a": 0,
+          "index_b": 1,
+          "heap_state": [80, 30, 70, 60, 50, 40],
+          "visual_note": "30 descends, 80 rises to root"
+        },
+        {
+          "step": 6,
+          "description": "Compare 30 with children (60, 50)",
+          "action": "compare_children",
+          "current_index": 1,
+          "left_child": {"index": 3, "value": 60},
+          "right_child": {"index": 4, "value": 50},
+          "larger_child": 60,
+          "comparison": "30 < 60",
+          "result": "SWAP with left child",
+          "visual_note": "Continue bubble down"
+        },
+        {
+          "step": 7,
+          "description": "Swap 30 and 60",
+          "action": "swap",
+          "index_a": 1,
+          "index_b": 3,
+          "heap_state": [80, 60, 70, 30, 50, 40],
+          "visual_note": "30 descends to level 2"
+        },
+        {
+          "step": 8,
+          "description": "30 is now a leaf, bubble down complete",
+          "action": "complete",
+          "extracted_value": 90,
+          "heap_state": [80, 60, 70, 30, 50, 40],
+          "visual_note": "Extraction complete, 90 displayed in result area"
+        }
+      ]
+    },
+    {
+      "algorithm": "heapify",
+      "name": "Build Heap from Array (Heapify)",
+      "complexity": "O(n)",
+      "input_array": [30, 50, 80, 20, 60, 40, 90],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start with unsorted array",
+          "action": "init",
+          "array": [30, 50, 80, 20, 60, 40, 90],
+          "visual_note": "Array displayed, not a valid heap"
+        },
+        {
+          "step": 2,
+          "description": "Find last non-leaf node (index 2)",
+          "action": "find_start",
+          "index": 2,
+          "formula": "floor(n/2) - 1 = floor(7/2) - 1 = 2",
+          "visual_note": "Index 2 (value 80) highlighted"
+        },
+        {
+          "step": 3,
+          "description": "Bubble down from index 2",
+          "action": "bubble_down",
+          "index": 2,
+          "value": 80,
+          "children": [40, 90],
+          "swap_with": 90,
+          "array_after": [30, 50, 90, 20, 60, 40, 80],
+          "visual_note": "80 swaps with 90"
+        },
+        {
+          "step": 4,
+          "description": "Move to index 1, bubble down",
+          "action": "bubble_down",
+          "index": 1,
+          "value": 50,
+          "children": [20, 60],
+          "swap_with": 60,
+          "array_after": [30, 60, 90, 20, 50, 40, 80],
+          "visual_note": "50 swaps with 60"
+        },
+        {
+          "step": 5,
+          "description": "Move to index 0 (root), bubble down",
+          "action": "bubble_down",
+          "index": 0,
+          "value": 30,
+          "children": [60, 90],
+          "swap_with": 90,
+          "array_after": [90, 60, 30, 20, 50, 40, 80],
+          "visual_note": "30 swaps with 90"
+        },
+        {
+          "step": 6,
+          "description": "Continue bubble down for 30",
+          "action": "bubble_down",
+          "index": 2,
+          "value": 30,
+          "children": [40, 80],
+          "swap_with": 80,
+          "array_after": [90, 60, 80, 20, 50, 40, 30],
+          "visual_note": "30 swaps with 80"
+        },
+        {
+          "step": 7,
+          "description": "Heapify complete - valid max-heap",
+          "action": "complete",
+          "heap_state": [90, 60, 80, 20, 50, 40, 30],
+          "visual_note": "Valid max-heap, all properties satisfied"
+        }
+      ]
+    },
+    {
+      "algorithm": "k_largest_elements",
+      "name": "Find K Largest Elements",
+      "complexity": "O(n log k)",
+      "input": [5, 2, 9, 1, 7, 6, 3],
+      "k": 3,
+      "steps": [
+        {
+          "step": 1,
+          "description": "Find 3 largest elements using min-heap of size 3",
+          "action": "init",
+          "stream": [5, 2, 9, 1, 7, 6, 3],
+          "k": 3,
+          "heap": [],
+          "visual_note": "Empty min-heap, k=3"
+        },
+        {
+          "step": 2,
+          "description": "Process 5: heap has space, insert",
+          "action": "insert",
+          "value": 5,
+          "heap": [5],
+          "visual_note": "5 enters heap"
+        },
+        {
+          "step": 3,
+          "description": "Process 2: heap has space, insert",
+          "action": "insert",
+          "value": 2,
+          "heap": [2, 5],
+          "visual_note": "2 enters heap, becomes root (min)"
+        },
+        {
+          "step": 4,
+          "description": "Process 9: heap has space, insert",
+          "action": "insert",
+          "value": 9,
+          "heap": [2, 5, 9],
+          "visual_note": "9 enters heap, heap now full"
+        },
+        {
+          "step": 5,
+          "description": "Process 1: 1 < heap min (2), skip",
+          "action": "skip",
+          "value": 1,
+          "heap_min": 2,
+          "comparison": "1 < 2",
+          "heap": [2, 5, 9],
+          "visual_note": "1 rejected, smaller than all in heap"
+        },
+        {
+          "step": 6,
+          "description": "Process 7: 7 > heap min (2), replace",
+          "action": "replace",
+          "value": 7,
+          "removed": 2,
+          "heap": [5, 7, 9],
+          "visual_note": "7 replaces 2, heap rebalances"
+        },
+        {
+          "step": 7,
+          "description": "Process 6: 6 > heap min (5), replace",
+          "action": "replace",
+          "value": 6,
+          "removed": 5,
+          "heap": [6, 7, 9],
+          "visual_note": "6 replaces 5"
+        },
+        {
+          "step": 8,
+          "description": "Process 3: 3 < heap min (6), skip",
+          "action": "skip",
+          "value": 3,
+          "heap_min": 6,
+          "heap": [6, 7, 9],
+          "visual_note": "3 rejected"
+        },
+        {
+          "step": 9,
+          "description": "Stream complete, heap contains k largest",
+          "action": "complete",
+          "result": [9, 7, 6],
+          "visual_note": "K largest elements: 9, 7, 6"
+        }
+      ]
+    },
+    {
+      "algorithm": "heap_sort",
+      "name": "Heap Sort",
+      "complexity": "O(n log n)",
+      "input": [4, 10, 3, 5, 1],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build max-heap from array",
+          "action": "heapify",
+          "array": [4, 10, 3, 5, 1],
+          "heap_after": [10, 5, 3, 4, 1],
+          "visual_note": "Array transformed to max-heap"
+        },
+        {
+          "step": 2,
+          "description": "Swap root (10) with last element",
+          "action": "swap_and_reduce",
+          "swap": [0, 4],
+          "array": [1, 5, 3, 4, 10],
+          "sorted_portion": [10],
+          "heap_size": 4,
+          "visual_note": "10 moves to sorted section"
+        },
+        {
+          "step": 3,
+          "description": "Heapify reduced heap, swap root (5)",
+          "action": "heapify_and_swap",
+          "heap_after_heapify": [5, 4, 3, 1],
+          "swap": [0, 3],
+          "array": [1, 4, 3, 5, 10],
+          "sorted_portion": [5, 10],
+          "visual_note": "5 moves to sorted section"
+        },
+        {
+          "step": 4,
+          "description": "Continue: heapify and swap root (4)",
+          "action": "heapify_and_swap",
+          "heap_after_heapify": [4, 1, 3],
+          "swap": [0, 2],
+          "array": [3, 1, 4, 5, 10],
+          "sorted_portion": [4, 5, 10],
+          "visual_note": "4 moves to sorted section"
+        },
+        {
+          "step": 5,
+          "description": "Continue: heapify and swap root (3)",
+          "action": "heapify_and_swap",
+          "swap": [0, 1],
+          "array": [1, 3, 4, 5, 10],
+          "sorted_portion": [3, 4, 5, 10],
+          "visual_note": "3 moves to sorted section"
+        },
+        {
+          "step": 6,
+          "description": "Heap sort complete",
+          "action": "complete",
+          "sorted_array": [1, 3, 4, 5, 10],
+          "visual_note": "Array fully sorted"
+        }
+      ]
+    },
+    {
+      "algorithm": "priority_queue_scheduling",
+      "name": "Task Scheduling with Priority Queue",
+      "complexity": "O(n log n)",
+      "tasks": [
+        {"id": "A", "priority": 3},
+        {"id": "B", "priority": 7},
+        {"id": "C", "priority": 1},
+        {"id": "D", "priority": 5}
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Add all tasks to priority queue",
+          "action": "enqueue_all",
+          "tasks": ["A(3)", "B(7)", "C(1)", "D(5)"],
+          "heap": ["B(7)", "D(5)", "C(1)", "A(3)"],
+          "visual_note": "Tasks arranged by priority in max-heap"
+        },
+        {
+          "step": 2,
+          "description": "Execute highest priority task B(7)",
+          "action": "dequeue",
+          "task": "B",
+          "priority": 7,
+          "heap_after": ["D(5)", "A(3)", "C(1)"],
+          "visual_note": "B extracted and executed"
+        },
+        {
+          "step": 3,
+          "description": "Execute next highest priority task D(5)",
+          "action": "dequeue",
+          "task": "D",
+          "priority": 5,
+          "heap_after": ["A(3)", "C(1)"],
+          "visual_note": "D extracted and executed"
+        },
+        {
+          "step": 4,
+          "description": "Execute task A(3)",
+          "action": "dequeue",
+          "task": "A",
+          "priority": 3,
+          "heap_after": ["C(1)"],
+          "visual_note": "A extracted and executed"
+        },
+        {
+          "step": 5,
+          "description": "Execute lowest priority task C(1)",
+          "action": "dequeue",
+          "task": "C",
+          "priority": 1,
+          "heap_after": [],
+          "visual_note": "C extracted and executed"
+        },
+        {
+          "step": 6,
+          "description": "All tasks completed",
+          "action": "complete",
+          "execution_order": ["B", "D", "A", "C"],
+          "visual_note": "Tasks executed in priority order"
+        }
+      ]
+    }
+  ]
+}

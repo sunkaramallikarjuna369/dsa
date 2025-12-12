@@ -1,0 +1,104 @@
+{
+  "world": "03_linked_lists",
+  "algorithms": [
+    {
+      "algorithm": "singly_linked_list_traversal",
+      "description": "Traverse a singly linked list from head to tail",
+      "input": {"values": [10, 20, 30, 40, 50]},
+      "steps": [
+        {"step": 1, "description": "Start at HEAD anchor", "current_node": null, "action": "highlight_head"},
+        {"step": 2, "description": "Follow chain to first node (10)", "current_node": 10, "action": "traverse_pulse"},
+        {"step": 3, "description": "Follow chain to node (20)", "current_node": 20, "action": "traverse_pulse"},
+        {"step": 4, "description": "Follow chain to node (30)", "current_node": 30, "action": "traverse_pulse"},
+        {"step": 5, "description": "Follow chain to node (40)", "current_node": 40, "action": "traverse_pulse"},
+        {"step": 6, "description": "Follow chain to node (50)", "current_node": 50, "action": "traverse_pulse"},
+        {"step": 7, "description": "Reached NULL terminator - end of list", "current_node": null, "action": "reach_null"}
+      ]
+    },
+    {
+      "algorithm": "insert_at_head",
+      "description": "Insert a new node at the head of the list",
+      "input": {"existing_list": [20, 30, 40], "new_value": 10},
+      "steps": [
+        {"step": 1, "description": "Current list state", "list_state": [20, 30, 40], "action": "show_initial"},
+        {"step": 2, "description": "Create new node with value 10", "new_node": 10, "action": "materialize_node"},
+        {"step": 3, "description": "Set new node's next to current head (20)", "pointer_change": {"node_10_next": 20}, "action": "create_chain"},
+        {"step": 4, "description": "Detach HEAD anchor from node 20", "action": "break_chain"},
+        {"step": 5, "description": "Attach HEAD anchor to new node (10)", "pointer_change": {"head": 10}, "action": "create_chain"},
+        {"step": 6, "description": "Insertion complete", "list_state": [10, 20, 30, 40], "complexity": "O(1)", "action": "complete"}
+      ]
+    },
+    {
+      "algorithm": "insert_at_tail",
+      "description": "Insert a new node at the tail of the list",
+      "input": {"existing_list": [10, 20, 30], "new_value": 40},
+      "steps": [
+        {"step": 1, "description": "Current list state", "list_state": [10, 20, 30], "action": "show_initial"},
+        {"step": 2, "description": "Create new node with value 40", "new_node": 40, "action": "materialize_node"},
+        {"step": 3, "description": "Traverse from HEAD to find tail", "current_node": 10, "action": "traverse_pulse"},
+        {"step": 4, "description": "Continue traversal", "current_node": 20, "action": "traverse_pulse"},
+        {"step": 5, "description": "Found tail node (30)", "current_node": 30, "action": "highlight_tail"},
+        {"step": 6, "description": "Remove NULL terminator from node 30", "action": "remove_null"},
+        {"step": 7, "description": "Create chain from node 30 to new node 40", "pointer_change": {"node_30_next": 40}, "action": "create_chain"},
+        {"step": 8, "description": "Add NULL terminator to node 40", "action": "add_null"},
+        {"step": 9, "description": "Insertion complete", "list_state": [10, 20, 30, 40], "complexity": "O(n)", "action": "complete"}
+      ]
+    },
+    {
+      "algorithm": "delete_node",
+      "description": "Delete a node from the middle of the list",
+      "input": {"existing_list": [10, 20, 30, 40, 50], "delete_value": 30},
+      "steps": [
+        {"step": 1, "description": "Current list state", "list_state": [10, 20, 30, 40, 50], "action": "show_initial"},
+        {"step": 2, "description": "Search for node to delete (30)", "action": "search_start"},
+        {"step": 3, "description": "Traverse: check node 10", "current_node": 10, "action": "traverse_pulse"},
+        {"step": 4, "description": "Traverse: check node 20, next is target", "current_node": 20, "action": "traverse_pulse"},
+        {"step": 5, "description": "Found target node (30) - highlight red", "target_node": 30, "action": "mark_deletion"},
+        {"step": 6, "description": "Break chain from node 20 to node 30", "action": "break_chain"},
+        {"step": 7, "description": "Break chain from node 30 to node 40", "action": "break_chain"},
+        {"step": 8, "description": "Create direct chain from node 20 to node 40", "pointer_change": {"node_20_next": 40}, "action": "create_chain"},
+        {"step": 9, "description": "Node 30 fades and drifts away (garbage collection)", "deleted_node": 30, "action": "garbage_collect"},
+        {"step": 10, "description": "Deletion complete", "list_state": [10, 20, 40, 50], "complexity": "O(n)", "action": "complete"}
+      ]
+    },
+    {
+      "algorithm": "reverse_linked_list",
+      "description": "Reverse a singly linked list in place",
+      "input": {"list": [1, 2, 3, 4, 5]},
+      "steps": [
+        {"step": 1, "description": "Initialize pointers", "prev": null, "curr": 1, "next_temp": null, "list_state": [1, 2, 3, 4, 5], "action": "initialize"},
+        {"step": 2, "description": "Save next: next_temp = 2", "prev": null, "curr": 1, "next_temp": 2, "action": "save_next"},
+        {"step": 3, "description": "Reverse link: node(1).next = None", "pointer_change": {"node_1_next": null}, "action": "reverse_link"},
+        {"step": 4, "description": "Advance: prev=1, curr=2", "prev": 1, "curr": 2, "action": "advance_pointers"},
+        {"step": 5, "description": "Save next: next_temp = 3", "prev": 1, "curr": 2, "next_temp": 3, "action": "save_next"},
+        {"step": 6, "description": "Reverse link: node(2).next = 1", "pointer_change": {"node_2_next": 1}, "action": "reverse_link"},
+        {"step": 7, "description": "Advance: prev=2, curr=3", "prev": 2, "curr": 3, "action": "advance_pointers"},
+        {"step": 8, "description": "Save next: next_temp = 4", "prev": 2, "curr": 3, "next_temp": 4, "action": "save_next"},
+        {"step": 9, "description": "Reverse link: node(3).next = 2", "pointer_change": {"node_3_next": 2}, "action": "reverse_link"},
+        {"step": 10, "description": "Advance: prev=3, curr=4", "prev": 3, "curr": 4, "action": "advance_pointers"},
+        {"step": 11, "description": "Save next: next_temp = 5", "prev": 3, "curr": 4, "next_temp": 5, "action": "save_next"},
+        {"step": 12, "description": "Reverse link: node(4).next = 3", "pointer_change": {"node_4_next": 3}, "action": "reverse_link"},
+        {"step": 13, "description": "Advance: prev=4, curr=5", "prev": 4, "curr": 5, "action": "advance_pointers"},
+        {"step": 14, "description": "Save next: next_temp = None", "prev": 4, "curr": 5, "next_temp": null, "action": "save_next"},
+        {"step": 15, "description": "Reverse link: node(5).next = 4", "pointer_change": {"node_5_next": 4}, "action": "reverse_link"},
+        {"step": 16, "description": "Advance: prev=5, curr=None", "prev": 5, "curr": null, "action": "advance_pointers"},
+        {"step": 17, "description": "Update HEAD to point to node 5", "pointer_change": {"head": 5}, "action": "update_head"},
+        {"step": 18, "description": "Reversal complete", "list_state": [5, 4, 3, 2, 1], "action": "complete"}
+      ]
+    },
+    {
+      "algorithm": "floyd_cycle_detection",
+      "description": "Detect cycle using tortoise and hare algorithm",
+      "input": {"list": [1, 2, 3, 4, 5, 6], "cycle_start": 3},
+      "steps": [
+        {"step": 1, "description": "Initialize: tortoise and hare at HEAD", "tortoise": 1, "hare": 1, "action": "initialize"},
+        {"step": 2, "description": "Move tortoise 1 step, hare 2 steps", "tortoise": 2, "hare": 3, "action": "move_pointers"},
+        {"step": 3, "description": "Move tortoise 1 step, hare 2 steps", "tortoise": 3, "hare": 5, "action": "move_pointers"},
+        {"step": 4, "description": "Move tortoise 1 step, hare 2 steps", "tortoise": 4, "hare": 3, "hare_wrapped": true, "action": "move_pointers"},
+        {"step": 5, "description": "Move tortoise 1 step, hare 2 steps", "tortoise": 5, "hare": 5, "action": "move_pointers"},
+        {"step": 6, "description": "TORTOISE AND HARE MEET! Cycle detected!", "meeting_point": 5, "action": "cycle_detected"},
+        {"step": 7, "description": "Display: Cycle exists, entry point at node 3", "cycle_entry": 3, "action": "show_result"}
+      ]
+    }
+  ]
+}

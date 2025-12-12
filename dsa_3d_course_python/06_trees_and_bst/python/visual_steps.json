@@ -1,0 +1,418 @@
+{
+  "world": "06_trees_and_bst",
+  "description": "Visualization steps for binary tree and BST operations",
+  "algorithms": [
+    {
+      "algorithm": "bst_insert",
+      "name": "BST Insert Operation",
+      "complexity": "O(log n) average",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Insert 35 into BST with root 50",
+          "action": "insert_start",
+          "value": 35,
+          "tree_state": [50, 30, 70, 20, 40],
+          "visual_note": "Value 35 appears above root"
+        },
+        {
+          "step": 2,
+          "description": "Compare 35 with root 50",
+          "action": "compare",
+          "current_node": 50,
+          "comparison": "35 < 50",
+          "direction": "LEFT",
+          "path": [50],
+          "visual_note": "35 < 50, descend left branch"
+        },
+        {
+          "step": 3,
+          "description": "Compare 35 with node 30",
+          "action": "compare",
+          "current_node": 30,
+          "comparison": "35 > 30",
+          "direction": "RIGHT",
+          "path": [50, 30],
+          "visual_note": "35 > 30, descend right branch"
+        },
+        {
+          "step": 4,
+          "description": "Compare 35 with node 40",
+          "action": "compare",
+          "current_node": 40,
+          "comparison": "35 < 40",
+          "direction": "LEFT",
+          "path": [50, 30, 40],
+          "visual_note": "35 < 40, left child is NULL"
+        },
+        {
+          "step": 5,
+          "description": "Insert 35 as left child of 40",
+          "action": "insert_complete",
+          "value": 35,
+          "parent": 40,
+          "position": "left",
+          "tree_state": [50, 30, 70, 20, 40, null, null, null, null, 35],
+          "visual_note": "New node materializes, edge connects to parent"
+        }
+      ]
+    },
+    {
+      "algorithm": "bst_search",
+      "name": "BST Search Operation",
+      "complexity": "O(log n) average",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Search for value 40",
+          "action": "search_start",
+          "value": 40,
+          "visual_note": "Search probe appears above root"
+        },
+        {
+          "step": 2,
+          "description": "Compare 40 with root 50",
+          "action": "compare",
+          "current_node": 50,
+          "comparison": "40 < 50",
+          "direction": "LEFT",
+          "visual_note": "40 < 50, probe descends left"
+        },
+        {
+          "step": 3,
+          "description": "Compare 40 with node 30",
+          "action": "compare",
+          "current_node": 30,
+          "comparison": "40 > 30",
+          "direction": "RIGHT",
+          "visual_note": "40 > 30, probe descends right"
+        },
+        {
+          "step": 4,
+          "description": "Compare 40 with node 40 - FOUND!",
+          "action": "found",
+          "current_node": 40,
+          "comparison": "40 == 40",
+          "visual_note": "Match found! Node glows green"
+        }
+      ]
+    },
+    {
+      "algorithm": "bst_delete_leaf",
+      "name": "BST Delete Leaf Node",
+      "complexity": "O(log n) average",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Delete leaf node 20",
+          "action": "delete_start",
+          "value": 20,
+          "tree_state": [50, 30, 70, 20, 40],
+          "visual_note": "Target node 20 highlighted"
+        },
+        {
+          "step": 2,
+          "description": "Node 20 is a leaf (no children)",
+          "action": "identify_case",
+          "case": "leaf",
+          "visual_note": "Case 1: Leaf node - simply remove"
+        },
+        {
+          "step": 3,
+          "description": "Remove node 20",
+          "action": "delete_complete",
+          "value": 20,
+          "tree_state": [50, 30, 70, null, 40],
+          "visual_note": "Node fades away with particle effect"
+        }
+      ]
+    },
+    {
+      "algorithm": "bst_delete_two_children",
+      "name": "BST Delete Node with Two Children",
+      "complexity": "O(log n) average",
+      "steps": [
+        {
+          "step": 1,
+          "description": "Delete node 30 (has two children)",
+          "action": "delete_start",
+          "value": 30,
+          "tree_state": [50, 30, 70, 20, 40],
+          "visual_note": "Target node 30 highlighted"
+        },
+        {
+          "step": 2,
+          "description": "Node 30 has two children (20 and 40)",
+          "action": "identify_case",
+          "case": "two_children",
+          "left_child": 20,
+          "right_child": 40,
+          "visual_note": "Case 3: Two children - find successor"
+        },
+        {
+          "step": 3,
+          "description": "Find in-order successor (smallest in right subtree)",
+          "action": "find_successor",
+          "subtree_root": 40,
+          "successor": 40,
+          "visual_note": "Traverse right subtree, find minimum"
+        },
+        {
+          "step": 4,
+          "description": "Copy successor value 40 to node position",
+          "action": "copy_value",
+          "from_node": 40,
+          "to_node": 30,
+          "visual_note": "Value 40 copies to replace 30"
+        },
+        {
+          "step": 5,
+          "description": "Delete original successor node",
+          "action": "delete_successor",
+          "value": 40,
+          "tree_state": [50, 40, 70, 20],
+          "visual_note": "Original 40 node removed"
+        }
+      ]
+    },
+    {
+      "algorithm": "inorder_traversal",
+      "name": "In-Order Traversal (Left, Root, Right)",
+      "complexity": "O(n)",
+      "tree": [50, 30, 70, 20, 40, 60, 80],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start in-order traversal at root 50",
+          "action": "start",
+          "current_node": 50,
+          "output": [],
+          "visual_note": "Green path begins at root"
+        },
+        {
+          "step": 2,
+          "description": "Go left to node 30",
+          "action": "descend_left",
+          "current_node": 30,
+          "visual_note": "Path descends to left subtree"
+        },
+        {
+          "step": 3,
+          "description": "Go left to node 20",
+          "action": "descend_left",
+          "current_node": 20,
+          "visual_note": "Continue left"
+        },
+        {
+          "step": 4,
+          "description": "Visit node 20 (no left child)",
+          "action": "visit",
+          "current_node": 20,
+          "output": [20],
+          "visual_note": "Node 20 lights up, added to output"
+        },
+        {
+          "step": 5,
+          "description": "Return to node 30, visit it",
+          "action": "visit",
+          "current_node": 30,
+          "output": [20, 30],
+          "visual_note": "Node 30 lights up"
+        },
+        {
+          "step": 6,
+          "description": "Go right to node 40, visit it",
+          "action": "visit",
+          "current_node": 40,
+          "output": [20, 30, 40],
+          "visual_note": "Node 40 lights up"
+        },
+        {
+          "step": 7,
+          "description": "Return to root 50, visit it",
+          "action": "visit",
+          "current_node": 50,
+          "output": [20, 30, 40, 50],
+          "visual_note": "Root 50 lights up"
+        },
+        {
+          "step": 8,
+          "description": "Go right to node 70",
+          "action": "descend_right",
+          "current_node": 70,
+          "visual_note": "Path descends to right subtree"
+        },
+        {
+          "step": 9,
+          "description": "Go left to node 60, visit it",
+          "action": "visit",
+          "current_node": 60,
+          "output": [20, 30, 40, 50, 60],
+          "visual_note": "Node 60 lights up"
+        },
+        {
+          "step": 10,
+          "description": "Return to node 70, visit it",
+          "action": "visit",
+          "current_node": 70,
+          "output": [20, 30, 40, 50, 60, 70],
+          "visual_note": "Node 70 lights up"
+        },
+        {
+          "step": 11,
+          "description": "Go right to node 80, visit it",
+          "action": "visit",
+          "current_node": 80,
+          "output": [20, 30, 40, 50, 60, 70, 80],
+          "visual_note": "Node 80 lights up - traversal complete!"
+        }
+      ]
+    },
+    {
+      "algorithm": "levelorder_traversal",
+      "name": "Level-Order Traversal (BFS)",
+      "complexity": "O(n)",
+      "tree": [50, 30, 70, 20, 40, 60, 80],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start level-order traversal",
+          "action": "start",
+          "queue": [50],
+          "output": [],
+          "visual_note": "Root added to queue"
+        },
+        {
+          "step": 2,
+          "description": "Process level 0: visit 50",
+          "action": "visit",
+          "current_node": 50,
+          "queue": [30, 70],
+          "output": [50],
+          "level": 0,
+          "visual_note": "Visit 50, add children to queue"
+        },
+        {
+          "step": 3,
+          "description": "Process level 1: visit 30",
+          "action": "visit",
+          "current_node": 30,
+          "queue": [70, 20, 40],
+          "output": [50, 30],
+          "level": 1,
+          "visual_note": "Visit 30, add children to queue"
+        },
+        {
+          "step": 4,
+          "description": "Process level 1: visit 70",
+          "action": "visit",
+          "current_node": 70,
+          "queue": [20, 40, 60, 80],
+          "output": [50, 30, 70],
+          "level": 1,
+          "visual_note": "Visit 70, add children to queue"
+        },
+        {
+          "step": 5,
+          "description": "Process level 2: visit 20, 40, 60, 80",
+          "action": "visit_level",
+          "nodes": [20, 40, 60, 80],
+          "queue": [],
+          "output": [50, 30, 70, 20, 40, 60, 80],
+          "level": 2,
+          "visual_note": "Visit all level 2 nodes"
+        },
+        {
+          "step": 6,
+          "description": "Queue empty, traversal complete",
+          "action": "complete",
+          "output": [50, 30, 70, 20, 40, 60, 80],
+          "visual_note": "All nodes visited level by level"
+        }
+      ]
+    },
+    {
+      "algorithm": "sorted_array_to_bst",
+      "name": "Convert Sorted Array to Balanced BST",
+      "complexity": "O(n)",
+      "input": [10, 20, 30, 40, 50, 60, 70],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Start with sorted array",
+          "action": "init",
+          "array": [10, 20, 30, 40, 50, 60, 70],
+          "visual_note": "Array displayed as horizontal blocks"
+        },
+        {
+          "step": 2,
+          "description": "Find middle element (40) - becomes root",
+          "action": "select_root",
+          "index": 3,
+          "value": 40,
+          "visual_note": "Middle element rises to become root"
+        },
+        {
+          "step": 3,
+          "description": "Recursively build left subtree from [10, 20, 30]",
+          "action": "build_left",
+          "subarray": [10, 20, 30],
+          "middle": 20,
+          "visual_note": "Left portion highlighted, 20 becomes left child"
+        },
+        {
+          "step": 4,
+          "description": "Build left subtree of 20: element 10",
+          "action": "build_node",
+          "value": 10,
+          "parent": 20,
+          "position": "left",
+          "visual_note": "10 becomes left child of 20"
+        },
+        {
+          "step": 5,
+          "description": "Build right subtree of 20: element 30",
+          "action": "build_node",
+          "value": 30,
+          "parent": 20,
+          "position": "right",
+          "visual_note": "30 becomes right child of 20"
+        },
+        {
+          "step": 6,
+          "description": "Recursively build right subtree from [50, 60, 70]",
+          "action": "build_right",
+          "subarray": [50, 60, 70],
+          "middle": 60,
+          "visual_note": "Right portion highlighted, 60 becomes right child"
+        },
+        {
+          "step": 7,
+          "description": "Build left subtree of 60: element 50",
+          "action": "build_node",
+          "value": 50,
+          "parent": 60,
+          "position": "left",
+          "visual_note": "50 becomes left child of 60"
+        },
+        {
+          "step": 8,
+          "description": "Build right subtree of 60: element 70",
+          "action": "build_node",
+          "value": 70,
+          "parent": 60,
+          "position": "right",
+          "visual_note": "70 becomes right child of 60"
+        },
+        {
+          "step": 9,
+          "description": "Balanced BST complete",
+          "action": "complete",
+          "tree": [40, 20, 60, 10, 30, 50, 70],
+          "height": 2,
+          "visual_note": "Perfectly balanced tree with minimum height"
+        }
+      ]
+    }
+  ]
+}
