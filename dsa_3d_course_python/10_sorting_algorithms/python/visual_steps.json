@@ -1,0 +1,491 @@
+{
+  "world": "10_sorting_algorithms",
+  "description": "Visualization steps for sorting algorithms",
+  "algorithms": [
+    {
+      "algorithm": "bubble_sort",
+      "name": "Bubble Sort",
+      "complexity": "O(n²)",
+      "array": [64, 34, 25, 12, 22, 11],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize bubble sort",
+          "action": "init",
+          "array": [64, 34, 25, 12, 22, 11],
+          "visual_note": "6 bars displayed with heights proportional to values"
+        },
+        {
+          "step": 2,
+          "description": "Pass 1: Compare 64 and 34",
+          "action": "compare",
+          "indices": [0, 1],
+          "values": [64, 34],
+          "comparison": "64 > 34",
+          "result": "swap",
+          "visual_note": "Bars 0 and 1 glow yellow"
+        },
+        {
+          "step": 3,
+          "description": "Swap 64 and 34",
+          "action": "swap",
+          "indices": [0, 1],
+          "array": [34, 64, 25, 12, 22, 11],
+          "visual_note": "Bars hop over each other"
+        },
+        {
+          "step": 4,
+          "description": "Compare 64 and 25",
+          "action": "compare",
+          "indices": [1, 2],
+          "values": [64, 25],
+          "comparison": "64 > 25",
+          "result": "swap",
+          "visual_note": "Bars 1 and 2 glow yellow"
+        },
+        {
+          "step": 5,
+          "description": "Swap 64 and 25",
+          "action": "swap",
+          "indices": [1, 2],
+          "array": [34, 25, 64, 12, 22, 11],
+          "visual_note": "Bars hop over each other"
+        },
+        {
+          "step": 6,
+          "description": "Continue pass 1, 64 bubbles to position 5",
+          "action": "pass_complete",
+          "pass": 1,
+          "sorted_position": 5,
+          "array": [34, 25, 12, 22, 11, 64],
+          "visual_note": "Position 5 turns green (sorted)"
+        },
+        {
+          "step": 7,
+          "description": "Pass 2: Bubble 34 to position 4",
+          "action": "pass_complete",
+          "pass": 2,
+          "sorted_position": 4,
+          "array": [25, 12, 22, 11, 34, 64],
+          "visual_note": "Position 4 turns green"
+        },
+        {
+          "step": 8,
+          "description": "Continue until sorted",
+          "action": "complete",
+          "array": [11, 12, 22, 25, 34, 64],
+          "total_comparisons": 15,
+          "total_swaps": 10,
+          "visual_note": "All bars green, sorted"
+        }
+      ]
+    },
+    {
+      "algorithm": "selection_sort",
+      "name": "Selection Sort",
+      "complexity": "O(n²)",
+      "array": [29, 10, 14, 37, 13],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize selection sort",
+          "action": "init",
+          "array": [29, 10, 14, 37, 13],
+          "visual_note": "5 bars displayed"
+        },
+        {
+          "step": 2,
+          "description": "Round 1: Find minimum in [0, 4]",
+          "action": "find_min_start",
+          "search_range": [0, 4],
+          "current_min": 29,
+          "current_min_idx": 0,
+          "visual_note": "Scanner beam starts at index 0"
+        },
+        {
+          "step": 3,
+          "description": "Compare 10 with current min 29",
+          "action": "compare",
+          "indices": [1, 0],
+          "values": [10, 29],
+          "comparison": "10 < 29",
+          "new_min": true,
+          "visual_note": "10 becomes new minimum (yellow)"
+        },
+        {
+          "step": 4,
+          "description": "Scan complete, minimum is 10 at index 1",
+          "action": "min_found",
+          "min_value": 10,
+          "min_idx": 1,
+          "visual_note": "10 pulses before moving"
+        },
+        {
+          "step": 5,
+          "description": "Swap 10 with 29 (position 0)",
+          "action": "swap",
+          "indices": [0, 1],
+          "array": [10, 29, 14, 37, 13],
+          "visual_note": "10 lifts, slides to position 0"
+        },
+        {
+          "step": 6,
+          "description": "Position 0 sorted",
+          "action": "position_sorted",
+          "sorted_idx": 0,
+          "array": [10, 29, 14, 37, 13],
+          "visual_note": "Position 0 turns green"
+        },
+        {
+          "step": 7,
+          "description": "Round 2: Find minimum in [1, 4]",
+          "action": "find_min_start",
+          "search_range": [1, 4],
+          "visual_note": "Scanner starts at index 1"
+        },
+        {
+          "step": 8,
+          "description": "Continue until sorted",
+          "action": "complete",
+          "array": [10, 13, 14, 29, 37],
+          "total_comparisons": 10,
+          "total_swaps": 3,
+          "visual_note": "All bars green, sorted"
+        }
+      ]
+    },
+    {
+      "algorithm": "insertion_sort",
+      "name": "Insertion Sort",
+      "complexity": "O(n²)",
+      "array": [12, 11, 13, 5, 6],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize insertion sort",
+          "action": "init",
+          "array": [12, 11, 13, 5, 6],
+          "sorted_portion": [0],
+          "visual_note": "First element (12) is sorted portion"
+        },
+        {
+          "step": 2,
+          "description": "Pick element 11 at index 1",
+          "action": "pick",
+          "index": 1,
+          "value": 11,
+          "visual_note": "Bar 11 lifts up"
+        },
+        {
+          "step": 3,
+          "description": "Compare 11 with 12",
+          "action": "compare",
+          "indices": [0],
+          "values": [12, 11],
+          "comparison": "12 > 11",
+          "result": "shift",
+          "visual_note": "12 needs to shift right"
+        },
+        {
+          "step": 4,
+          "description": "Shift 12 right",
+          "action": "shift",
+          "from_idx": 0,
+          "to_idx": 1,
+          "value": 12,
+          "visual_note": "12 slides right"
+        },
+        {
+          "step": 5,
+          "description": "Insert 11 at position 0",
+          "action": "insert",
+          "index": 0,
+          "value": 11,
+          "array": [11, 12, 13, 5, 6],
+          "visual_note": "11 drops into position 0"
+        },
+        {
+          "step": 6,
+          "description": "Pick element 13 at index 2",
+          "action": "pick",
+          "index": 2,
+          "value": 13,
+          "visual_note": "Bar 13 lifts up"
+        },
+        {
+          "step": 7,
+          "description": "13 > 12, no shift needed",
+          "action": "insert",
+          "index": 2,
+          "value": 13,
+          "array": [11, 12, 13, 5, 6],
+          "visual_note": "13 stays in place"
+        },
+        {
+          "step": 8,
+          "description": "Pick element 5, shift 11, 12, 13",
+          "action": "insert",
+          "index": 0,
+          "value": 5,
+          "shifts": [11, 12, 13],
+          "array": [5, 11, 12, 13, 6],
+          "visual_note": "5 inserted at front after 3 shifts"
+        },
+        {
+          "step": 9,
+          "description": "Complete",
+          "action": "complete",
+          "array": [5, 6, 11, 12, 13],
+          "visual_note": "All bars sorted"
+        }
+      ]
+    },
+    {
+      "algorithm": "merge_sort",
+      "name": "Merge Sort",
+      "complexity": "O(n log n)",
+      "array": [38, 27, 43, 3, 9, 82, 10, 15],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize merge sort",
+          "action": "init",
+          "array": [38, 27, 43, 3, 9, 82, 10, 15],
+          "visual_note": "8 bars on platform"
+        },
+        {
+          "step": 2,
+          "description": "Divide: Split into two halves",
+          "action": "divide",
+          "left": [38, 27, 43, 3],
+          "right": [9, 82, 10, 15],
+          "depth": 1,
+          "visual_note": "Array splits, halves separate"
+        },
+        {
+          "step": 3,
+          "description": "Divide left half",
+          "action": "divide",
+          "left": [38, 27],
+          "right": [43, 3],
+          "depth": 2,
+          "visual_note": "Left half splits again"
+        },
+        {
+          "step": 4,
+          "description": "Divide to single elements",
+          "action": "divide",
+          "elements": [[38], [27], [43], [3], [9], [82], [10], [15]],
+          "depth": 3,
+          "visual_note": "All single elements (base case)"
+        },
+        {
+          "step": 5,
+          "description": "Merge [38] and [27]",
+          "action": "merge",
+          "left": [38],
+          "right": [27],
+          "result": [27, 38],
+          "visual_note": "27 < 38, interleave to [27, 38]"
+        },
+        {
+          "step": 6,
+          "description": "Merge [43] and [3]",
+          "action": "merge",
+          "left": [43],
+          "right": [3],
+          "result": [3, 43],
+          "visual_note": "3 < 43, interleave to [3, 43]"
+        },
+        {
+          "step": 7,
+          "description": "Merge [27, 38] and [3, 43]",
+          "action": "merge",
+          "left": [27, 38],
+          "right": [3, 43],
+          "result": [3, 27, 38, 43],
+          "comparisons": [
+            {"compare": [27, 3], "take": 3},
+            {"compare": [27, 43], "take": 27},
+            {"compare": [38, 43], "take": 38},
+            {"take": 43}
+          ],
+          "visual_note": "Elements interleave based on comparison"
+        },
+        {
+          "step": 8,
+          "description": "Merge right half similarly",
+          "action": "merge",
+          "result": [9, 10, 15, 82],
+          "visual_note": "Right half merged"
+        },
+        {
+          "step": 9,
+          "description": "Final merge",
+          "action": "merge",
+          "left": [3, 27, 38, 43],
+          "right": [9, 10, 15, 82],
+          "result": [3, 9, 10, 15, 27, 38, 43, 82],
+          "visual_note": "Final sorted array emerges"
+        },
+        {
+          "step": 10,
+          "description": "Complete",
+          "action": "complete",
+          "array": [3, 9, 10, 15, 27, 38, 43, 82],
+          "visual_note": "All bars sorted"
+        }
+      ]
+    },
+    {
+      "algorithm": "quick_sort",
+      "name": "Quick Sort",
+      "complexity": "O(n log n) average",
+      "array": [10, 80, 30, 90, 40, 50, 70],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize quick sort",
+          "action": "init",
+          "array": [10, 80, 30, 90, 40, 50, 70],
+          "visual_note": "7 bars displayed"
+        },
+        {
+          "step": 2,
+          "description": "Select pivot: 70 (last element)",
+          "action": "pivot_select",
+          "pivot": 70,
+          "pivot_idx": 6,
+          "visual_note": "Bar 70 glows gold"
+        },
+        {
+          "step": 3,
+          "description": "Initialize pointers i=-1, j=0",
+          "action": "init_pointers",
+          "i": -1,
+          "j": 0,
+          "visual_note": "Cyan marker at -1, magenta at 0"
+        },
+        {
+          "step": 4,
+          "description": "j=0: 10 <= 70, i++, swap(0,0)",
+          "action": "partition_step",
+          "j": 0,
+          "value": 10,
+          "comparison": "10 <= 70",
+          "i": 0,
+          "visual_note": "10 stays in place"
+        },
+        {
+          "step": 5,
+          "description": "j=1: 80 > 70, no swap",
+          "action": "partition_step",
+          "j": 1,
+          "value": 80,
+          "comparison": "80 > 70",
+          "visual_note": "80 stays, j moves"
+        },
+        {
+          "step": 6,
+          "description": "j=2: 30 <= 70, i++, swap(1,2)",
+          "action": "partition_step",
+          "j": 2,
+          "value": 30,
+          "comparison": "30 <= 70",
+          "i": 1,
+          "swap": [1, 2],
+          "array": [10, 30, 80, 90, 40, 50, 70],
+          "visual_note": "30 and 80 swap"
+        },
+        {
+          "step": 7,
+          "description": "Continue partitioning",
+          "action": "partition_continue",
+          "array": [10, 30, 40, 50, 80, 90, 70],
+          "i": 3,
+          "visual_note": "Elements <= 70 on left"
+        },
+        {
+          "step": 8,
+          "description": "Place pivot at i+1",
+          "action": "pivot_place",
+          "pivot": 70,
+          "final_position": 4,
+          "array": [10, 30, 40, 50, 70, 90, 80],
+          "visual_note": "70 drops into position 4 (green)"
+        },
+        {
+          "step": 9,
+          "description": "Recurse on left [10, 30, 40, 50]",
+          "action": "recurse",
+          "range": [0, 3],
+          "visual_note": "Left partition highlighted"
+        },
+        {
+          "step": 10,
+          "description": "Recurse on right [90, 80]",
+          "action": "recurse",
+          "range": [5, 6],
+          "visual_note": "Right partition highlighted"
+        },
+        {
+          "step": 11,
+          "description": "Complete",
+          "action": "complete",
+          "array": [10, 30, 40, 50, 70, 80, 90],
+          "visual_note": "All bars sorted"
+        }
+      ]
+    },
+    {
+      "algorithm": "algorithm_comparison",
+      "name": "Sorting Algorithm Race",
+      "description": "Side-by-side comparison of sorting algorithms",
+      "array": [64, 34, 25, 12, 22, 11, 90, 45, 78, 56],
+      "algorithms_compared": ["bubble_sort", "selection_sort", "merge_sort", "quick_sort"],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Initialize race with 4 algorithms",
+          "action": "init",
+          "visual_note": "4 panels, same array in each"
+        },
+        {
+          "step": 2,
+          "description": "Start signal",
+          "action": "start",
+          "visual_note": "All algorithms begin simultaneously"
+        },
+        {
+          "step": 3,
+          "description": "Progress update",
+          "action": "progress",
+          "bubble_sort": {"comparisons": 45, "swaps": 20, "progress": "50%"},
+          "selection_sort": {"comparisons": 30, "swaps": 5, "progress": "60%"},
+          "merge_sort": {"comparisons": 20, "progress": "80%"},
+          "quick_sort": {"comparisons": 18, "swaps": 8, "progress": "85%"},
+          "visual_note": "Quick sort and merge sort leading"
+        },
+        {
+          "step": 4,
+          "description": "Quick sort finishes first",
+          "action": "finish",
+          "winner": "quick_sort",
+          "visual_note": "Quick sort panel shows FINISHED"
+        },
+        {
+          "step": 5,
+          "description": "Final results",
+          "action": "complete",
+          "results": {
+            "quick_sort": {"time_rank": 1, "comparisons": 25, "swaps": 12},
+            "merge_sort": {"time_rank": 2, "comparisons": 34, "swaps": 0},
+            "selection_sort": {"time_rank": 3, "comparisons": 45, "swaps": 9},
+            "bubble_sort": {"time_rank": 4, "comparisons": 45, "swaps": 22}
+          },
+          "visual_note": "Final statistics displayed"
+        }
+      ]
+    }
+  ]
+}
