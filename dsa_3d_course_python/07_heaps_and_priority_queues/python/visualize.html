@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heaps & Priority Queues - 3D Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: #888; font-size: 1.1em; }
+        .algorithm-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .algo-btn {
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .algo-btn:hover, .algo-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 500px;
+        }
+        .step-description {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            border: none;
+            color: #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
+
+        /* Heap Visualization */
+        .heap-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            padding: 20px;
+        }
+        .heap-tree {
+            width: 100%;
+            max-width: 800px;
+        }
+        .heap-svg {
+            width: 100%;
+            height: 300px;
+        }
+        .heap-svg line {
+            stroke: #00ffff;
+            stroke-width: 2;
+        }
+        .heap-svg circle {
+            fill: #1a1a3a;
+            stroke: #00ffff;
+            stroke-width: 3;
+            transition: all 0.3s ease;
+        }
+        .heap-svg circle.root {
+            stroke: #ffd700;
+            filter: drop-shadow(0 0 10px #ffd700);
+        }
+        .heap-svg circle.current {
+            fill: #00ff0033;
+            stroke: #00ff00;
+            filter: drop-shadow(0 0 15px #00ff00);
+        }
+        .heap-svg circle.swapping {
+            fill: #ff00ff33;
+            stroke: #ff00ff;
+            filter: drop-shadow(0 0 15px #ff00ff);
+        }
+        .heap-svg circle.comparing {
+            fill: #ff660033;
+            stroke: #ff6600;
+        }
+        .heap-svg circle.new-node {
+            fill: #ffd70033;
+            stroke: #ffd700;
+            animation: pulse 0.5s infinite;
+        }
+        .heap-svg text {
+            fill: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Array representation */
+        .heap-array {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .array-cell.current {
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        }
+        .array-cell.swapping {
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+        }
+        .cell-value { font-weight: bold; font-size: 1.1em; }
+        .cell-index { font-size: 0.7em; color: #888; }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+        .info-label { color: #888; font-size: 0.9em; }
+        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .speed-label { color: #888; }
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Heaps & Priority Queues</h1>
+        <p class="subtitle">Interactive 3D Visualization</p>
+    </header>
+    <div class="container">
+        <div class="algorithm-selector" id="algoSelector"></div>
+        <div class="visualization-area">
+            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
+            <div id="vizContent"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="nextBtn" disabled>Next</button>
+            <button class="control-btn" id="resetBtn">Reset</button>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
+            <span class="speed-label" id="speedValue">800ms</span>
+        </div>
+    </div>
+
+    <script>
+        const visualData = {
+            "world": "07_heaps_and_priority_queues",
+            "algorithms": [
+                {
+                    "algorithm": "max_heap_insert",
+                    "description": "Insert elements into Max Heap with heapify-up",
+                    "steps": [
+                        {"step": 1, "description": "Start with empty max heap, insert 10", "heap": [10], "current": 0, "action": "insert"},
+                        {"step": 2, "description": "Insert 20, compare with parent 10", "heap": [10, 20], "current": 1, "comparing": 0, "action": "compare"},
+                        {"step": 3, "description": "20 > 10, swap! Heapify up", "heap": [20, 10], "swapping": [0, 1], "action": "swap"},
+                        {"step": 4, "description": "Insert 15", "heap": [20, 10, 15], "current": 2, "action": "insert"},
+                        {"step": 5, "description": "15 < 20, no swap needed", "heap": [20, 10, 15], "current": 2, "comparing": 0, "action": "compare"},
+                        {"step": 6, "description": "Insert 30, compare with parent 10", "heap": [20, 10, 15, 30], "current": 3, "comparing": 1, "action": "compare"},
+                        {"step": 7, "description": "30 > 10, swap!", "heap": [20, 30, 15, 10], "swapping": [1, 3], "action": "swap"},
+                        {"step": 8, "description": "30 > 20, swap with root!", "heap": [30, 20, 15, 10], "swapping": [0, 1], "action": "swap"},
+                        {"step": 9, "description": "Insert 25", "heap": [30, 20, 15, 10, 25], "current": 4, "action": "insert"},
+                        {"step": 10, "description": "25 > 20, swap!", "heap": [30, 25, 15, 10, 20], "swapping": [1, 4], "action": "swap"},
+                        {"step": 11, "description": "Max heap complete", "heap": [30, 25, 15, 10, 20], "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "max_heap_extract",
+                    "description": "Extract maximum from Max Heap with heapify-down",
+                    "steps": [
+                        {"step": 1, "description": "Max heap state: extract max (30)", "heap": [30, 25, 15, 10, 20], "current": 0, "action": "highlight_max"},
+                        {"step": 2, "description": "Move last element (20) to root", "heap": [20, 25, 15, 10], "current": 0, "action": "move_last"},
+                        {"step": 3, "description": "Heapify down: compare 20 with children 25, 15", "heap": [20, 25, 15, 10], "current": 0, "comparing": [1, 2], "action": "compare"},
+                        {"step": 4, "description": "25 is largest child, 25 > 20, swap!", "heap": [25, 20, 15, 10], "swapping": [0, 1], "action": "swap"},
+                        {"step": 5, "description": "Compare 20 with child 10", "heap": [25, 20, 15, 10], "current": 1, "comparing": [3], "action": "compare"},
+                        {"step": 6, "description": "20 > 10, heap property restored", "heap": [25, 20, 15, 10], "action": "complete"},
+                        {"step": 7, "description": "Extracted value: 30", "heap": [25, 20, 15, 10], "extracted": 30, "action": "result"}
+                    ]
+                },
+                {
+                    "algorithm": "min_heap_operations",
+                    "description": "Min Heap - smallest element at root",
+                    "steps": [
+                        {"step": 1, "description": "Build min heap: insert 50", "heap": [50], "current": 0, "action": "insert"},
+                        {"step": 2, "description": "Insert 30, 30 < 50, swap!", "heap": [30, 50], "swapping": [0, 1], "action": "swap"},
+                        {"step": 3, "description": "Insert 40, 40 > 30, no swap", "heap": [30, 50, 40], "current": 2, "action": "insert"},
+                        {"step": 4, "description": "Insert 10, 10 < 50, swap!", "heap": [30, 10, 40, 50], "swapping": [1, 3], "action": "swap"},
+                        {"step": 5, "description": "10 < 30, swap with root!", "heap": [10, 30, 40, 50], "swapping": [0, 1], "action": "swap"},
+                        {"step": 6, "description": "Insert 20, 20 < 30, swap!", "heap": [10, 20, 40, 50, 30], "swapping": [1, 4], "action": "swap"},
+                        {"step": 7, "description": "Min heap complete - 10 at root", "heap": [10, 20, 40, 50, 30], "action": "complete"}
+                    ]
+                },
+                {
+                    "algorithm": "heapify_array",
+                    "description": "Build heap from array in O(n) time",
+                    "steps": [
+                        {"step": 1, "description": "Array to heapify: [4, 10, 3, 5, 1]", "heap": [4, 10, 3, 5, 1], "action": "init"},
+                        {"step": 2, "description": "Start from last non-leaf (index 1)", "heap": [4, 10, 3, 5, 1], "current": 1, "action": "start"},
+                        {"step": 3, "description": "Compare 10 with children 5, 1", "heap": [4, 10, 3, 5, 1], "current": 1, "comparing": [3, 4], "action": "compare"},
+                        {"step": 4, "description": "10 > both children, no swap needed", "heap": [4, 10, 3, 5, 1], "current": 1, "action": "no_swap"},
+                        {"step": 5, "description": "Move to index 0 (root)", "heap": [4, 10, 3, 5, 1], "current": 0, "action": "move"},
+                        {"step": 6, "description": "Compare 4 with children 10, 3", "heap": [4, 10, 3, 5, 1], "current": 0, "comparing": [1, 2], "action": "compare"},
+                        {"step": 7, "description": "10 > 4, swap!", "heap": [10, 4, 3, 5, 1], "swapping": [0, 1], "action": "swap"},
+                        {"step": 8, "description": "Continue heapify at index 1", "heap": [10, 4, 3, 5, 1], "current": 1, "comparing": [3, 4], "action": "compare"},
+                        {"step": 9, "description": "5 > 4, swap!", "heap": [10, 5, 3, 4, 1], "swapping": [1, 3], "action": "swap"},
+                        {"step": 10, "description": "Heapify complete - valid max heap", "heap": [10, 5, 3, 4, 1], "action": "complete"}
+                    ]
+                }
+            ]
+        };
+
+        let currentAlgo = null;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let speed = 800;
+
+        function init() {
+            const selector = document.getElementById('algoSelector');
+            visualData.algorithms.forEach((algo, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'algo-btn';
+                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => selectAlgorithm(index);
+                selector.appendChild(btn);
+            });
+            document.getElementById('prevBtn').onclick = prevStep;
+            document.getElementById('nextBtn').onclick = nextStep;
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('resetBtn').onclick = reset;
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = 2100 - e.target.value;
+                document.getElementById('speedValue').textContent = speed + 'ms';
+            };
+        }
+
+        function selectAlgorithm(index) {
+            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+            currentAlgo = visualData.algorithms[index];
+            currentStep = 0;
+            stopPlay();
+            renderStep();
+            updateControls();
+        }
+
+        function getHeapNodePositions(heap) {
+            const positions = [];
+            const levels = Math.ceil(Math.log2(heap.length + 1));
+            const width = 700;
+            const height = 250;
+            const startY = 40;
+            
+            heap.forEach((val, i) => {
+                const level = Math.floor(Math.log2(i + 1));
+                const levelStart = Math.pow(2, level) - 1;
+                const posInLevel = i - levelStart;
+                const nodesInLevel = Math.pow(2, level);
+                const spacing = width / (nodesInLevel + 1);
+                
+                positions.push({
+                    val: val,
+                    x: 50 + spacing * (posInLevel + 1),
+                    y: startY + level * 60,
+                    index: i
+                });
+            });
+            return positions;
+        }
+
+        function renderStep() {
+            if (!currentAlgo) return;
+            const step = currentAlgo.steps[currentStep];
+            document.getElementById('stepDesc').textContent = step.description;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
+            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+
+            const content = document.getElementById('vizContent');
+            renderHeap(content, step);
+        }
+
+        function renderHeap(container, step) {
+            const heap = step.heap || [];
+            const current = step.current;
+            const swapping = step.swapping || [];
+            const comparing = step.comparing || [];
+            const positions = getHeapNodePositions(heap);
+
+            let html = '<div class="heap-container">';
+            
+            // Tree visualization
+            html += '<div class="heap-tree"><svg class="heap-svg" viewBox="0 0 800 280">';
+            
+            // Draw edges
+            positions.forEach((node, i) => {
+                const leftChild = 2 * i + 1;
+                const rightChild = 2 * i + 2;
+                if (leftChild < positions.length) {
+                    html += `<line x1="${node.x}" y1="${node.y}" x2="${positions[leftChild].x}" y2="${positions[leftChild].y}"/>`;
+                }
+                if (rightChild < positions.length) {
+                    html += `<line x1="${node.x}" y1="${node.y}" x2="${positions[rightChild].x}" y2="${positions[rightChild].y}"/>`;
+                }
+            });
+            
+            // Draw nodes
+            positions.forEach((node, i) => {
+                let nodeClass = '';
+                if (swapping.includes(i)) nodeClass = 'swapping';
+                else if (i === current) nodeClass = 'current';
+                else if (comparing.includes && comparing.includes(i)) nodeClass = 'comparing';
+                else if (i === 0) nodeClass = 'root';
+                
+                html += `<circle cx="${node.x}" cy="${node.y}" r="25" class="${nodeClass}"/>`;
+                html += `<text x="${node.x}" y="${node.y}">${node.val}</text>`;
+            });
+            
+            html += '</svg></div>';
+            
+            // Array representation
+            html += '<div style="text-align: center; color: #888; margin-bottom: 10px;">Array Representation:</div>';
+            html += '<div class="heap-array">';
+            heap.forEach((val, i) => {
+                let cellClass = '';
+                if (swapping.includes(i)) cellClass = 'swapping';
+                else if (i === current) cellClass = 'current';
+                html += `<div class="array-cell ${cellClass}"><div class="cell-value">${val}</div><div class="cell-index">[${i}]</div></div>`;
+            });
+            html += '</div>';
+            
+            html += '</div>';
+            
+            // Info panel
+            html += '<div class="info-panel">';
+            html += `<div class="info-box"><div class="info-label">Heap Size</div><div class="info-value">${heap.length}</div></div>`;
+            if (heap.length > 0) html += `<div class="info-box"><div class="info-label">Root (Max/Min)</div><div class="info-value">${heap[0]}</div></div>`;
+            if (step.extracted !== undefined) html += `<div class="info-box"><div class="info-label">Extracted</div><div class="info-value" style="color:#ffd700;">${step.extracted}</div></div>`;
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
+        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
+        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
+        function startPlay() {
+            if (!currentAlgo) return;
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Pause';
+            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
+        }
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (playInterval) { clearInterval(playInterval); playInterval = null; }
+        }
+        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
+            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
+        }
+        init();
+    </script>
+</body>
+</html>

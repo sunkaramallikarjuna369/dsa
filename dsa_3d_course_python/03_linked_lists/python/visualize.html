@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linked Lists - 3D Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: #888; font-size: 1.1em; }
+        .algorithm-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .algo-btn {
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .algo-btn:hover, .algo-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 400px;
+        }
+        .step-description {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            border: none;
+            color: #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-bottom: 20px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
+
+        /* Linked List Visualization */
+        .linked-list-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 40px 20px;
+            flex-wrap: wrap;
+            perspective: 1000px;
+        }
+        .list-node {
+            display: flex;
+            align-items: center;
+            transition: all 0.5s ease;
+            transform-style: preserve-3d;
+        }
+        .node-box {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+        .node-box.head-anchor {
+            background: linear-gradient(135deg, #2a1a3a 0%, #1a0a2a 100%);
+            border-color: #ff00ff;
+            width: 60px;
+            height: 60px;
+        }
+        .node-box.null-terminator {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border-color: #666;
+            width: 60px;
+            height: 60px;
+        }
+        .node-box.current {
+            border-color: #00ff00;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.5);
+            transform: scale(1.1) translateY(-10px);
+        }
+        .node-box.new-node {
+            border-color: #ffd700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+            animation: materialize 0.5s ease;
+        }
+        .node-box.delete-target {
+            border-color: #ff3333;
+            box-shadow: 0 0 40px rgba(255, 51, 51, 0.5);
+            animation: shake 0.3s ease;
+        }
+        .node-box.deleted {
+            opacity: 0;
+            transform: translateY(50px) scale(0.5);
+        }
+        .node-box.tortoise {
+            border-color: #00ff00;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
+        }
+        .node-box.hare {
+            border-color: #ff6600;
+            box-shadow: 0 0 30px rgba(255, 102, 0, 0.4);
+        }
+        .node-box.meeting {
+            border-color: #ff00ff;
+            box-shadow: 0 0 50px rgba(255, 0, 255, 0.6);
+            animation: pulse 0.5s infinite;
+        }
+        @keyframes materialize {
+            from { opacity: 0; transform: scale(0) rotate(180deg); }
+            to { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .node-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+        }
+        .node-label {
+            font-size: 0.7em;
+            color: #888;
+            position: absolute;
+            bottom: -20px;
+        }
+        .pointer-label {
+            position: absolute;
+            top: -25px;
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .pointer-label.prev { background: #ff00ff; color: #fff; }
+        .pointer-label.curr { background: #00ff00; color: #000; }
+        .pointer-label.tortoise { background: #00ff00; color: #000; }
+        .pointer-label.hare { background: #ff6600; color: #fff; }
+
+        /* Chain/Arrow */
+        .chain {
+            width: 50px;
+            height: 4px;
+            background: linear-gradient(90deg, #00ffff, #0088aa);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .chain::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -6px;
+            border: 8px solid transparent;
+            border-left-color: #0088aa;
+        }
+        .chain.broken {
+            background: #ff3333;
+            opacity: 0.3;
+        }
+        .chain.new-chain {
+            background: linear-gradient(90deg, #ffd700, #cc9900);
+            animation: glow 0.5s ease;
+        }
+        .chain.new-chain::after {
+            border-left-color: #cc9900;
+        }
+        .chain.cycle {
+            background: linear-gradient(90deg, #ff00ff, #880088);
+        }
+        .chain.cycle::after {
+            border-left-color: #880088;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            to { box-shadow: none; }
+        }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+        .info-label { color: #888; font-size: 0.9em; }
+        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .speed-label { color: #888; }
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: #888;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Linked Lists</h1>
+        <p class="subtitle">Interactive 3D Visualization</p>
+    </header>
+    <div class="container">
+        <div class="algorithm-selector" id="algoSelector"></div>
+        <div class="visualization-area">
+            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
+            <div id="vizContent"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="nextBtn" disabled>Next</button>
+            <button class="control-btn" id="resetBtn">Reset</button>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
+            <span class="speed-label" id="speedValue">800ms</span>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="border-color: #00ffff; background: rgba(0,255,255,0.2);"></div>Normal Node</div>
+            <div class="legend-item"><div class="legend-color" style="border-color: #00ff00; background: rgba(0,255,0,0.2);"></div>Current</div>
+            <div class="legend-item"><div class="legend-color" style="border-color: #ffd700; background: rgba(255,215,0,0.2);"></div>New Node</div>
+            <div class="legend-item"><div class="legend-color" style="border-color: #ff3333; background: rgba(255,51,51,0.2);"></div>Delete Target</div>
+        </div>
+    </div>
+
+    <script>
+        const visualData = {"world":"03_linked_lists","algorithms":[{"algorithm":"singly_linked_list_traversal","description":"Traverse a singly linked list from head to tail","input":{"values":[10,20,30,40,50]},"steps":[{"step":1,"description":"Start at HEAD anchor","current_node":null,"action":"highlight_head"},{"step":2,"description":"Follow chain to first node (10)","current_node":10,"action":"traverse_pulse"},{"step":3,"description":"Follow chain to node (20)","current_node":20,"action":"traverse_pulse"},{"step":4,"description":"Follow chain to node (30)","current_node":30,"action":"traverse_pulse"},{"step":5,"description":"Follow chain to node (40)","current_node":40,"action":"traverse_pulse"},{"step":6,"description":"Follow chain to node (50)","current_node":50,"action":"traverse_pulse"},{"step":7,"description":"Reached NULL terminator - end of list","current_node":null,"action":"reach_null"}]},{"algorithm":"insert_at_head","description":"Insert a new node at the head of the list","input":{"existing_list":[20,30,40],"new_value":10},"steps":[{"step":1,"description":"Current list state","list_state":[20,30,40],"action":"show_initial"},{"step":2,"description":"Create new node with value 10","new_node":10,"action":"materialize_node"},{"step":3,"description":"Set new node's next to current head (20)","pointer_change":{"node_10_next":20},"action":"create_chain"},{"step":4,"description":"Detach HEAD anchor from node 20","action":"break_chain"},{"step":5,"description":"Attach HEAD anchor to new node (10)","pointer_change":{"head":10},"action":"create_chain"},{"step":6,"description":"Insertion complete","list_state":[10,20,30,40],"complexity":"O(1)","action":"complete"}]},{"algorithm":"insert_at_tail","description":"Insert a new node at the tail of the list","input":{"existing_list":[10,20,30],"new_value":40},"steps":[{"step":1,"description":"Current list state","list_state":[10,20,30],"action":"show_initial"},{"step":2,"description":"Create new node with value 40","new_node":40,"action":"materialize_node"},{"step":3,"description":"Traverse from HEAD to find tail","current_node":10,"action":"traverse_pulse"},{"step":4,"description":"Continue traversal","current_node":20,"action":"traverse_pulse"},{"step":5,"description":"Found tail node (30)","current_node":30,"action":"highlight_tail"},{"step":6,"description":"Remove NULL terminator from node 30","action":"remove_null"},{"step":7,"description":"Create chain from node 30 to new node 40","pointer_change":{"node_30_next":40},"action":"create_chain"},{"step":8,"description":"Add NULL terminator to node 40","action":"add_null"},{"step":9,"description":"Insertion complete","list_state":[10,20,30,40],"complexity":"O(n)","action":"complete"}]},{"algorithm":"delete_node","description":"Delete a node from the middle of the list","input":{"existing_list":[10,20,30,40,50],"delete_value":30},"steps":[{"step":1,"description":"Current list state","list_state":[10,20,30,40,50],"action":"show_initial"},{"step":2,"description":"Search for node to delete (30)","action":"search_start"},{"step":3,"description":"Traverse: check node 10","current_node":10,"action":"traverse_pulse"},{"step":4,"description":"Traverse: check node 20, next is target","current_node":20,"action":"traverse_pulse"},{"step":5,"description":"Found target node (30) - highlight red","target_node":30,"action":"mark_deletion"},{"step":6,"description":"Break chain from node 20 to node 30","action":"break_chain"},{"step":7,"description":"Break chain from node 30 to node 40","action":"break_chain"},{"step":8,"description":"Create direct chain from node 20 to node 40","pointer_change":{"node_20_next":40},"action":"create_chain"},{"step":9,"description":"Node 30 fades and drifts away (garbage collection)","deleted_node":30,"action":"garbage_collect"},{"step":10,"description":"Deletion complete","list_state":[10,20,40,50],"complexity":"O(n)","action":"complete"}]},{"algorithm":"reverse_linked_list","description":"Reverse a singly linked list in place","input":{"list":[1,2,3,4,5]},"steps":[{"step":1,"description":"Initialize pointers","prev":null,"curr":1,"next_temp":null,"list_state":[1,2,3,4,5],"action":"initialize"},{"step":2,"description":"Save next: next_temp = 2","prev":null,"curr":1,"next_temp":2,"action":"save_next"},{"step":3,"description":"Reverse link: node(1).next = None","pointer_change":{"node_1_next":null},"action":"reverse_link"},{"step":4,"description":"Advance: prev=1, curr=2","prev":1,"curr":2,"action":"advance_pointers"},{"step":5,"description":"Save next: next_temp = 3","prev":1,"curr":2,"next_temp":3,"action":"save_next"},{"step":6,"description":"Reverse link: node(2).next = 1","pointer_change":{"node_2_next":1},"action":"reverse_link"},{"step":7,"description":"Advance: prev=2, curr=3","prev":2,"curr":3,"action":"advance_pointers"},{"step":8,"description":"Save next: next_temp = 4","prev":2,"curr":3,"next_temp":4,"action":"save_next"},{"step":9,"description":"Reverse link: node(3).next = 2","pointer_change":{"node_3_next":2},"action":"reverse_link"},{"step":10,"description":"Advance: prev=3, curr=4","prev":3,"curr":4,"action":"advance_pointers"},{"step":11,"description":"Save next: next_temp = 5","prev":3,"curr":4,"next_temp":5,"action":"save_next"},{"step":12,"description":"Reverse link: node(4).next = 3","pointer_change":{"node_4_next":3},"action":"reverse_link"},{"step":13,"description":"Advance: prev=4, curr=5","prev":4,"curr":5,"action":"advance_pointers"},{"step":14,"description":"Save next: next_temp = None","prev":4,"curr":5,"next_temp":null,"action":"save_next"},{"step":15,"description":"Reverse link: node(5).next = 4","pointer_change":{"node_5_next":4},"action":"reverse_link"},{"step":16,"description":"Advance: prev=5, curr=None","prev":5,"curr":null,"action":"advance_pointers"},{"step":17,"description":"Update HEAD to point to node 5","pointer_change":{"head":5},"action":"update_head"},{"step":18,"description":"Reversal complete","list_state":[5,4,3,2,1],"action":"complete"}]},{"algorithm":"floyd_cycle_detection","description":"Detect cycle using tortoise and hare algorithm","input":{"list":[1,2,3,4,5,6],"cycle_start":3},"steps":[{"step":1,"description":"Initialize: tortoise and hare at HEAD","tortoise":1,"hare":1,"action":"initialize"},{"step":2,"description":"Move tortoise 1 step, hare 2 steps","tortoise":2,"hare":3,"action":"move_pointers"},{"step":3,"description":"Move tortoise 1 step, hare 2 steps","tortoise":3,"hare":5,"action":"move_pointers"},{"step":4,"description":"Move tortoise 1 step, hare 2 steps","tortoise":4,"hare":3,"hare_wrapped":true,"action":"move_pointers"},{"step":5,"description":"Move tortoise 1 step, hare 2 steps","tortoise":5,"hare":5,"action":"move_pointers"},{"step":6,"description":"TORTOISE AND HARE MEET! Cycle detected!","meeting_point":5,"action":"cycle_detected"},{"step":7,"description":"Display: Cycle exists, entry point at node 3","cycle_entry":3,"action":"show_result"}]}]};
+
+        let currentAlgo = null;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let speed = 800;
+
+        function init() {
+            const selector = document.getElementById('algoSelector');
+            visualData.algorithms.forEach((algo, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'algo-btn';
+                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => selectAlgorithm(index);
+                selector.appendChild(btn);
+            });
+            document.getElementById('prevBtn').onclick = prevStep;
+            document.getElementById('nextBtn').onclick = nextStep;
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('resetBtn').onclick = reset;
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = 2100 - e.target.value;
+                document.getElementById('speedValue').textContent = speed + 'ms';
+            };
+        }
+
+        function selectAlgorithm(index) {
+            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+            currentAlgo = visualData.algorithms[index];
+            currentStep = 0;
+            stopPlay();
+            renderStep();
+            updateControls();
+        }
+
+        function renderStep() {
+            if (!currentAlgo) return;
+            const step = currentAlgo.steps[currentStep];
+            document.getElementById('stepDesc').textContent = step.description;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
+            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+
+            const content = document.getElementById('vizContent');
+            
+            switch(currentAlgo.algorithm) {
+                case 'singly_linked_list_traversal':
+                    renderTraversal(content, step);
+                    break;
+                case 'insert_at_head':
+                case 'insert_at_tail':
+                    renderInsert(content, step);
+                    break;
+                case 'delete_node':
+                    renderDelete(content, step);
+                    break;
+                case 'reverse_linked_list':
+                    renderReverse(content, step);
+                    break;
+                case 'floyd_cycle_detection':
+                    renderCycleDetection(content, step);
+                    break;
+            }
+        }
+
+        function renderTraversal(container, step) {
+            const values = currentAlgo.input.values;
+            const currentNode = step.current_node;
+            const isNull = step.action === 'reach_null';
+
+            container.innerHTML = `
+                <div class="linked-list-container">
+                    <div class="list-node">
+                        <div class="node-box head-anchor ${step.action === 'highlight_head' ? 'current' : ''}">
+                            <div class="node-value">HEAD</div>
+                        </div>
+                        <div class="chain"></div>
+                    </div>
+                    ${values.map((val, i) => `
+                        <div class="list-node">
+                            <div class="node-box ${val === currentNode ? 'current' : ''}">
+                                <div class="node-value">${val}</div>
+                            </div>
+                            <div class="chain"></div>
+                        </div>
+                    `).join('')}
+                    <div class="list-node">
+                        <div class="node-box null-terminator ${isNull ? 'current' : ''}">
+                            <div class="node-value">NULL</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInsert(container, step) {
+            const listState = step.list_state || currentAlgo.input.existing_list;
+            const newNode = step.new_node;
+            const isNewNodeStep = step.action === 'materialize_node';
+            const isComplete = step.action === 'complete';
+
+            let html = '<div class="linked-list-container">';
+            html += `<div class="list-node"><div class="node-box head-anchor"><div class="node-value">HEAD</div></div><div class="chain ${step.action === 'break_chain' ? 'broken' : ''}"></div></div>`;
+            
+            if (isNewNodeStep || (step.action === 'create_chain' && newNode)) {
+                html += `<div class="list-node"><div class="node-box new-node"><div class="node-value">${newNode}</div></div><div class="chain new-chain"></div></div>`;
+            }
+            
+            listState.forEach((val, i) => {
+                const isCurrent = step.current_node === val;
+                html += `<div class="list-node"><div class="node-box ${isCurrent ? 'current' : ''}">${isCurrent && step.action === 'highlight_tail' ? '<span class="pointer-label curr">TAIL</span>' : ''}<div class="node-value">${val}</div></div><div class="chain"></div></div>`;
+            });
+            
+            if (currentAlgo.algorithm === 'insert_at_tail' && (step.action === 'add_null' || isComplete)) {
+                html += `<div class="list-node"><div class="node-box new-node"><div class="node-value">${currentAlgo.input.new_value}</div></div><div class="chain"></div></div>`;
+            }
+            
+            html += '<div class="list-node"><div class="node-box null-terminator"><div class="node-value">NULL</div></div></div>';
+            html += '</div>';
+            
+            if (step.complexity) {
+                html += `<div class="info-panel"><div class="info-box"><div class="info-label">Complexity</div><div class="info-value">${step.complexity}</div></div></div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function renderDelete(container, step) {
+            const listState = step.list_state || currentAlgo.input.existing_list;
+            const targetNode = step.target_node || currentAlgo.input.delete_value;
+            const deletedNode = step.deleted_node;
+            const currentNode = step.current_node;
+
+            let html = '<div class="linked-list-container">';
+            html += '<div class="list-node"><div class="node-box head-anchor"><div class="node-value">HEAD</div></div><div class="chain"></div></div>';
+            
+            listState.forEach((val, i) => {
+                const isTarget = val === targetNode && (step.action === 'mark_deletion' || step.action === 'break_chain');
+                const isDeleted = val === deletedNode;
+                const isCurrent = val === currentNode;
+                const chainClass = (step.action === 'break_chain' && (val === 20 || val === targetNode)) ? 'broken' : 
+                                  (step.action === 'create_chain' && val === 20) ? 'new-chain' : '';
+                
+                if (!isDeleted || step.action !== 'complete') {
+                    html += `<div class="list-node"><div class="node-box ${isTarget ? 'delete-target' : ''} ${isCurrent ? 'current' : ''} ${isDeleted ? 'deleted' : ''}"><div class="node-value">${val}</div></div><div class="chain ${chainClass}"></div></div>`;
+                }
+            });
+            
+            html += '<div class="list-node"><div class="node-box null-terminator"><div class="node-value">NULL</div></div></div>';
+            html += '</div>';
+            
+            if (step.complexity) {
+                html += `<div class="info-panel"><div class="info-box"><div class="info-label">Complexity</div><div class="info-value">${step.complexity}</div></div></div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function renderReverse(container, step) {
+            const listState = step.list_state || currentAlgo.input.list;
+            const prev = step.prev;
+            const curr = step.curr;
+
+            let html = '<div class="linked-list-container">';
+            html += '<div class="list-node"><div class="node-box head-anchor"><div class="node-value">HEAD</div></div><div class="chain"></div></div>';
+            
+            listState.forEach((val, i) => {
+                const isPrev = val === prev;
+                const isCurr = val === curr;
+                html += `
+                    <div class="list-node">
+                        <div class="node-box ${isCurr ? 'current' : ''} ${isPrev ? 'new-node' : ''}">
+                            ${isPrev ? '<span class="pointer-label prev">prev</span>' : ''}
+                            ${isCurr ? '<span class="pointer-label curr">curr</span>' : ''}
+                            <div class="node-value">${val}</div>
+                        </div>
+                        <div class="chain"></div>
+                    </div>
+                `;
+            });
+            
+            html += '<div class="list-node"><div class="node-box null-terminator"><div class="node-value">NULL</div></div></div>';
+            html += '</div>';
+            
+            html += `<div class="info-panel">
+                <div class="info-box"><div class="info-label">prev</div><div class="info-value">${prev !== null ? prev : 'NULL'}</div></div>
+                <div class="info-box"><div class="info-label">curr</div><div class="info-value">${curr !== null ? curr : 'NULL'}</div></div>
+                ${step.next_temp !== undefined ? `<div class="info-box"><div class="info-label">next_temp</div><div class="info-value">${step.next_temp !== null ? step.next_temp : 'NULL'}</div></div>` : ''}
+            </div>`;
+            
+            container.innerHTML = html;
+        }
+
+        function renderCycleDetection(container, step) {
+            const list = currentAlgo.input.list;
+            const cycleStart = currentAlgo.input.cycle_start;
+            const tortoise = step.tortoise;
+            const hare = step.hare;
+            const isMeeting = step.action === 'cycle_detected';
+
+            let html = '<div class="linked-list-container">';
+            html += '<div class="list-node"><div class="node-box head-anchor"><div class="node-value">HEAD</div></div><div class="chain"></div></div>';
+            
+            list.forEach((val, i) => {
+                const isTortoise = val === tortoise;
+                const isHare = val === hare;
+                const isBoth = isTortoise && isHare;
+                const isCycleEntry = val === step.cycle_entry;
+                
+                html += `
+                    <div class="list-node">
+                        <div class="node-box ${isBoth ? 'meeting' : isTortoise ? 'tortoise' : isHare ? 'hare' : ''} ${isCycleEntry ? 'new-node' : ''}">
+                            ${isTortoise && !isBoth ? '<span class="pointer-label tortoise">T</span>' : ''}
+                            ${isHare && !isBoth ? '<span class="pointer-label hare">H</span>' : ''}
+                            ${isBoth ? '<span class="pointer-label" style="background:#ff00ff;color:#fff;">T+H</span>' : ''}
+                            <div class="node-value">${val}</div>
+                        </div>
+                        <div class="chain ${val >= cycleStart && i < list.length - 1 ? 'cycle' : ''}"></div>
+                    </div>
+                `;
+            });
+            
+            // Show cycle back arrow
+            html += '<div style="color: #ff00ff; font-size: 1.5em; margin-left: -30px;">↩</div>';
+            html += '</div>';
+            
+            html += `<div class="info-panel">
+                <div class="info-box"><div class="info-label">Tortoise</div><div class="info-value">${tortoise}</div></div>
+                <div class="info-box"><div class="info-label">Hare</div><div class="info-value">${hare}</div></div>
+                ${step.cycle_entry ? `<div class="info-box"><div class="info-label">Cycle Entry</div><div class="info-value">${step.cycle_entry}</div></div>` : ''}
+            </div>`;
+            
+            container.innerHTML = html;
+        }
+
+        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
+        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
+        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
+        function startPlay() {
+            if (!currentAlgo) return;
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Pause';
+            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
+        }
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (playInterval) { clearInterval(playInterval); playInterval = null; }
+        }
+        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
+            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
+        }
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Complexity & Recursion - 3D Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+        }
+
+        .algorithm-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .algo-btn {
+            padding: 12px 24px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        .algo-btn:hover, .algo-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 500px;
+            position: relative;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .visualization-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .step-description {
+            text-align: center;
+            font-size: 1.3em;
+            color: #00ffff;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            border: none;
+            color: #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .step-counter {
+            text-align: center;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        /* Recursion Visualization */
+        .recursion-stack {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            min-height: 400px;
+            justify-content: flex-start;
+        }
+
+        .stack-frame {
+            width: 80%;
+            max-width: 400px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 100, 150, 0.2) 100%);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            text-align: center;
+            transform-style: preserve-3d;
+            transform: rotateX(10deg) translateZ(0);
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .stack-frame.active {
+            border-color: #ff00ff;
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.4);
+            transform: rotateX(10deg) translateZ(20px) scale(1.05);
+        }
+
+        .stack-frame.returning {
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.2) 0%, rgba(0, 150, 0, 0.2) 100%);
+            border-color: #00ff00;
+        }
+
+        .stack-frame.base-case {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(200, 150, 0, 0.2) 100%);
+            border-color: #ffd700;
+        }
+
+        .frame-label {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .frame-value {
+            font-size: 2em;
+            color: #00ffff;
+            margin-top: 10px;
+        }
+
+        /* Complexity Chambers */
+        .complexity-chambers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .chamber {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s ease;
+            transform-style: preserve-3d;
+        }
+
+        .chamber.highlighted {
+            border-color: #00ffff;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
+            transform: translateZ(30px) scale(1.05);
+        }
+
+        .chamber-orb {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, #00ffff, #006688);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .chamber.highlighted .chamber-orb {
+            animation: glow 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 30px rgba(0, 255, 255, 0.5); }
+            to { box-shadow: 0 0 60px rgba(0, 255, 255, 0.8), 0 0 100px rgba(0, 255, 255, 0.4); }
+        }
+
+        .chamber-label {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .chamber-desc {
+            color: #888;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Fibonacci Tree */
+        .fib-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        .tree-level {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .tree-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
+            border: 2px solid #00ffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #00ffff;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tree-node.active {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+        }
+
+        .tree-node.computed {
+            background: linear-gradient(135deg, #00ff00, #008800);
+            border-color: #00ff00;
+            color: #000;
+        }
+
+        .tree-node.duplicate {
+            border-color: #ff6600;
+            box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
+        }
+
+        .tree-node.base-case {
+            background: linear-gradient(135deg, #ffd700, #cc9900);
+            border-color: #ffd700;
+            color: #000;
+        }
+
+        /* Binary Search */
+        .search-array {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            padding: 40px 20px;
+            flex-wrap: wrap;
+        }
+
+        .array-cell {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .array-cell.in-range {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .array-cell.mid {
+            background: linear-gradient(135deg, #ff00ff, #880088);
+            border-color: #ff00ff;
+            transform: translateY(-10px) scale(1.1);
+            box-shadow: 0 10px 30px rgba(255, 0, 255, 0.4);
+        }
+
+        .array-cell.found {
+            background: linear-gradient(135deg, #00ff00, #008800);
+            border-color: #00ff00;
+            transform: translateY(-15px) scale(1.15);
+            box-shadow: 0 15px 40px rgba(0, 255, 0, 0.5);
+        }
+
+        .array-cell.eliminated {
+            opacity: 0.3;
+            transform: scale(0.9);
+        }
+
+        .cell-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .cell-index {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Comparison View */
+        .comparison-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .comparison-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .panel-title {
+            text-align: center;
+            font-size: 1.3em;
+            color: #00ffff;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .panel-content {
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .info-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .info-value {
+            color: #00ffff;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* Speed Control */
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .speed-label {
+            color: #888;
+        }
+
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .comparison-view { grid-template-columns: 1fr; }
+            .array-cell { width: 50px; height: 50px; }
+            .cell-value { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Time Complexity & Recursion</h1>
+        <p class="subtitle">Interactive 3D Visualization</p>
+    </header>
+
+    <div class="container">
+        <div class="algorithm-selector" id="algoSelector"></div>
+
+        <div class="visualization-area" id="vizArea">
+            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
+            <div id="vizContent"></div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+
+        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="playBtn">Play</button>
+            <button class="control-btn" id="nextBtn" disabled>Next</button>
+            <button class="control-btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="speed-control">
+            <span class="speed-label">Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
+            <span class="speed-label" id="speedValue">800ms</span>
+        </div>
+    </div>
+
+    <script>
+        const visualData = {
+  "world": "01_time_complexity_and_recursion",
+  "algorithms": [
+    {
+      "algorithm": "complexity_comparison",
+      "description": "Comparing different time complexity classes",
+      "steps": [
+        {"step": 1, "description": "Initialize observatory view with all complexity chambers visible", "camera": "wide_orbit", "highlight": []},
+        {"step": 2, "description": "Zoom into O(1) chamber - single orb glows", "camera": "focus_o1", "highlight": ["o1_orb"]},
+        {"step": 3, "description": "Add input elements outside O(1) chamber - orb unchanged", "camera": "focus_o1", "highlight": ["o1_orb", "input_elements"]},
+        {"step": 4, "description": "Transition to O(log n) chamber - spiral staircase", "camera": "focus_ologn", "highlight": ["spiral_platforms"]},
+        {"step": 5, "description": "Demonstrate halving - descend through platforms", "camera": "follow_descent", "highlight": ["active_platform"]},
+        {"step": 6, "description": "Transition to O(n) corridor - pillars extend", "camera": "focus_on", "highlight": ["corridor_pillars"]},
+        {"step": 7, "description": "Add more input - corridor grows proportionally", "camera": "pan_corridor", "highlight": ["new_pillars"]},
+        {"step": 8, "description": "Transition to O(n²) arena - grid expands", "camera": "focus_on2", "highlight": ["grid_tiles"]},
+        {"step": 9, "description": "Double input size - grid quadruples", "camera": "zoom_out_on2", "highlight": ["expanded_grid"]},
+        {"step": 10, "description": "Return to observatory view - compare all chambers", "camera": "wide_orbit", "highlight": ["all_chambers"]}
+      ]
+    },
+    {
+      "algorithm": "factorial_recursive",
+      "description": "Recursive factorial calculation with call stack visualization",
+      "input": {"n": 5},
+      "steps": [
+        {"step": 1, "description": "Enter top mirror chamber: factorial(5)", "depth": 0, "chamber_params": {"n": 5}, "action": "enter"},
+        {"step": 2, "description": "Descend to chamber: factorial(4)", "depth": 1, "chamber_params": {"n": 4}, "action": "enter"},
+        {"step": 3, "description": "Descend to chamber: factorial(3)", "depth": 2, "chamber_params": {"n": 3}, "action": "enter"},
+        {"step": 4, "description": "Descend to chamber: factorial(2)", "depth": 3, "chamber_params": {"n": 2}, "action": "enter"},
+        {"step": 5, "description": "Descend to chamber: factorial(1)", "depth": 4, "chamber_params": {"n": 1}, "action": "enter"},
+        {"step": 6, "description": "Base case reached - golden floor glows", "depth": 4, "chamber_params": {"n": 1}, "action": "base_case", "return_value": 1},
+        {"step": 7, "description": "Return orb ascends: 1", "depth": 4, "action": "return", "return_value": 1},
+        {"step": 8, "description": "Compute 2 * 1 = 2, orb transforms", "depth": 3, "action": "compute", "return_value": 2},
+        {"step": 9, "description": "Return orb ascends: 2", "depth": 3, "action": "return", "return_value": 2},
+        {"step": 10, "description": "Compute 3 * 2 = 6, orb transforms", "depth": 2, "action": "compute", "return_value": 6},
+        {"step": 11, "description": "Return orb ascends: 6", "depth": 2, "action": "return", "return_value": 6},
+        {"step": 12, "description": "Compute 4 * 6 = 24, orb transforms", "depth": 1, "action": "compute", "return_value": 24},
+        {"step": 13, "description": "Return orb ascends: 24", "depth": 1, "action": "return", "return_value": 24},
+        {"step": 14, "description": "Compute 5 * 24 = 120, final orb glows bright", "depth": 0, "action": "compute", "return_value": 120},
+        {"step": 15, "description": "Final result displayed: 120", "depth": 0, "action": "complete", "return_value": 120}
+      ]
+    },
+    {
+      "algorithm": "fibonacci_recursive",
+      "description": "Recursive Fibonacci showing overlapping subproblems",
+      "input": {"n": 5},
+      "steps": [
+        {"step": 1, "description": "Root node appears: fib(5)", "node_id": "fib5", "depth": 0, "action": "create_node"},
+        {"step": 2, "description": "Branch left: fib(4)", "node_id": "fib4_1", "parent": "fib5", "depth": 1, "action": "create_node"},
+        {"step": 3, "description": "Branch left: fib(3)", "node_id": "fib3_1", "parent": "fib4_1", "depth": 2, "action": "create_node"},
+        {"step": 4, "description": "Branch left: fib(2)", "node_id": "fib2_1", "parent": "fib3_1", "depth": 3, "action": "create_node"},
+        {"step": 5, "description": "Branch left: fib(1) - base case", "node_id": "fib1_1", "parent": "fib2_1", "depth": 4, "action": "base_case", "value": 1},
+        {"step": 6, "description": "Branch right: fib(0) - base case", "node_id": "fib0_1", "parent": "fib2_1", "depth": 4, "action": "base_case", "value": 0},
+        {"step": 7, "description": "Compute fib(2) = 1 + 0 = 1", "node_id": "fib2_1", "action": "compute", "value": 1},
+        {"step": 8, "description": "Branch right from fib(3): fib(1) - base case", "node_id": "fib1_2", "parent": "fib3_1", "depth": 3, "action": "base_case", "value": 1},
+        {"step": 9, "description": "Compute fib(3) = 1 + 1 = 2", "node_id": "fib3_1", "action": "compute", "value": 2},
+        {"step": 10, "description": "Branch right from fib(4): fib(2) - DUPLICATE highlighted", "node_id": "fib2_2", "parent": "fib4_1", "depth": 2, "action": "create_node", "duplicate_of": "fib2_1"},
+        {"step": 11, "description": "Recompute fib(2) subtree (redundant work)", "node_id": "fib2_2", "action": "compute", "value": 1},
+        {"step": 12, "description": "Compute fib(4) = 2 + 1 = 3", "node_id": "fib4_1", "action": "compute", "value": 3},
+        {"step": 13, "description": "Branch right from fib(5): fib(3) - DUPLICATE highlighted", "node_id": "fib3_2", "parent": "fib5", "depth": 1, "action": "create_node", "duplicate_of": "fib3_1"},
+        {"step": 14, "description": "Recompute fib(3) subtree (redundant work)", "node_id": "fib3_2", "action": "compute", "value": 2},
+        {"step": 15, "description": "Compute fib(5) = 3 + 2 = 5", "node_id": "fib5", "action": "compute", "value": 5},
+        {"step": 16, "description": "Highlight all duplicate computations", "action": "show_duplicates", "duplicates": ["fib2_1", "fib2_2", "fib3_1", "fib3_2"]}
+      ]
+    },
+    {
+      "algorithm": "binary_search_recursive",
+      "description": "Recursive binary search halving the search space",
+      "input": {"array": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19], "target": 11},
+      "steps": [
+        {"step": 1, "description": "Initialize search range [0, 9]", "left": 0, "right": 9, "focus_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "action": "highlight_range"},
+        {"step": 2, "description": "Calculate mid = 4, check arr[4] = 9", "mid": 4, "mid_value": 9, "focus_indices": [4], "action": "check_mid"},
+        {"step": 3, "description": "9 < 11, search right half [5, 9]", "left": 5, "right": 9, "focus_indices": [5, 6, 7, 8, 9], "action": "narrow_range"},
+        {"step": 4, "description": "Calculate mid = 7, check arr[7] = 15", "mid": 7, "mid_value": 15, "focus_indices": [7], "action": "check_mid"},
+        {"step": 5, "description": "15 > 11, search left half [5, 6]", "left": 5, "right": 6, "focus_indices": [5, 6], "action": "narrow_range"},
+        {"step": 6, "description": "Calculate mid = 5, check arr[5] = 11", "mid": 5, "mid_value": 11, "focus_indices": [5], "action": "check_mid"},
+        {"step": 7, "description": "Found target 11 at index 5!", "result_index": 5, "focus_indices": [5], "action": "found"}
+      ]
+    },
+    {
+      "algorithm": "iterative_vs_recursive_comparison",
+      "description": "Side-by-side comparison of iterative and recursive factorial",
+      "input": {"n": 5},
+      "steps": [
+        {"step": 1, "description": "Initialize both paths", "iterative": {"result": 1, "i": 1}, "recursive": {"depth": 0, "n": 5}},
+        {"step": 2, "description": "Iterative: multiply by 1, Recursive: enter factorial(5)", "iterative": {"result": 1, "i": 2}, "recursive": {"depth": 1, "n": 4}},
+        {"step": 3, "description": "Iterative: multiply by 2, Recursive: enter factorial(4)", "iterative": {"result": 2, "i": 3}, "recursive": {"depth": 2, "n": 3}},
+        {"step": 4, "description": "Iterative: multiply by 3, Recursive: enter factorial(3)", "iterative": {"result": 6, "i": 4}, "recursive": {"depth": 3, "n": 2}},
+        {"step": 5, "description": "Iterative: multiply by 4, Recursive: enter factorial(2)", "iterative": {"result": 24, "i": 5}, "recursive": {"depth": 4, "n": 1}},
+        {"step": 6, "description": "Iterative: multiply by 5, Recursive: base case reached", "iterative": {"result": 120, "i": 6}, "recursive": {"depth": 4, "n": 1, "returning": true}},
+        {"step": 7, "description": "Iterative: complete, Recursive: returning 1", "iterative": {"result": 120, "complete": true}, "recursive": {"depth": 3, "return_value": 1}},
+        {"step": 8, "description": "Recursive: compute 2*1=2, return", "iterative": {"result": 120, "complete": true}, "recursive": {"depth": 2, "return_value": 2}},
+        {"step": 9, "description": "Recursive: compute 3*2=6, return", "iterative": {"result": 120, "complete": true}, "recursive": {"depth": 1, "return_value": 6}},
+        {"step": 10, "description": "Recursive: compute 4*6=24, return", "iterative": {"result": 120, "complete": true}, "recursive": {"depth": 0, "return_value": 24}},
+        {"step": 11, "description": "Recursive: compute 5*24=120, complete", "iterative": {"result": 120, "complete": true}, "recursive": {"depth": 0, "return_value": 120, "complete": true}},
+        {"step": 12, "description": "Both paths converge with result 120", "final_result": 120, "memory_comparison": {"iterative": "O(1)", "recursive": "O(n)"}}
+      ]
+    }
+  ]
+};
+
+        let currentAlgo = null;
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let speed = 800;
+
+        // Initialize
+        function init() {
+            const selector = document.getElementById('algoSelector');
+            visualData.algorithms.forEach((algo, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'algo-btn';
+                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => selectAlgorithm(index);
+                selector.appendChild(btn);
+            });
+
+            document.getElementById('prevBtn').onclick = prevStep;
+            document.getElementById('nextBtn').onclick = nextStep;
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('resetBtn').onclick = reset;
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = 2100 - e.target.value;
+                document.getElementById('speedValue').textContent = speed + 'ms';
+            };
+        }
+
+        function selectAlgorithm(index) {
+            document.querySelectorAll('.algo-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            currentAlgo = visualData.algorithms[index];
+            currentStep = 0;
+            stopPlay();
+            renderStep();
+            updateControls();
+        }
+
+        function renderStep() {
+            if (!currentAlgo) return;
+            
+            const step = currentAlgo.steps[currentStep];
+            document.getElementById('stepDesc').textContent = step.description;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
+            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+
+            const content = document.getElementById('vizContent');
+            
+            switch(currentAlgo.algorithm) {
+                case 'complexity_comparison':
+                    renderComplexityChambers(content, step);
+                    break;
+                case 'factorial_recursive':
+                    renderRecursionStack(content, step);
+                    break;
+                case 'fibonacci_recursive':
+                    renderFibTree(content, step);
+                    break;
+                case 'binary_search_recursive':
+                    renderBinarySearch(content, step);
+                    break;
+                case 'iterative_vs_recursive_comparison':
+                    renderComparison(content, step);
+                    break;
+            }
+        }
+
+        function renderComplexityChambers(container, step) {
+            const chambers = [
+                { id: 'o1_orb', label: 'O(1)', desc: 'Constant Time' },
+                { id: 'spiral_platforms', label: 'O(log n)', desc: 'Logarithmic' },
+                { id: 'corridor_pillars', label: 'O(n)', desc: 'Linear Time' },
+                { id: 'grid_tiles', label: 'O(n²)', desc: 'Quadratic Time' }
+            ];
+
+            container.innerHTML = `
+                <div class="complexity-chambers">
+                    ${chambers.map(c => `
+                        <div class="chamber ${step.highlight.includes(c.id) || step.highlight.includes('all_chambers') ? 'highlighted' : ''}">
+                            <div class="chamber-orb"></div>
+                            <div class="chamber-label">${c.label}</div>
+                            <div class="chamber-desc">${c.desc}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderRecursionStack(container, step) {
+            const frames = [];
+            const allSteps = currentAlgo.steps.slice(0, currentStep + 1);
+            
+            // Build stack state
+            let stack = [];
+            for (const s of allSteps) {
+                if (s.action === 'enter') {
+                    stack.push({ n: s.chamber_params.n, state: 'active' });
+                } else if (s.action === 'base_case') {
+                    if (stack.length > 0) stack[stack.length - 1].state = 'base-case';
+                } else if (s.action === 'return' || s.action === 'compute') {
+                    if (stack.length > 0) {
+                        stack[stack.length - 1].state = 'returning';
+                        stack[stack.length - 1].value = s.return_value;
+                    }
+                } else if (s.action === 'complete') {
+                    if (stack.length > 0) {
+                        stack[stack.length - 1].state = 'returning';
+                        stack[stack.length - 1].value = s.return_value;
+                    }
+                }
+            }
+
+            // Pop returned frames
+            const returnedCount = allSteps.filter(s => s.action === 'return').length;
+            for (let i = 0; i < returnedCount && stack.length > 1; i++) {
+                stack.pop();
+            }
+
+            container.innerHTML = `
+                <div class="recursion-stack">
+                    ${stack.map((frame, i) => `
+                        <div class="stack-frame ${frame.state} ${i === stack.length - 1 ? 'active' : ''}">
+                            <div class="frame-label">factorial(${frame.n})</div>
+                            ${frame.value !== undefined ? `<div class="frame-value">= ${frame.value}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderFibTree(container, step) {
+            const nodes = {};
+            const allSteps = currentAlgo.steps.slice(0, currentStep + 1);
+            
+            for (const s of allSteps) {
+                if (s.node_id) {
+                    if (!nodes[s.node_id]) {
+                        nodes[s.node_id] = { 
+                            id: s.node_id, 
+                            parent: s.parent, 
+                            depth: s.depth || 0,
+                            state: 'active',
+                            duplicate: s.duplicate_of
+                        };
+                    }
+                    if (s.action === 'base_case') {
+                        nodes[s.node_id].state = 'base-case';
+                        nodes[s.node_id].value = s.value;
+                    } else if (s.action === 'compute') {
+                        nodes[s.node_id].state = 'computed';
+                        nodes[s.node_id].value = s.value;
+                    }
+                }
+            }
+
+            // Show duplicates
+            if (step.action === 'show_duplicates') {
+                step.duplicates.forEach(id => {
+                    if (nodes[id]) nodes[id].duplicate = true;
+                });
+            }
+
+            // Group by depth
+            const levels = {};
+            Object.values(nodes).forEach(n => {
+                if (!levels[n.depth]) levels[n.depth] = [];
+                levels[n.depth].push(n);
+            });
+
+            container.innerHTML = `
+                <div class="fib-tree">
+                    ${Object.keys(levels).sort((a,b) => a-b).map(depth => `
+                        <div class="tree-level">
+                            ${levels[depth].map(n => `
+                                <div class="tree-node ${n.state} ${n.duplicate ? 'duplicate' : ''}">
+                                    ${n.id.replace('fib', 'F').replace(/_\d+/, '')}
+                                    ${n.value !== undefined ? `<br><small>=${n.value}</small>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderBinarySearch(container, step) {
+            const array = currentAlgo.input.array;
+            const target = currentAlgo.input.target;
+            
+            // Track eliminated indices
+            const allSteps = currentAlgo.steps.slice(0, currentStep + 1);
+            let eliminated = new Set();
+            let currentRange = [0, array.length - 1];
+            
+            for (const s of allSteps) {
+                if (s.left !== undefined && s.right !== undefined) {
+                    for (let i = 0; i < array.length; i++) {
+                        if (i < s.left || i > s.right) eliminated.add(i);
+                    }
+                    currentRange = [s.left, s.right];
+                }
+            }
+
+            container.innerHTML = `
+                <div class="search-array">
+                    ${array.map((val, i) => {
+                        let classes = 'array-cell';
+                        if (eliminated.has(i)) classes += ' eliminated';
+                        else if (step.action === 'found' && i === step.result_index) classes += ' found';
+                        else if (step.mid === i) classes += ' mid';
+                        else if (i >= currentRange[0] && i <= currentRange[1]) classes += ' in-range';
+                        return `
+                            <div class="${classes}">
+                                <div class="cell-value">${val}</div>
+                                <div class="cell-index">[${i}]</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Target</div>
+                    <div class="info-value">${target}</div>
+                </div>
+            `;
+        }
+
+        function renderComparison(container, step) {
+            container.innerHTML = `
+                <div class="comparison-view">
+                    <div class="comparison-panel">
+                        <div class="panel-title">Iterative Approach</div>
+                        <div class="panel-content">
+                            <div class="result-display">${step.iterative?.result || step.final_result || 1}</div>
+                            <div class="info-box">
+                                <div class="info-label">Memory</div>
+                                <div class="info-value">${step.memory_comparison?.iterative || 'O(1)'}</div>
+                            </div>
+                            ${step.iterative?.complete ? '<div style="color: #00ff00; margin-top: 10px;">Complete!</div>' : ''}
+                        </div>
+                    </div>
+                    <div class="comparison-panel">
+                        <div class="panel-title">Recursive Approach</div>
+                        <div class="panel-content">
+                            <div class="result-display">${step.recursive?.return_value || '...'}</div>
+                            <div class="info-box">
+                                <div class="info-label">Stack Depth</div>
+                                <div class="info-value">${step.recursive?.depth !== undefined ? step.recursive.depth : 0}</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Memory</div>
+                                <div class="info-value">${step.memory_comparison?.recursive || 'O(n)'}</div>
+                            </div>
+                            ${step.recursive?.complete ? '<div style="color: #00ff00; margin-top: 10px;">Complete!</div>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function nextStep() {
+            if (currentAlgo && currentStep < currentAlgo.steps.length - 1) {
+                currentStep++;
+                renderStep();
+                updateControls();
+            }
+        }
+
+        function prevStep() {
+            if (currentAlgo && currentStep > 0) {
+                currentStep--;
+                renderStep();
+                updateControls();
+            }
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                stopPlay();
+            } else {
+                startPlay();
+            }
+        }
+
+        function startPlay() {
+            if (!currentAlgo) return;
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Pause';
+            playInterval = setInterval(() => {
+                if (currentStep < currentAlgo.steps.length - 1) {
+                    nextStep();
+                } else {
+                    stopPlay();
+                }
+            }, speed);
+        }
+
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+            }
+        }
+
+        function reset() {
+            stopPlay();
+            currentStep = 0;
+            renderStep();
+            updateControls();
+        }
+
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
+            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
+        }
+
+        init();
+    </script>
+</body>
+</html>
