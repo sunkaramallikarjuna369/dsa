@@ -7,595 +7,732 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
-            color: #fff;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
-            padding: 30px 0;
-            background: rgba(0, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            margin-bottom: 30px;
+            padding: 25px 0;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            margin-bottom: 25px;
         }
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2rem;
             background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            animation: gradient-shift 3s linear infinite;
         }
-        .subtitle { color: #888; font-size: 1.1em; }
+        @keyframes gradient-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .subtitle { color: #888; font-size: 1rem; margin-top: 8px; }
         .algorithm-selector {
             display: flex;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
         }
         .algo-btn {
-            padding: 12px 20px;
-            background: rgba(0, 255, 255, 0.1);
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(0, 255, 255, 0.3);
             color: #00ffff;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-        .algo-btn:hover, .algo-btn.active {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-        .visualization-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            min-height: 500px;
-        }
-        .step-description {
-            text-align: center;
-            font-size: 1.2em;
-            color: #00ffff;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .control-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
-            border: none;
+        .algo-btn:hover { border-color: #00ffff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+        .algo-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
             color: #000;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease;
         }
-        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
-        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
-
-        /* DP Grid Visualization */
-        .dp-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
             gap: 20px;
-            padding: 20px;
+        }
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
+        .visualization-area {
+            background: radial-gradient(ellipse at center, #0f0f1a 0%, #050508 70%, #000 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        .scene {
+            width: 100%;
+            height: 380px;
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .scene:active { cursor: grabbing; }
+        .stage {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+            transition: transform 0.1s ease-out;
+            position: relative;
+        }
+        .dp-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .dp-grid {
             display: grid;
             gap: 3px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 15px;
+            transform-style: preserve-3d;
         }
         .dp-cell {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
-            border: 2px solid #00ffff;
-            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 0.8rem;
             font-weight: bold;
-            transition: all 0.3s ease;
-            position: relative;
+            transition: all 0.4s ease;
+            transform-style: preserve-3d;
+        }
+        .dp-cell.filled {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
         }
         .dp-cell.current {
-            border-color: #ffd700;
-            background: linear-gradient(135deg, #ffd70033, #cc990033);
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
-            transform: scale(1.1);
-            z-index: 10;
-        }
-        .dp-cell.computed {
-            border-color: #00ff00;
-            background: linear-gradient(135deg, #00ff0022, #00880022);
+            background: linear-gradient(135deg, #ffd700, #cc9900);
+            color: #000;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+            transform: translateZ(10px) scale(1.1);
         }
         .dp-cell.dependency {
-            border-color: #ff00ff;
-            background: linear-gradient(135deg, #ff00ff22, #88008822);
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+            background: linear-gradient(135deg, #ff00ff, #aa0088);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
         }
-        .dp-cell.optimal {
-            border-color: #00ff00;
-            background: linear-gradient(135deg, #00ff0044, #00880044);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        .dp-cell.result {
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
         }
-        .dp-cell.header {
+        .dp-cell.path {
+            border-color: #ffd700;
+            border-width: 2px;
+        }
+        .dp-row-label, .dp-col-label {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: #888;
+        }
+        .code-panel {
+            background: linear-gradient(135deg, #0d0d15, #1a1a25);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 15px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .code-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .code-title::before { content: "</>"; color: #ff00ff; font-weight: bold; }
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: pre;
+        }
+        .code-line.active {
             background: rgba(0, 255, 255, 0.2);
-            font-size: 0.8em;
+            border-left: 3px solid #00ffff;
         }
-
-        /* Fibonacci Tree */
-        .fib-tree {
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-number { color: #bd93f9; }
+        .code-comment { color: #6272a4; }
+        .code-variable { color: #8be9fd; }
+        .info-panel {
+            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+        }
+        .panel-section { margin-bottom: 20px; }
+        .panel-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 8px;
         }
-        .fib-level {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
+        .panel-title::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 2px;
         }
-        .fib-node {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
-            border: 3px solid #00ffff;
+        .step-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e0e0e0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+        }
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+            border: 1px solid rgba(255, 0, 255, 0.4);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        .state-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+        }
+        .controls {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
         }
-        .fib-node.current {
-            border-color: #ffd700;
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
-        }
-        .fib-node.computed {
-            border-color: #00ff00;
-            background: linear-gradient(135deg, #00ff0022, #00880022);
-        }
-        .fib-node.cached {
-            border-color: #ff00ff;
-            background: linear-gradient(135deg, #ff00ff22, #88008822);
-        }
-        .fib-label { font-size: 0.7em; color: #888; }
-        .fib-value { font-weight: bold; }
-
-        /* LCS Grid */
-        .lcs-strings {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 20px;
-        }
-        .string-display {
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-        .string-label { color: #888; font-size: 0.9em; }
-        .string-value { color: #00ffff; font-size: 1.2em; font-family: monospace; letter-spacing: 3px; }
-        .string-value .highlight { color: #00ff00; font-weight: bold; }
-
-        /* Info Panel */
-        .info-panel {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .info-box {
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px 25px;
-            text-align: center;
-        }
-        .info-label { color: #888; font-size: 0.9em; }
-        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
-
-        .speed-control {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .speed-label { color: #888; }
+        .control-btn:hover:not(:disabled) { background: linear-gradient(135deg, #00ffff, #0088aa); color: #000; }
+        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .control-btn.playing { background: linear-gradient(135deg, #ff00ff, #aa0088); border-color: #ff00ff; }
+        .speed-control { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .speed-label { color: #888; font-size: 0.85rem; }
         .speed-slider {
-            width: 150px;
+            width: 100px;
+            height: 5px;
             -webkit-appearance: none;
-            height: 6px;
-            background: rgba(0, 255, 255, 0.2);
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
             border-radius: 3px;
         }
         .speed-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #00ffff;
+            width: 16px;
+            height: 16px;
+            background: #fff;
             border-radius: 50%;
             cursor: pointer;
         }
-
-        .formula {
-            text-align: center;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
+        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; font-size: 0.85rem; margin-top: 8px; }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+        .result-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border: 2px solid #00ff88;
             border-radius: 10px;
-            font-family: monospace;
-            color: #ffd700;
-            margin-bottom: 20px;
+            font-size: 1rem;
+            color: #00ff88;
+            font-weight: bold;
+            display: none;
+        }
+        .camera-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Dynamic Programming</h1>
-        <p class="subtitle">Interactive 3D Visualization</p>
+        <p class="subtitle">Interactive 3D Visualization with Code - Drag to rotate, scroll to zoom</p>
     </header>
     <div class="container">
         <div class="algorithm-selector" id="algoSelector"></div>
-        <div class="visualization-area">
-            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
-            <div id="vizContent"></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
-        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
-        <div class="controls">
-            <button class="control-btn" id="prevBtn" disabled>Previous</button>
-            <button class="control-btn" id="playBtn">Play</button>
-            <button class="control-btn" id="nextBtn" disabled>Next</button>
-            <button class="control-btn" id="resetBtn">Reset</button>
-        </div>
-        <div class="speed-control">
-            <span class="speed-label">Speed:</span>
-            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
-            <span class="speed-label" id="speedValue">800ms</span>
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="scene" id="scene">
+                        <div class="stage" id="stage">
+                            <div class="dp-container" id="dpContainer"></div>
+                        </div>
+                        <div class="result-display" id="resultDisplay"></div>
+                        <div class="camera-hint">Drag to rotate | Scroll to zoom</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" id="prevBtn">Prev</button>
+                        <button class="control-btn" id="playBtn">Play</button>
+                        <button class="control-btn" id="nextBtn">Next</button>
+                        <button class="control-btn" id="resetBtn">Reset</button>
+                        <div class="speed-control">
+                            <span class="speed-label">Speed:</span>
+                            <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" value="800">
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+                </div>
+                <div class="code-panel">
+                    <div class="code-title">Python Code</div>
+                    <div class="code-block" id="codeBlock"></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="panel-section">
+                    <div class="panel-title">Current Step</div>
+                    <div class="step-description" id="stepDescription">Select an algorithm to begin</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Complexity</div>
+                    <div class="complexity-badge" id="complexityBadge">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">DP State</div>
+                    <div class="state-info" id="stateInfo">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Legend</div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#ffd700,#996600)"></div><span>Current</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#ff00ff,#660055)"></div><span>Dependency</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#00ffff,#006688)"></div><span>Filled</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#00ff88,#006633)"></div><span>Result</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <script>
-        const visualData = {
-            "world": "12_dynamic_programming",
-            "algorithms": [
-                {
-                    "algorithm": "fibonacci_memoization",
-                    "description": "Fibonacci with Memoization - avoid redundant calculations",
-                    "n": 6,
-                    "steps": [
-                        {"step": 1, "description": "Calculate F(6) using memoization", "computing": "F(6)", "memo": {}, "action": "init"},
-                        {"step": 2, "description": "F(6) = F(5) + F(4), need to compute F(5)", "computing": "F(5)", "memo": {}, "dependencies": ["F(5)", "F(4)"], "action": "recurse"},
-                        {"step": 3, "description": "F(5) = F(4) + F(3), need to compute F(4)", "computing": "F(4)", "memo": {}, "action": "recurse"},
-                        {"step": 4, "description": "F(4) = F(3) + F(2), need to compute F(3)", "computing": "F(3)", "memo": {}, "action": "recurse"},
-                        {"step": 5, "description": "F(3) = F(2) + F(1), need to compute F(2)", "computing": "F(2)", "memo": {}, "action": "recurse"},
-                        {"step": 6, "description": "F(2) = F(1) + F(0) = 1 + 0 = 1", "computing": "F(2)", "memo": {"F(0)": 0, "F(1)": 1, "F(2)": 1}, "action": "compute"},
-                        {"step": 7, "description": "F(3) = F(2) + F(1) = 1 + 1 = 2", "computing": "F(3)", "memo": {"F(0)": 0, "F(1)": 1, "F(2)": 1, "F(3)": 2}, "action": "compute"},
-                        {"step": 8, "description": "F(4) = F(3) + F(2) = 2 + 1 = 3 (F(2) from cache!)", "computing": "F(4)", "memo": {"F(0)": 0, "F(1)": 1, "F(2)": 1, "F(3)": 2, "F(4)": 3}, "cached": "F(2)", "action": "compute"},
-                        {"step": 9, "description": "F(5) = F(4) + F(3) = 3 + 2 = 5 (both from cache!)", "computing": "F(5)", "memo": {"F(0)": 0, "F(1)": 1, "F(2)": 1, "F(3)": 2, "F(4)": 3, "F(5)": 5}, "cached": ["F(4)", "F(3)"], "action": "compute"},
-                        {"step": 10, "description": "F(6) = F(5) + F(4) = 5 + 3 = 8 (both from cache!)", "computing": "F(6)", "memo": {"F(0)": 0, "F(1)": 1, "F(2)": 1, "F(3)": 2, "F(4)": 3, "F(5)": 5, "F(6)": 8}, "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "fibonacci_tabulation",
-                    "description": "Fibonacci with Tabulation - bottom-up approach",
-                    "n": 8,
-                    "steps": [
-                        {"step": 1, "description": "Build Fibonacci table bottom-up for F(8)", "table": [null, null, null, null, null, null, null, null, null], "current": null, "action": "init"},
-                        {"step": 2, "description": "Base case: F(0) = 0", "table": [0, null, null, null, null, null, null, null, null], "current": 0, "action": "base"},
-                        {"step": 3, "description": "Base case: F(1) = 1", "table": [0, 1, null, null, null, null, null, null, null], "current": 1, "action": "base"},
-                        {"step": 4, "description": "F(2) = F(1) + F(0) = 1 + 0 = 1", "table": [0, 1, 1, null, null, null, null, null, null], "current": 2, "deps": [0, 1], "action": "compute"},
-                        {"step": 5, "description": "F(3) = F(2) + F(1) = 1 + 1 = 2", "table": [0, 1, 1, 2, null, null, null, null, null], "current": 3, "deps": [1, 2], "action": "compute"},
-                        {"step": 6, "description": "F(4) = F(3) + F(2) = 2 + 1 = 3", "table": [0, 1, 1, 2, 3, null, null, null, null], "current": 4, "deps": [2, 3], "action": "compute"},
-                        {"step": 7, "description": "F(5) = F(4) + F(3) = 3 + 2 = 5", "table": [0, 1, 1, 2, 3, 5, null, null, null], "current": 5, "deps": [3, 4], "action": "compute"},
-                        {"step": 8, "description": "F(6) = F(5) + F(4) = 5 + 3 = 8", "table": [0, 1, 1, 2, 3, 5, 8, null, null], "current": 6, "deps": [4, 5], "action": "compute"},
-                        {"step": 9, "description": "F(7) = F(6) + F(5) = 8 + 5 = 13", "table": [0, 1, 1, 2, 3, 5, 8, 13, null], "current": 7, "deps": [5, 6], "action": "compute"},
-                        {"step": 10, "description": "F(8) = F(7) + F(6) = 13 + 8 = 21", "table": [0, 1, 1, 2, 3, 5, 8, 13, 21], "current": 8, "deps": [6, 7], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "longest_common_subsequence",
-                    "description": "LCS - find longest common subsequence of two strings",
-                    "str1": "ABCD",
-                    "str2": "AEBD",
-                    "steps": [
-                        {"step": 1, "description": "Find LCS of 'ABCD' and 'AEBD'", "grid": [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]], "current": null, "action": "init"},
-                        {"step": 2, "description": "Initialize first row and column with 0s", "grid": [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]], "action": "base"},
-                        {"step": 3, "description": "Compare A with A: match! dp[1][1] = dp[0][0] + 1 = 1", "grid": [[0,0,0,0,0],[0,1,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]], "current": [1,1], "deps": [[0,0]], "action": "match"},
-                        {"step": 4, "description": "Compare A with E: no match. dp[1][2] = max(dp[0][2], dp[1][1]) = 1", "grid": [[0,0,0,0,0],[0,1,1,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]], "current": [1,2], "deps": [[0,2],[1,1]], "action": "no_match"},
-                        {"step": 5, "description": "Fill row 1: A vs AEBD", "grid": [[0,0,0,0,0],[0,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]], "current": [1,4], "action": "row"},
-                        {"step": 6, "description": "Compare B with B: match! dp[2][3] = dp[1][2] + 1 = 2", "grid": [[0,0,0,0,0],[0,1,1,1,1],[0,1,1,2,2],[0,0,0,0,0],[0,0,0,0,0]], "current": [2,3], "deps": [[1,2]], "action": "match"},
-                        {"step": 7, "description": "Fill row 2: B vs AEBD", "grid": [[0,0,0,0,0],[0,1,1,1,1],[0,1,1,2,2],[0,0,0,0,0],[0,0,0,0,0]], "action": "row"},
-                        {"step": 8, "description": "Fill row 3: C vs AEBD (no matches)", "grid": [[0,0,0,0,0],[0,1,1,1,1],[0,1,1,2,2],[0,1,1,2,2],[0,0,0,0,0]], "action": "row"},
-                        {"step": 9, "description": "Compare D with D: match! dp[4][4] = dp[3][3] + 1 = 3", "grid": [[0,0,0,0,0],[0,1,1,1,1],[0,1,1,2,2],[0,1,1,2,2],[0,1,1,2,3]], "current": [4,4], "deps": [[3,3]], "action": "match"},
-                        {"step": 10, "description": "LCS length = 3. LCS = 'ABD'", "grid": [[0,0,0,0,0],[0,1,1,1,1],[0,1,1,2,2],[0,1,1,2,2],[0,1,1,2,3]], "result": "ABD", "length": 3, "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "knapsack_01",
-                    "description": "0/1 Knapsack - maximize value with weight constraint",
-                    "capacity": 7,
-                    "items": [{"w": 1, "v": 1}, {"w": 3, "v": 4}, {"w": 4, "v": 5}, {"w": 5, "v": 7}],
-                    "steps": [
-                        {"step": 1, "description": "0/1 Knapsack: capacity=7, items: (w=1,v=1), (w=3,v=4), (w=4,v=5), (w=5,v=7)", "grid": [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]], "action": "init"},
-                        {"step": 2, "description": "Item 1 (w=1, v=1): can include if capacity >= 1", "grid": [[0,0,0,0,0,0,0,0],[0,1,1,1,1,1,1,1],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]], "current_row": 1, "action": "fill_row"},
-                        {"step": 3, "description": "Item 2 (w=3, v=4): dp[2][3] = max(dp[1][3], 4+dp[1][0]) = 4", "grid": [[0,0,0,0,0,0,0,0],[0,1,1,1,1,1,1,1],[0,1,1,4,5,5,5,5],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]], "current": [2,3], "action": "compute"},
-                        {"step": 4, "description": "Item 3 (w=4, v=5): dp[3][4] = max(dp[2][4], 5+dp[2][0]) = 5", "grid": [[0,0,0,0,0,0,0,0],[0,1,1,1,1,1,1,1],[0,1,1,4,5,5,5,5],[0,1,1,4,5,6,6,9],[0,0,0,0,0,0,0,0]], "current": [3,4], "action": "compute"},
-                        {"step": 5, "description": "Item 4 (w=5, v=7): dp[4][5] = max(dp[3][5], 7+dp[3][0]) = 7", "grid": [[0,0,0,0,0,0,0,0],[0,1,1,1,1,1,1,1],[0,1,1,4,5,5,5,5],[0,1,1,4,5,6,6,9],[0,1,1,4,5,7,8,9]], "current": [4,5], "action": "compute"},
-                        {"step": 6, "description": "Maximum value = dp[4][7] = 9", "grid": [[0,0,0,0,0,0,0,0],[0,1,1,1,1,1,1,1],[0,1,1,4,5,5,5,5],[0,1,1,4,5,6,6,9],[0,1,1,4,5,7,8,9]], "optimal": [4,7], "result": 9, "action": "complete"}
-                    ]
-                }
-            ]
-        };
+const codeSnippets = {
+    "fibonacci_tabulation": `<span class="code-keyword">def</span> <span class="code-function">fibonacci</span>(n):
+    <span class="code-keyword">if</span> n <= <span class="code-number">1</span>:
+        <span class="code-keyword">return</span> n
+    
+    dp = [<span class="code-number">0</span>] * (n + <span class="code-number">1</span>)
+    dp[<span class="code-number">0</span>], dp[<span class="code-number">1</span>] = <span class="code-number">0</span>, <span class="code-number">1</span>
+    
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(<span class="code-number">2</span>, n + <span class="code-number">1</span>):
+        dp[i] = dp[i-<span class="code-number">1</span>] + dp[i-<span class="code-number">2</span>]
+    
+    <span class="code-keyword">return</span> dp[n]`,
+    "knapsack_01": `<span class="code-keyword">def</span> <span class="code-function">knapsack</span>(W, weights, values):
+    n = len(weights)
+    dp = [[<span class="code-number">0</span>]*(W+<span class="code-number">1</span>) <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(n+<span class="code-number">1</span>)]
+    
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(<span class="code-number">1</span>, n+<span class="code-number">1</span>):
+        <span class="code-keyword">for</span> w <span class="code-keyword">in</span> range(<span class="code-number">1</span>, W+<span class="code-number">1</span>):
+            <span class="code-keyword">if</span> weights[i-<span class="code-number">1</span>] <= w:
+                dp[i][w] = max(dp[i-<span class="code-number">1</span>][w],
+                    values[i-<span class="code-number">1</span>] + dp[i-<span class="code-number">1</span>][w-weights[i-<span class="code-number">1</span>]])
+            <span class="code-keyword">else</span>:
+                dp[i][w] = dp[i-<span class="code-number">1</span>][w]
+    
+    <span class="code-keyword">return</span> dp[n][W]`,
+    "lcs": `<span class="code-keyword">def</span> <span class="code-function">lcs</span>(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[<span class="code-number">0</span>]*(n+<span class="code-number">1</span>) <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(m+<span class="code-number">1</span>)]
+    
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(<span class="code-number">1</span>, m+<span class="code-number">1</span>):
+        <span class="code-keyword">for</span> j <span class="code-keyword">in</span> range(<span class="code-number">1</span>, n+<span class="code-number">1</span>):
+            <span class="code-keyword">if</span> s1[i-<span class="code-number">1</span>] == s2[j-<span class="code-number">1</span>]:
+                dp[i][j] = dp[i-<span class="code-number">1</span>][j-<span class="code-number">1</span>] + <span class="code-number">1</span>
+            <span class="code-keyword">else</span>:
+                dp[i][j] = max(dp[i-<span class="code-number">1</span>][j], dp[i][j-<span class="code-number">1</span>])
+    
+    <span class="code-keyword">return</span> dp[m][n]`,
+    "coin_change": `<span class="code-keyword">def</span> <span class="code-function">coin_change</span>(coins, amount):
+    dp = [float(<span class="code-string">'inf'</span>)] * (amount + <span class="code-number">1</span>)
+    dp[<span class="code-number">0</span>] = <span class="code-number">0</span>
+    
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(<span class="code-number">1</span>, amount + <span class="code-number">1</span>):
+        <span class="code-keyword">for</span> coin <span class="code-keyword">in</span> coins:
+            <span class="code-keyword">if</span> coin <= i:
+                dp[i] = min(dp[i], dp[i-coin] + <span class="code-number">1</span>)
+    
+    <span class="code-keyword">return</span> dp[amount] <span class="code-keyword">if</span> dp[amount] != float(<span class="code-string">'inf'</span>) <span class="code-keyword">else</span> -<span class="code-number">1</span>`,
+    "edit_distance": `<span class="code-keyword">def</span> <span class="code-function">edit_distance</span>(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[<span class="code-number">0</span>]*(n+<span class="code-number">1</span>) <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(m+<span class="code-number">1</span>)]
+    
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(m+<span class="code-number">1</span>): dp[i][<span class="code-number">0</span>] = i
+    <span class="code-keyword">for</span> j <span class="code-keyword">in</span> range(n+<span class="code-number">1</span>): dp[<span class="code-number">0</span>][j] = j
+    
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(<span class="code-number">1</span>, m+<span class="code-number">1</span>):
+        <span class="code-keyword">for</span> j <span class="code-keyword">in</span> range(<span class="code-number">1</span>, n+<span class="code-number">1</span>):
+            <span class="code-keyword">if</span> s1[i-<span class="code-number">1</span>] == s2[j-<span class="code-number">1</span>]:
+                dp[i][j] = dp[i-<span class="code-number">1</span>][j-<span class="code-number">1</span>]
+            <span class="code-keyword">else</span>:
+                dp[i][j] = <span class="code-number">1</span> + min(dp[i-<span class="code-number">1</span>][j], dp[i][j-<span class="code-number">1</span>], dp[i-<span class="code-number">1</span>][j-<span class="code-number">1</span>])
+    
+    <span class="code-keyword">return</span> dp[m][n]`,
+    "lis": `<span class="code-keyword">def</span> <span class="code-function">lis</span>(nums):
+    <span class="code-keyword">if</span> <span class="code-keyword">not</span> nums:
+        <span class="code-keyword">return</span> <span class="code-number">0</span>
+    
+    dp = [<span class="code-number">1</span>] * len(nums)
+    
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(<span class="code-number">1</span>, len(nums)):
+        <span class="code-keyword">for</span> j <span class="code-keyword">in</span> range(i):
+            <span class="code-keyword">if</span> nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + <span class="code-number">1</span>)
+    
+    <span class="code-keyword">return</span> max(dp)`
+};
 
-        let currentAlgo = null;
-        let currentStep = 0;
-        let isPlaying = false;
-        let playInterval = null;
-        let speed = 800;
+const codeLineMap = {
+    "fibonacci_tabulation": { 1: [0,4,5], 2: [7,8], 3: [7,8], 4: [7,8], 5: [7,8], 6: [7,8], 7: [7,8], 8: [10] },
+    "knapsack_01": { 1: [0,1,2], 2: [4,5,6,7,8,9,10], 3: [4,5,6,7,8,9,10], 4: [4,5,6,7,8,9,10], 5: [4,5,6,7,8,9,10], 6: [4,5,6,7,8,9,10], 7: [4,5,6,7,8,9,10], 8: [12] },
+    "lcs": { 1: [0,1,2], 2: [4,5,6,7,8,9], 3: [4,5,6,7,8,9], 4: [4,5,6,7,8,9], 5: [4,5,6,7,8,9], 6: [4,5,6,7,8,9], 7: [4,5,6,7,8,9], 8: [11] },
+    "coin_change": { 1: [0,1,2], 2: [4,5,6,7], 3: [4,5,6,7], 4: [4,5,6,7], 5: [4,5,6,7], 6: [4,5,6,7], 7: [4,5,6,7], 8: [9] },
+    "edit_distance": { 1: [0,1,2,4,5], 2: [7,8,9,10,11,12], 3: [7,8,9,10,11,12], 4: [7,8,9,10,11,12], 5: [7,8,9,10,11,12], 6: [7,8,9,10,11,12], 7: [7,8,9,10,11,12], 8: [14] },
+    "lis": { 1: [0,1,2,4], 2: [6,7,8,9], 3: [6,7,8,9], 4: [6,7,8,9], 5: [6,7,8,9], 6: [6,7,8,9], 7: [11] }
+};
 
-        function init() {
-            const selector = document.getElementById('algoSelector');
-            visualData.algorithms.forEach((algo, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'algo-btn';
-                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                btn.onclick = () => selectAlgorithm(index);
-                selector.appendChild(btn);
-            });
-            document.getElementById('prevBtn').onclick = prevStep;
-            document.getElementById('nextBtn').onclick = nextStep;
-            document.getElementById('playBtn').onclick = togglePlay;
-            document.getElementById('resetBtn').onclick = reset;
-            document.getElementById('speedSlider').oninput = (e) => {
-                speed = 2100 - e.target.value;
-                document.getElementById('speedValue').textContent = speed + 'ms';
-            };
+const visualData = {"algorithms":[{"algorithm":"fibonacci_tabulation","name":"Fibonacci","complexity":"O(n)","steps":[{"step":1,"description":"Fibonacci with tabulation: Build solution bottom-up. dp[i] = dp[i-1] + dp[i-2].","action":"init","table":[0,1,null,null,null,null,null,null]},{"step":2,"description":"F(2) = F(1) + F(0) = 1 + 0 = 1. Fill dp[2].","action":"fill","cell":2,"value":1,"deps":[0,1],"table":[0,1,1,null,null,null,null,null]},{"step":3,"description":"F(3) = F(2) + F(1) = 1 + 1 = 2. Fill dp[3].","action":"fill","cell":3,"value":2,"deps":[1,2],"table":[0,1,1,2,null,null,null,null]},{"step":4,"description":"F(4) = F(3) + F(2) = 2 + 1 = 3. Fill dp[4].","action":"fill","cell":4,"value":3,"deps":[2,3],"table":[0,1,1,2,3,null,null,null]},{"step":5,"description":"F(5) = F(4) + F(3) = 3 + 2 = 5. Fill dp[5].","action":"fill","cell":5,"value":5,"deps":[3,4],"table":[0,1,1,2,3,5,null,null]},{"step":6,"description":"F(6) = F(5) + F(4) = 5 + 3 = 8. Fill dp[6].","action":"fill","cell":6,"value":8,"deps":[4,5],"table":[0,1,1,2,3,5,8,null]},{"step":7,"description":"F(7) = F(6) + F(5) = 8 + 5 = 13. Fill dp[7].","action":"fill","cell":7,"value":13,"deps":[5,6],"table":[0,1,1,2,3,5,8,13]},{"step":8,"description":"Complete! F(7) = 13. Each cell computed only once (no redundant work).","action":"complete","result":13,"table":[0,1,1,2,3,5,8,13]}]},{"algorithm":"knapsack_01","name":"0/1 Knapsack","complexity":"O(n*W)","steps":[{"step":1,"description":"0/1 Knapsack: Maximize value with capacity 7. Items: (w=1,v=1), (w=3,v=4), (w=4,v=5), (w=5,v=7).","action":"init","rows":5,"cols":8},{"step":2,"description":"Item 0 (w=1,v=1), capacity 1: Can include! dp[1][1] = max(0, 1+0) = 1.","action":"fill","cell":[1,1],"value":1,"choice":"include"},{"step":3,"description":"Item 1 (w=3,v=4), capacity 3: Include! dp[2][3] = max(1, 4+0) = 4.","action":"fill","cell":[2,3],"value":4,"choice":"include"},{"step":4,"description":"Item 1, capacity 4: Include with item 0! dp[2][4] = max(1, 4+1) = 5.","action":"fill","cell":[2,4],"value":5,"choice":"include"},{"step":5,"description":"Continue filling... Each cell considers: include item or skip it.","action":"fill_batch"},{"step":6,"description":"Final cell dp[4][7] = 9. Maximum value achievable.","action":"fill","cell":[4,7],"value":9},{"step":7,"description":"Backtrack: Items 1 (w=3,v=4) and 2 (w=4,v=5) selected. Total: w=7, v=9.","action":"backtrack","selected":[1,2]},{"step":8,"description":"Complete! Max value = 9 using items 1 and 2.","action":"complete","result":9,"selected":[1,2]}]},{"algorithm":"lcs","name":"LCS","complexity":"O(m*n)","steps":[{"step":1,"description":"Longest Common Subsequence: Find LCS of 'ABCDGH' and 'AEDFHR'.","action":"init","s1":"ABCDGH","s2":"AEDFHR"},{"step":2,"description":"A vs A: Match! dp[1][1] = dp[0][0] + 1 = 1. LCS includes 'A'.","action":"match","cell":[1,1],"value":1,"char":"A"},{"step":3,"description":"B vs A: No match. dp[2][1] = max(dp[1][1], dp[2][0]) = 1.","action":"no_match","cell":[2,1],"value":1},{"step":4,"description":"D vs D: Match! dp[4][3] = dp[3][2] + 1 = 2. LCS includes 'D'.","action":"match","cell":[4,3],"value":2,"char":"D"},{"step":5,"description":"H vs H: Match! dp[6][5] = dp[5][4] + 1 = 3. LCS includes 'H'.","action":"match","cell":[6,5],"value":3,"char":"H"},{"step":6,"description":"Final cell dp[6][6] = 3. LCS length is 3.","action":"fill","cell":[6,6],"value":3},{"step":7,"description":"Backtrack: Follow diagonal arrows at matches. LCS = 'ADH'.","action":"backtrack","lcs":"ADH"},{"step":8,"description":"Complete! LCS = 'ADH', length = 3.","action":"complete","result":3,"lcs":"ADH"}]},{"algorithm":"coin_change","name":"Coin Change","complexity":"O(amount*coins)","steps":[{"step":1,"description":"Minimum coins for amount 6 using coins [1, 3, 4]. dp[i] = min coins for amount i.","action":"init","coins":[1,3,4],"amount":6,"table":[0,"inf","inf","inf","inf","inf","inf"]},{"step":2,"description":"Amount 1: Try coin 1. dp[1] = min(inf, dp[0]+1) = 1.","action":"fill","cell":1,"value":1,"coin":1,"table":[0,1,"inf","inf","inf","inf","inf"]},{"step":3,"description":"Amount 2: Try coin 1. dp[2] = min(inf, dp[1]+1) = 2.","action":"fill","cell":2,"value":2,"coin":1,"table":[0,1,2,"inf","inf","inf","inf"]},{"step":4,"description":"Amount 3: Try coin 3. dp[3] = min(3, dp[0]+1) = 1. Better than 1+1+1!","action":"fill","cell":3,"value":1,"coin":3,"table":[0,1,2,1,"inf","inf","inf"]},{"step":5,"description":"Amount 4: Try coin 4. dp[4] = min(2, dp[0]+1) = 1. Single coin!","action":"fill","cell":4,"value":1,"coin":4,"table":[0,1,2,1,1,"inf","inf"]},{"step":6,"description":"Amount 5: Try coins. dp[5] = min(dp[4]+1, dp[2]+1) = 2.","action":"fill","cell":5,"value":2,"coin":4,"table":[0,1,2,1,1,2,"inf"]},{"step":7,"description":"Amount 6: Try coin 3. dp[6] = min(3, dp[3]+1) = 2. Use 3+3!","action":"fill","cell":6,"value":2,"coin":3,"table":[0,1,2,1,1,2,2]},{"step":8,"description":"Complete! Minimum coins = 2 (coins: 3+3). Greedy would give 3 (4+1+1).","action":"complete","result":2,"coins":[3,3]}]},{"algorithm":"edit_distance","name":"Edit Distance","complexity":"O(m*n)","steps":[{"step":1,"description":"Edit Distance: Transform 'HORSE' to 'ROS'. Count min operations (insert/delete/replace).","action":"init","s1":"HORSE","s2":"ROS"},{"step":2,"description":"H vs R: Different. Replace H with R. dp[1][1] = dp[0][0] + 1 = 1.","action":"edit","cell":[1,1],"value":1,"op":"replace"},{"step":3,"description":"O vs O: Match! No operation needed. dp[2][2] = dp[1][1] = 1.","action":"match","cell":[2,2],"value":1},{"step":4,"description":"R vs R: Match! dp[3][1] = dp[2][0] = 2... wait, let me recalculate.","action":"fill","cell":[3,1],"value":2},{"step":5,"description":"Continue filling grid with min of insert/delete/replace operations.","action":"fill_batch"},{"step":6,"description":"Final cell dp[5][3] = 3. Minimum 3 edits needed.","action":"fill","cell":[5,3],"value":3},{"step":7,"description":"Operations: Replace H->R, keep O, delete R, keep S, delete E.","action":"backtrack","ops":["replace H->R","keep O","delete R","keep S","delete E"]},{"step":8,"description":"Complete! HORSE -> ROS in 3 edits.","action":"complete","result":3}]},{"algorithm":"lis","name":"LIS","complexity":"O(n^2)","steps":[{"step":1,"description":"Longest Increasing Subsequence: Find LIS in [10, 9, 2, 5, 3, 7, 101, 18].","action":"init","array":[10,9,2,5,3,7,101,18],"dp":[1,1,1,1,1,1,1,1]},{"step":2,"description":"Index 3 (value 5): 2 < 5, so dp[3] = max(1, dp[2]+1) = 2.","action":"extend","index":3,"value":5,"from":2,"dp":[1,1,1,2,1,1,1,1]},{"step":3,"description":"Index 4 (value 3): 2 < 3, so dp[4] = max(1, dp[2]+1) = 2.","action":"extend","index":4,"value":3,"from":2,"dp":[1,1,1,2,2,1,1,1]},{"step":4,"description":"Index 5 (value 7): 5 < 7, so dp[5] = max(1, dp[3]+1) = 3.","action":"extend","index":5,"value":7,"from":3,"dp":[1,1,1,2,2,3,1,1]},{"step":5,"description":"Index 6 (value 101): 7 < 101, so dp[6] = max(1, dp[5]+1) = 4.","action":"extend","index":6,"value":101,"from":5,"dp":[1,1,1,2,2,3,4,1]},{"step":6,"description":"Index 7 (value 18): 7 < 18, so dp[7] = max(1, dp[5]+1) = 4.","action":"extend","index":7,"value":18,"from":5,"dp":[1,1,1,2,2,3,4,4]},{"step":7,"description":"Complete! LIS length = 4. One LIS: [2, 5, 7, 101] or [2, 3, 7, 101].","action":"complete","result":4,"lis":[2,5,7,101],"dp":[1,1,1,2,2,3,4,4]}]}]};
+
+let currentAlgorithm = null;
+let currentStep = 0;
+let isPlaying = false;
+let playInterval = null;
+let cameraRotX = 15;
+let cameraRotY = 0;
+let cameraZoom = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const scene = document.getElementById('scene');
+const stage = document.getElementById('stage');
+const dpContainer = document.getElementById('dpContainer');
+const codeBlock = document.getElementById('codeBlock');
+const stepDescription = document.getElementById('stepDescription');
+const complexityBadge = document.getElementById('complexityBadge');
+const stateInfo = document.getElementById('stateInfo');
+const progressFill = document.getElementById('progressFill');
+const stepCounter = document.getElementById('stepCounter');
+const playBtn = document.getElementById('playBtn');
+const resultDisplay = document.getElementById('resultDisplay');
+
+function initAlgorithmSelector() {
+    const selector = document.getElementById('algoSelector');
+    visualData.algorithms.forEach((algo, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'algo-btn';
+        btn.textContent = algo.name;
+        btn.onclick = () => selectAlgorithm(index);
+        selector.appendChild(btn);
+    });
+}
+
+function selectAlgorithm(index) {
+    document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+    currentAlgorithm = visualData.algorithms[index];
+    currentStep = 0;
+    stopPlaying();
+    complexityBadge.textContent = currentAlgorithm.complexity;
+    renderCode();
+    renderStep();
+    updateControls();
+}
+
+function renderCode() {
+    const code = codeSnippets[currentAlgorithm.algorithm] || '';
+    const lines = code.split('\n');
+    let html = '';
+    lines.forEach((line, idx) => {
+        html += '<div class="code-line" data-line="' + idx + '">' + line + '</div>';
+    });
+    codeBlock.innerHTML = html;
+}
+
+function highlightCodeLines(stepNum) {
+    const lineMap = codeLineMap[currentAlgorithm.algorithm] || {};
+    const activeLines = lineMap[stepNum] || [];
+    document.querySelectorAll('.code-line').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (activeLines.includes(idx)) el.classList.add('active');
+    });
+}
+
+function render1DArray(step) {
+    const table = step.table || currentAlgorithm.steps[0].table;
+    const current = step.cell;
+    const deps = step.deps || [];
+    const isComplete = step.action === 'complete';
+    
+    let html = '<div class="dp-grid" style="grid-template-columns:repeat(' + table.length + ',1fr)">';
+    
+    table.forEach((val, idx) => {
+        let cellClass = 'dp-cell';
+        if (val !== null && val !== 'inf') cellClass += ' filled';
+        if (idx === current) cellClass += ' current';
+        if (deps.includes(idx)) cellClass += ' dependency';
+        if (isComplete && idx === table.length - 1) cellClass += ' result';
+        
+        const displayVal = val === null ? '-' : (val === 'inf' ? 'inf' : val);
+        html += '<div class="' + cellClass + '">' + displayVal + '</div>';
+    });
+    
+    html += '</div>';
+    html += '<div style="display:flex;justify-content:center;gap:3px;margin-top:5px">';
+    table.forEach((_, idx) => {
+        html += '<div class="dp-col-label">' + idx + '</div>';
+    });
+    html += '</div>';
+    
+    dpContainer.innerHTML = html;
+}
+
+function render2DGrid(step, rows, cols, rowLabels, colLabels) {
+    const current = step.cell;
+    const isComplete = step.action === 'complete';
+    
+    // Build a simple grid representation
+    let html = '<div class="dp-grid" style="grid-template-columns:repeat(' + (cols + 1) + ',1fr)">';
+    
+    // Header row
+    html += '<div class="dp-col-label"></div>';
+    for (let j = 0; j < cols; j++) {
+        html += '<div class="dp-col-label">' + (colLabels ? colLabels[j] : j) + '</div>';
+    }
+    
+    // Data rows
+    for (let i = 0; i < rows; i++) {
+        html += '<div class="dp-row-label">' + (rowLabels ? rowLabels[i] : i) + '</div>';
+        for (let j = 0; j < cols; j++) {
+            let cellClass = 'dp-cell';
+            
+            // Determine if this cell should be filled based on current step
+            const stepNum = currentStep;
+            if (i === 0 || j === 0) cellClass += ' filled';
+            else if (current && current[0] === i && current[1] === j) cellClass += ' current';
+            else if (stepNum > 1 && i <= Math.ceil(stepNum / 2) && j <= Math.ceil(stepNum / 2)) cellClass += ' filled';
+            
+            if (isComplete && i === rows - 1 && j === cols - 1) cellClass += ' result';
+            
+            html += '<div class="' + cellClass + '">-</div>';
         }
+    }
+    
+    html += '</div>';
+    dpContainer.innerHTML = html;
+}
 
-        function selectAlgorithm(index) {
-            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-            currentAlgo = visualData.algorithms[index];
-            currentStep = 0;
-            stopPlay();
-            renderStep();
-            updateControls();
-        }
+function renderLIS(step) {
+    const array = currentAlgorithm.steps[0].array;
+    const dp = step.dp || currentAlgorithm.steps[0].dp;
+    const current = step.index;
+    const from = step.from;
+    const isComplete = step.action === 'complete';
+    
+    let html = '<div style="display:flex;flex-direction:column;align-items:center;gap:20px">';
+    
+    // Array values
+    html += '<div style="display:flex;gap:5px">';
+    array.forEach((val, idx) => {
+        let style = 'width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:bold;transition:all 0.3s;';
+        if (idx === current) style += 'background:linear-gradient(135deg,#ffd700,#cc9900);color:#000;box-shadow:0 0 20px rgba(255,215,0,0.5);';
+        else if (idx === from) style += 'background:linear-gradient(135deg,#ff00ff,#aa0088);color:#fff;box-shadow:0 0 15px rgba(255,0,255,0.4);';
+        else style += 'background:linear-gradient(135deg,#1a1a2e,#0f0f1a);border:1px solid rgba(0,255,255,0.3);';
+        
+        html += '<div style="' + style + '">' + val + '</div>';
+    });
+    html += '</div>';
+    
+    // DP values
+    html += '<div style="display:flex;gap:5px">';
+    dp.forEach((val, idx) => {
+        let cellClass = 'dp-cell';
+        if (idx === current) cellClass += ' current';
+        else if (val > 1) cellClass += ' filled';
+        if (isComplete && val === Math.max(...dp)) cellClass += ' result';
+        
+        html += '<div class="' + cellClass + '" style="width:50px;height:50px">' + val + '</div>';
+    });
+    html += '</div>';
+    
+    html += '<div style="color:#888;font-size:0.8rem">Top: Array values | Bottom: LIS length at each index</div>';
+    html += '</div>';
+    
+    dpContainer.innerHTML = html;
+}
 
-        function renderStep() {
-            if (!currentAlgo) return;
-            const step = currentAlgo.steps[currentStep];
-            document.getElementById('stepDesc').textContent = step.description;
-            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
-            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+function renderStep() {
+    if (!currentAlgorithm) return;
+    const step = currentAlgorithm.steps[currentStep];
+    stepDescription.textContent = step.description;
+    highlightCodeLines(step.step);
+    resultDisplay.style.display = 'none';
+    
+    // Render based on algorithm type
+    const algo = currentAlgorithm.algorithm;
+    if (algo === 'fibonacci_tabulation' || algo === 'coin_change') {
+        render1DArray(step);
+    } else if (algo === 'lis') {
+        renderLIS(step);
+    } else if (algo === 'knapsack_01') {
+        render2DGrid(step, 5, 8, ['', 'I0', 'I1', 'I2', 'I3'], ['', '0', '1', '2', '3', '4', '5', '6', '7']);
+    } else if (algo === 'lcs') {
+        render2DGrid(step, 7, 7, ['', 'A', 'B', 'C', 'D', 'G', 'H'], ['', 'A', 'E', 'D', 'F', 'H', 'R']);
+    } else if (algo === 'edit_distance') {
+        render2DGrid(step, 6, 4, ['', 'H', 'O', 'R', 'S', 'E'], ['', 'R', 'O', 'S']);
+    }
+    
+    // Update state info
+    let info = '';
+    if (step.table) info += 'DP: [' + step.table.map(v => v === null ? '-' : v).join(', ') + ']\n';
+    if (step.dp) info += 'DP: [' + step.dp.join(', ') + ']\n';
+    if (step.value !== undefined) info += 'Current value: ' + step.value + '\n';
+    if (step.result !== undefined) info += 'Result: ' + step.result;
+    if (step.lcs) info += '\nLCS: "' + step.lcs + '"';
+    if (step.selected) info += '\nSelected items: [' + step.selected.join(', ') + ']';
+    stateInfo.textContent = info || '-';
+    
+    if (step.action === 'complete') {
+        resultDisplay.style.display = 'block';
+        resultDisplay.textContent = 'Result: ' + step.result;
+    }
+    
+    progressFill.style.width = ((currentStep + 1) / currentAlgorithm.steps.length * 100) + '%';
+    stepCounter.textContent = 'Step ' + (currentStep + 1) + ' / ' + currentAlgorithm.steps.length;
+}
 
-            const content = document.getElementById('vizContent');
-            
-            switch(currentAlgo.algorithm) {
-                case 'fibonacci_memoization':
-                    renderFibMemo(content, step);
-                    break;
-                case 'fibonacci_tabulation':
-                    renderFibTable(content, step);
-                    break;
-                case 'longest_common_subsequence':
-                    renderLCS(content, step);
-                    break;
-                case 'knapsack_01':
-                    renderKnapsack(content, step);
-                    break;
-            }
-        }
+function updateControls() {
+    document.getElementById('prevBtn').disabled = !currentAlgorithm || currentStep === 0;
+    document.getElementById('nextBtn').disabled = !currentAlgorithm || currentStep >= currentAlgorithm.steps.length - 1;
+    document.getElementById('playBtn').disabled = !currentAlgorithm;
+}
 
-        function renderFibMemo(container, step) {
-            const memo = step.memo || {};
-            const computing = step.computing;
-            const cached = step.cached;
+function nextStep() {
+    if (currentAlgorithm && currentStep < currentAlgorithm.steps.length - 1) { currentStep++; renderStep(); updateControls(); }
+    else stopPlaying();
+}
 
-            let html = '<div class="dp-container">';
-            html += '<div class="formula">F(n) = F(n-1) + F(n-2)</div>';
-            
-            html += '<div style="color: #888; margin-bottom: 10px;">Memoization Cache:</div>';
-            html += '<div class="dp-grid" style="grid-template-columns: repeat(7, 1fr);">';
-            
-            for (let i = 0; i <= 6; i++) {
-                const key = `F(${i})`;
-                const val = memo[key];
-                let cellClass = '';
-                if (computing === key) cellClass = 'current';
-                else if (val !== undefined) cellClass = 'computed';
-                if (cached === key || (Array.isArray(cached) && cached.includes(key))) cellClass = 'dependency';
-                
-                html += `<div class="dp-cell ${cellClass}">
-                    <div style="font-size: 0.7em; color: #888;">F(${i})</div>
-                    <div>${val !== undefined ? val : '?'}</div>
-                </div>`;
-            }
-            html += '</div>';
-            
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Computing</div><div class="info-value">${computing || '-'}</div></div>`;
-            html += `<div class="info-box"><div class="info-label">Cache Hits</div><div class="info-value">${Object.keys(memo).length}</div></div>`;
-            if (step.action === 'complete') {
-                html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#00ff00;">${memo['F(6)']}</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function prevStep() {
+    if (currentAlgorithm && currentStep > 0) { currentStep--; renderStep(); updateControls(); }
+}
 
-        function renderFibTable(container, step) {
-            const table = step.table || [];
-            const current = step.current;
-            const deps = step.deps || [];
+function togglePlay() { if (isPlaying) stopPlaying(); else startPlaying(); }
 
-            let html = '<div class="dp-container">';
-            html += '<div class="formula">dp[i] = dp[i-1] + dp[i-2]</div>';
-            
-            html += '<div style="color: #888; margin-bottom: 10px;">DP Table (Bottom-Up):</div>';
-            html += '<div class="dp-grid" style="grid-template-columns: repeat(9, 1fr);">';
-            
-            table.forEach((val, i) => {
-                let cellClass = '';
-                if (i === current) cellClass = 'current';
-                else if (deps.includes(i)) cellClass = 'dependency';
-                else if (val !== null) cellClass = 'computed';
-                
-                html += `<div class="dp-cell ${cellClass}">
-                    <div style="font-size: 0.7em; color: #888;">F(${i})</div>
-                    <div>${val !== null ? val : '?'}</div>
-                </div>`;
-            });
-            html += '</div>';
-            
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Current Index</div><div class="info-value">${current !== null ? current : '-'}</div></div>`;
-            html += `<div class="info-box"><div class="info-label">Computed</div><div class="info-value">${table.filter(v => v !== null).length}</div></div>`;
-            if (step.action === 'complete') {
-                html += `<div class="info-box"><div class="info-label">F(8)</div><div class="info-value" style="color:#00ff00;">${table[8]}</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function startPlaying() {
+    isPlaying = true;
+    playBtn.textContent = 'Pause';
+    playBtn.classList.add('playing');
+    playInterval = setInterval(() => {
+        if (currentStep < currentAlgorithm.steps.length - 1) nextStep();
+        else stopPlaying();
+    }, 2200 - document.getElementById('speedSlider').value);
+}
 
-        function renderLCS(container, step) {
-            const grid = step.grid || [];
-            const current = step.current;
-            const deps = step.deps || [];
-            const str1 = currentAlgo.str1;
-            const str2 = currentAlgo.str2;
+function stopPlaying() {
+    isPlaying = false;
+    playBtn.textContent = 'Play';
+    playBtn.classList.remove('playing');
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+}
 
-            let html = '<div class="dp-container">';
-            
-            html += '<div class="lcs-strings">';
-            html += `<div class="string-display"><div class="string-label">String 1:</div><div class="string-value">${str1}</div></div>`;
-            html += `<div class="string-display"><div class="string-label">String 2:</div><div class="string-value">${str2}</div></div>`;
-            html += '</div>';
-            
-            html += '<div class="dp-grid" style="grid-template-columns: repeat(6, 1fr);">';
-            
-            // Header row
-            html += '<div class="dp-cell header"></div>';
-            html += '<div class="dp-cell header">-</div>';
-            for (let c of str2) {
-                html += `<div class="dp-cell header">${c}</div>`;
-            }
-            
-            // Grid rows
-            for (let i = 0; i < grid.length; i++) {
-                html += `<div class="dp-cell header">${i === 0 ? '-' : str1[i-1]}</div>`;
-                for (let j = 0; j < grid[i].length; j++) {
-                    let cellClass = '';
-                    if (current && current[0] === i && current[1] === j) cellClass = 'current';
-                    else if (deps.some(d => d[0] === i && d[1] === j)) cellClass = 'dependency';
-                    else if (grid[i][j] > 0) cellClass = 'computed';
-                    if (step.optimal && step.optimal[0] === i && step.optimal[1] === j) cellClass = 'optimal';
-                    
-                    html += `<div class="dp-cell ${cellClass}">${grid[i][j]}</div>`;
-                }
-            }
-            html += '</div>';
-            
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            if (step.result) {
-                html += `<div class="info-box"><div class="info-label">LCS</div><div class="info-value" style="color:#00ff00;">${step.result}</div></div>`;
-                html += `<div class="info-box"><div class="info-label">Length</div><div class="info-value">${step.length}</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function reset() { stopPlaying(); currentStep = 0; renderStep(); updateControls(); }
 
-        function renderKnapsack(container, step) {
-            const grid = step.grid || [];
-            const current = step.current;
-            const optimal = step.optimal;
-            const items = currentAlgo.items;
+function updateCamera() {
+    stage.style.transform = 'translateZ(' + cameraZoom + 'px) rotateX(' + cameraRotX + 'deg) rotateY(' + cameraRotY + 'deg)';
+}
 
-            let html = '<div class="dp-container">';
-            html += '<div class="formula">dp[i][w] = max(dp[i-1][w], value[i] + dp[i-1][w-weight[i]])</div>';
-            
-            html += '<div class="dp-grid" style="grid-template-columns: repeat(9, 1fr);">';
-            
-            // Header row
-            html += '<div class="dp-cell header">Item\\W</div>';
-            for (let w = 0; w <= 7; w++) {
-                html += `<div class="dp-cell header">${w}</div>`;
-            }
-            
-            // Grid rows
-            for (let i = 0; i < grid.length; i++) {
-                const itemLabel = i === 0 ? '0' : `(${items[i-1].w},${items[i-1].v})`;
-                html += `<div class="dp-cell header" style="font-size: 0.7em;">${itemLabel}</div>`;
-                for (let w = 0; w < grid[i].length; w++) {
-                    let cellClass = '';
-                    if (current && current[0] === i && current[1] === w) cellClass = 'current';
-                    else if (optimal && optimal[0] === i && optimal[1] === w) cellClass = 'optimal';
-                    else if (grid[i][w] > 0) cellClass = 'computed';
-                    
-                    html += `<div class="dp-cell ${cellClass}">${grid[i][w]}</div>`;
-                }
-            }
-            html += '</div>';
-            
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Capacity</div><div class="info-value">${currentAlgo.capacity}</div></div>`;
-            if (step.result !== undefined) {
-                html += `<div class="info-box"><div class="info-label">Max Value</div><div class="info-value" style="color:#00ff00;">$${step.result}</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+scene.addEventListener('mousedown', (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    cameraRotY += (e.clientX - lastMouseX) * 0.5;
+    cameraRotX -= (e.clientY - lastMouseY) * 0.3;
+    cameraRotX = Math.max(-60, Math.min(60, cameraRotX));
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+    updateCamera();
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+scene.addEventListener('wheel', (e) => { e.preventDefault(); cameraZoom += e.deltaY * -0.5; cameraZoom = Math.max(-300, Math.min(200, cameraZoom)); updateCamera(); });
 
-        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
-        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
-        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
-        function startPlay() {
-            if (!currentAlgo) return;
-            isPlaying = true;
-            document.getElementById('playBtn').textContent = 'Pause';
-            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
-        }
-        function stopPlay() {
-            isPlaying = false;
-            document.getElementById('playBtn').textContent = 'Play';
-            if (playInterval) { clearInterval(playInterval); playInterval = null; }
-        }
-        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
-        function updateControls() {
-            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
-            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
-        }
-        init();
+document.getElementById('playBtn').onclick = togglePlay;
+document.getElementById('prevBtn').onclick = prevStep;
+document.getElementById('nextBtn').onclick = nextStep;
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('speedSlider').oninput = () => { if (isPlaying) { stopPlaying(); startPlaying(); } };
+
+initAlgorithmSelector();
+updateCamera();
     </script>
 </body>
 </html>

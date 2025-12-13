@@ -7,625 +7,783 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
-            color: #fff;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
-            padding: 30px 0;
-            background: rgba(0, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            margin-bottom: 30px;
+            padding: 25px 0;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            margin-bottom: 25px;
         }
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2rem;
             background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            animation: gradient-shift 3s linear infinite;
         }
-        .subtitle { color: #888; font-size: 1.1em; }
+        @keyframes gradient-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .subtitle { color: #888; font-size: 1rem; margin-top: 8px; }
         .algorithm-selector {
             display: flex;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
         }
         .algo-btn {
-            padding: 12px 20px;
-            background: rgba(0, 255, 255, 0.1);
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(0, 255, 255, 0.3);
             color: #00ffff;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-        .algo-btn:hover, .algo-btn.active {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        .algo-btn:hover { border-color: #00ffff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+        .algo-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
+            color: #000;
+            font-weight: bold;
         }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
         .visualization-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
+            background: radial-gradient(ellipse at center, #0f0f1a 0%, #050508 70%, #000 100%);
+            border-radius: 12px;
             border: 1px solid rgba(0, 255, 255, 0.2);
-            min-height: 450px;
+            overflow: hidden;
+            position: relative;
+        }
+        .scene {
+            width: 100%;
+            height: 380px;
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .scene:active { cursor: grabbing; }
+        .stage {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+            transition: transform 0.1s ease-out;
+            position: relative;
+        }
+        .greedy-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            padding: 20px;
+        }
+        .activity-bar {
+            position: absolute;
+            height: 30px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #fff;
+            transition: all 0.4s ease;
+        }
+        .activity-bar.selected {
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+        .activity-bar.rejected {
+            opacity: 0.3;
+            background: linear-gradient(135deg, #333, #222);
+        }
+        .activity-bar.checking {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        .coin {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.4s ease;
+            position: absolute;
+        }
+        .coin.quarter { background: linear-gradient(135deg, #ffd700, #cc9900); color: #000; }
+        .coin.dime { background: linear-gradient(135deg, #c0c0c0, #888); color: #000; }
+        .coin.nickel { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
+        .coin.penny { background: linear-gradient(135deg, #b87333, #8b4513); color: #fff; }
+        .coin.selected {
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.7);
+            transform: scale(1.1);
+        }
+        .item-box {
+            position: absolute;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+        .item-box.taken {
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            border-color: #00ff88;
+        }
+        .item-box.partial {
+            background: linear-gradient(135deg, #ffd700, #cc9900);
+            border-color: #ffd700;
+        }
+        .timeline {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            right: 50px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+        .timeline-marker {
+            position: absolute;
+            bottom: -8px;
+            width: 2px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .timeline-label {
+            position: absolute;
+            bottom: -30px;
+            font-size: 0.7rem;
+            color: #888;
+            transform: translateX(-50%);
+        }
+        .code-panel {
+            background: linear-gradient(135deg, #0d0d15, #1a1a25);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 15px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .code-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .code-title::before { content: "</>"; color: #ff00ff; font-weight: bold; }
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: pre;
+        }
+        .code-line.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-left: 3px solid #00ffff;
+        }
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-number { color: #bd93f9; }
+        .code-comment { color: #6272a4; }
+        .code-variable { color: #8be9fd; }
+        .info-panel {
+            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+        }
+        .panel-section { margin-bottom: 20px; }
+        .panel-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 2px;
         }
         .step-description {
-            text-align: center;
-            font-size: 1.2em;
-            color: #00ffff;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e0e0e0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+        }
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+            border: 1px solid rgba(255, 0, 255, 0.4);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        .state-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
         }
         .controls {
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
         }
         .control-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
-            border: none;
-            color: #000;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00ffff;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
         }
-        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
-        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
-
-        /* Coin Change Visualization */
-        .coins-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
-            padding: 20px;
-        }
-        .coins-available {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .coin {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.1em;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .coin.gold { background: linear-gradient(135deg, #ffd700, #cc9900); color: #000; border: 3px solid #ffaa00; }
-        .coin.silver { background: linear-gradient(135deg, #c0c0c0, #808080); color: #000; border: 3px solid #a0a0a0; }
-        .coin.bronze { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; border: 3px solid #a0522d; }
-        .coin.selected {
-            transform: scale(1.2);
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
-            border-color: #00ff00;
-        }
-        .coin.considering {
-            animation: pulse 0.5s infinite;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        .coin-count {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #00ffff;
-            color: #000;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-        }
-        .selected-coins {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 20px;
-            background: rgba(0, 255, 0, 0.1);
-            border-radius: 15px;
-            min-height: 100px;
-            min-width: 300px;
-        }
-
-        /* Activity Selection */
-        .timeline-container {
-            width: 100%;
-            max-width: 800px;
-            padding: 20px;
-        }
-        .timeline {
-            position: relative;
-            height: 200px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        .time-axis {
-            position: absolute;
-            bottom: 30px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #666;
-        }
-        .time-label {
-            position: absolute;
-            bottom: 5px;
-            transform: translateX(-50%);
-            color: #888;
-            font-size: 0.8em;
-        }
-        .activity {
-            position: absolute;
-            height: 30px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        .activity.available {
-            background: linear-gradient(90deg, #00ffff33, #00888833);
-            border: 2px solid #00ffff;
-        }
-        .activity.selected {
-            background: linear-gradient(90deg, #00ff0033, #00880033);
-            border: 2px solid #00ff00;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
-        }
-        .activity.considering {
-            background: linear-gradient(90deg, #ffd70033, #cc990033);
-            border: 2px solid #ffd700;
-            animation: pulse 0.5s infinite;
-        }
-        .activity.rejected {
-            background: linear-gradient(90deg, #ff333333, #cc000033);
-            border: 2px solid #ff3333;
-            opacity: 0.5;
-        }
-
-        /* Fractional Knapsack */
-        .knapsack-container {
-            display: flex;
-            gap: 40px;
-            justify-content: center;
-            flex-wrap: wrap;
-            padding: 20px;
-        }
-        .items-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            border: 2px solid #00ffff;
-            transition: all 0.3s ease;
-        }
-        .item.selected {
-            border-color: #00ff00;
-            background: rgba(0, 255, 0, 0.1);
-        }
-        .item.partial {
-            border-color: #ffd700;
-            background: rgba(255, 215, 0, 0.1);
-        }
-        .item-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #ff00ff, #880088);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .knapsack {
-            width: 150px;
-            height: 200px;
-            background: linear-gradient(180deg, #1a1a3a, #0a0a2a);
-            border: 3px solid #00ffff;
-            border-radius: 10px 10px 20px 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        .knapsack-fill {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(180deg, #00ff00, #008800);
-            transition: height 0.5s ease;
-        }
-        .knapsack-label {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-weight: bold;
-            z-index: 1;
-        }
-
-        /* Info Panel */
-        .info-panel {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .info-box {
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px 25px;
-            text-align: center;
-        }
-        .info-label { color: #888; font-size: 0.9em; }
-        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
-
-        .speed-control {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .speed-label { color: #888; }
+        .control-btn:hover:not(:disabled) { background: linear-gradient(135deg, #00ffff, #0088aa); color: #000; }
+        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .control-btn.playing { background: linear-gradient(135deg, #ff00ff, #aa0088); border-color: #ff00ff; }
+        .speed-control { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .speed-label { color: #888; font-size: 0.85rem; }
         .speed-slider {
-            width: 150px;
+            width: 100px;
+            height: 5px;
             -webkit-appearance: none;
-            height: 6px;
-            background: rgba(0, 255, 255, 0.2);
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
             border-radius: 3px;
         }
         .speed-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #00ffff;
+            width: 16px;
+            height: 16px;
+            background: #fff;
             border-radius: 50%;
             cursor: pointer;
+        }
+        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; font-size: 0.85rem; margin-top: 8px; }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+        .result-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #00ff88;
+            font-weight: bold;
+            display: none;
+        }
+        .camera-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Greedy Algorithms</h1>
-        <p class="subtitle">Interactive 3D Visualization</p>
+        <p class="subtitle">Interactive 3D Visualization with Code - Drag to rotate, scroll to zoom</p>
     </header>
     <div class="container">
         <div class="algorithm-selector" id="algoSelector"></div>
-        <div class="visualization-area">
-            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
-            <div id="vizContent"></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
-        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
-        <div class="controls">
-            <button class="control-btn" id="prevBtn" disabled>Previous</button>
-            <button class="control-btn" id="playBtn">Play</button>
-            <button class="control-btn" id="nextBtn" disabled>Next</button>
-            <button class="control-btn" id="resetBtn">Reset</button>
-        </div>
-        <div class="speed-control">
-            <span class="speed-label">Speed:</span>
-            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
-            <span class="speed-label" id="speedValue">800ms</span>
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="scene" id="scene">
+                        <div class="stage" id="stage">
+                            <div class="greedy-container" id="greedyContainer"></div>
+                        </div>
+                        <div class="result-display" id="resultDisplay"></div>
+                        <div class="camera-hint">Drag to rotate | Scroll to zoom</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" id="prevBtn">Prev</button>
+                        <button class="control-btn" id="playBtn">Play</button>
+                        <button class="control-btn" id="nextBtn">Next</button>
+                        <button class="control-btn" id="resetBtn">Reset</button>
+                        <div class="speed-control">
+                            <span class="speed-label">Speed:</span>
+                            <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" value="800">
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+                </div>
+                <div class="code-panel">
+                    <div class="code-title">Python Code</div>
+                    <div class="code-block" id="codeBlock"></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="panel-section">
+                    <div class="panel-title">Current Step</div>
+                    <div class="step-description" id="stepDescription">Select an algorithm to begin</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Complexity</div>
+                    <div class="complexity-badge" id="complexityBadge">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">State</div>
+                    <div class="state-info" id="stateInfo">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Legend</div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#00ff88,#006633)"></div><span>Selected</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#ffd700,#996600)"></div><span>Checking</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:rgba(100,100,100,0.5)"></div><span>Rejected</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <script>
-        const visualData = {
-            "world": "11_greedy_algorithms",
-            "algorithms": [
-                {
-                    "algorithm": "coin_change_greedy",
-                    "description": "Coin Change - make change using fewest coins",
-                    "coins": [25, 10, 5, 1],
-                    "amount": 63,
-                    "steps": [
-                        {"step": 1, "description": "Make change for 63 cents using coins [25, 10, 5, 1]", "remaining": 63, "selected": [], "action": "init"},
-                        {"step": 2, "description": "Greedy: try largest coin first (25)", "remaining": 63, "considering": 25, "selected": [], "action": "consider"},
-                        {"step": 3, "description": "25 <= 63, use it! Remaining: 63-25=38", "remaining": 38, "selected": [25], "action": "select"},
-                        {"step": 4, "description": "Try 25 again: 25 <= 38, use it! Remaining: 13", "remaining": 13, "selected": [25, 25], "action": "select"},
-                        {"step": 5, "description": "Try 25: 25 > 13, too big. Try 10", "remaining": 13, "considering": 10, "selected": [25, 25], "action": "consider"},
-                        {"step": 6, "description": "10 <= 13, use it! Remaining: 3", "remaining": 3, "selected": [25, 25, 10], "action": "select"},
-                        {"step": 7, "description": "Try 10: 10 > 3. Try 5: 5 > 3. Try 1", "remaining": 3, "considering": 1, "selected": [25, 25, 10], "action": "consider"},
-                        {"step": 8, "description": "Use three 1-cent coins", "remaining": 0, "selected": [25, 25, 10, 1, 1, 1], "action": "select"},
-                        {"step": 9, "description": "Done! 6 coins total: 2x25 + 1x10 + 3x1 = 63", "remaining": 0, "selected": [25, 25, 10, 1, 1, 1], "total_coins": 6, "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "activity_selection",
-                    "description": "Activity Selection - maximize non-overlapping activities",
-                    "activities": [
-                        {"id": "A", "start": 1, "end": 4},
-                        {"id": "B", "start": 3, "end": 5},
-                        {"id": "C", "start": 0, "end": 6},
-                        {"id": "D", "start": 5, "end": 7},
-                        {"id": "E", "start": 3, "end": 9},
-                        {"id": "F", "start": 5, "end": 9},
-                        {"id": "G", "start": 6, "end": 10},
-                        {"id": "H", "start": 8, "end": 11}
-                    ],
-                    "steps": [
-                        {"step": 1, "description": "Select maximum non-overlapping activities", "selected": [], "action": "init"},
-                        {"step": 2, "description": "Sort by end time: A(1-4), B(3-5), C(0-6), D(5-7), E(3-9), F(5-9), G(6-10), H(8-11)", "selected": [], "sorted": true, "action": "sort"},
-                        {"step": 3, "description": "Greedy: always pick activity with earliest end time", "selected": [], "considering": "A", "action": "consider"},
-                        {"step": 4, "description": "Select A (ends at 4)", "selected": ["A"], "last_end": 4, "action": "select"},
-                        {"step": 5, "description": "B starts at 3 < 4, overlaps with A. Skip.", "selected": ["A"], "considering": "B", "rejected": "B", "action": "reject"},
-                        {"step": 6, "description": "C starts at 0 < 4, overlaps. Skip.", "selected": ["A"], "rejected": "C", "action": "reject"},
-                        {"step": 7, "description": "D starts at 5 >= 4, no overlap. Select D!", "selected": ["A", "D"], "considering": "D", "last_end": 7, "action": "select"},
-                        {"step": 8, "description": "E starts at 3 < 7, overlaps. F starts at 5 < 7, overlaps. Skip both.", "selected": ["A", "D"], "rejected": ["E", "F"], "action": "reject"},
-                        {"step": 9, "description": "G starts at 6 < 7, overlaps. Skip.", "selected": ["A", "D"], "rejected": "G", "action": "reject"},
-                        {"step": 10, "description": "H starts at 8 >= 7, no overlap. Select H!", "selected": ["A", "D", "H"], "considering": "H", "action": "select"},
-                        {"step": 11, "description": "Done! Maximum 3 activities: A, D, H", "selected": ["A", "D", "H"], "total": 3, "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "fractional_knapsack",
-                    "description": "Fractional Knapsack - maximize value with weight limit",
-                    "capacity": 50,
-                    "items": [
-                        {"id": 1, "weight": 10, "value": 60, "ratio": 6.0},
-                        {"id": 2, "weight": 20, "value": 100, "ratio": 5.0},
-                        {"id": 3, "weight": 30, "value": 120, "ratio": 4.0}
-                    ],
-                    "steps": [
-                        {"step": 1, "description": "Knapsack capacity: 50kg. Maximize value.", "capacity": 50, "used": 0, "value": 0, "selected": [], "action": "init"},
-                        {"step": 2, "description": "Sort by value/weight ratio: Item1(6.0) > Item2(5.0) > Item3(4.0)", "sorted": true, "action": "sort"},
-                        {"step": 3, "description": "Greedy: pick highest ratio first. Item1: 10kg, $60", "considering": 1, "action": "consider"},
-                        {"step": 4, "description": "Take all of Item1 (10kg). Remaining: 40kg, Value: $60", "used": 10, "value": 60, "selected": [{"id": 1, "fraction": 1.0}], "action": "select"},
-                        {"step": 5, "description": "Item2: 20kg, $100. Take all.", "considering": 2, "action": "consider"},
-                        {"step": 6, "description": "Take all of Item2 (20kg). Remaining: 20kg, Value: $160", "used": 30, "value": 160, "selected": [{"id": 1, "fraction": 1.0}, {"id": 2, "fraction": 1.0}], "action": "select"},
-                        {"step": 7, "description": "Item3: 30kg, but only 20kg space. Take fraction!", "considering": 3, "action": "consider"},
-                        {"step": 8, "description": "Take 20/30 = 66.7% of Item3. Value: $80", "used": 50, "value": 240, "selected": [{"id": 1, "fraction": 1.0}, {"id": 2, "fraction": 1.0}, {"id": 3, "fraction": 0.667}], "action": "select_partial"},
-                        {"step": 9, "description": "Knapsack full! Total value: $240", "used": 50, "value": 240, "action": "complete"}
-                    ]
-                }
-            ]
-        };
+const codeSnippets = {
+    "activity_selection": `<span class="code-keyword">def</span> <span class="code-function">activity_selection</span>(activities):
+    <span class="code-comment"># Sort by end time (greedy choice)</span>
+    activities.sort(key=<span class="code-keyword">lambda</span> x: x[<span class="code-number">1</span>])
+    selected = [activities[<span class="code-number">0</span>]]
+    last_end = activities[<span class="code-number">0</span>][<span class="code-number">1</span>]
+    
+    <span class="code-keyword">for</span> start, end <span class="code-keyword">in</span> activities[<span class="code-number">1</span>:]:
+        <span class="code-keyword">if</span> start >= last_end:
+            selected.append((start, end))
+            last_end = end
+    
+    <span class="code-keyword">return</span> selected`,
+    "coin_change_greedy": `<span class="code-keyword">def</span> <span class="code-function">coin_change</span>(amount, coins):
+    coins.sort(reverse=<span class="code-keyword">True</span>)  <span class="code-comment"># Largest first</span>
+    result = []
+    
+    <span class="code-keyword">for</span> coin <span class="code-keyword">in</span> coins:
+        <span class="code-keyword">while</span> amount >= coin:
+            result.append(coin)
+            amount -= coin
+    
+    <span class="code-keyword">return</span> result`,
+    "fractional_knapsack": `<span class="code-keyword">def</span> <span class="code-function">fractional_knapsack</span>(capacity, items):
+    <span class="code-comment"># Sort by value/weight ratio</span>
+    items.sort(key=<span class="code-keyword">lambda</span> x: x[<span class="code-number">0</span>]/x[<span class="code-number">1</span>], reverse=<span class="code-keyword">True</span>)
+    total_value = <span class="code-number">0</span>
+    
+    <span class="code-keyword">for</span> value, weight <span class="code-keyword">in</span> items:
+        <span class="code-keyword">if</span> capacity >= weight:
+            total_value += value
+            capacity -= weight
+        <span class="code-keyword">else</span>:
+            total_value += value * (capacity / weight)
+            <span class="code-keyword">break</span>
+    
+    <span class="code-keyword">return</span> total_value`,
+    "jump_game": `<span class="code-keyword">def</span> <span class="code-function">can_jump</span>(nums):
+    farthest = <span class="code-number">0</span>
+    
+    <span class="code-keyword">for</span> i, jump <span class="code-keyword">in</span> enumerate(nums):
+        <span class="code-keyword">if</span> i > farthest:
+            <span class="code-keyword">return</span> <span class="code-keyword">False</span>
+        farthest = max(farthest, i + jump)
+        <span class="code-keyword">if</span> farthest >= len(nums) - <span class="code-number">1</span>:
+            <span class="code-keyword">return</span> <span class="code-keyword">True</span>
+    
+    <span class="code-keyword">return</span> <span class="code-keyword">True</span>`,
+    "gas_station": `<span class="code-keyword">def</span> <span class="code-function">can_complete_circuit</span>(gas, cost):
+    <span class="code-keyword">if</span> sum(gas) < sum(cost):
+        <span class="code-keyword">return</span> -<span class="code-number">1</span>
+    
+    start = tank = <span class="code-number">0</span>
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(len(gas)):
+        tank += gas[i] - cost[i]
+        <span class="code-keyword">if</span> tank < <span class="code-number">0</span>:
+            start = i + <span class="code-number">1</span>  <span class="code-comment"># Reset start</span>
+            tank = <span class="code-number">0</span>
+    
+    <span class="code-keyword">return</span> start`,
+    "huffman_encoding": `<span class="code-keyword">import</span> heapq
 
-        let currentAlgo = null;
-        let currentStep = 0;
-        let isPlaying = false;
-        let playInterval = null;
-        let speed = 800;
+<span class="code-keyword">def</span> <span class="code-function">huffman</span>(freq):
+    heap = [[f, [c, ""]] <span class="code-keyword">for</span> c, f <span class="code-keyword">in</span> freq.items()]
+    heapq.heapify(heap)
+    
+    <span class="code-keyword">while</span> len(heap) > <span class="code-number">1</span>:
+        lo = heapq.heappop(heap)
+        hi = heapq.heappop(heap)
+        <span class="code-keyword">for</span> pair <span class="code-keyword">in</span> lo[<span class="code-number">1</span>:]: pair[<span class="code-number">1</span>] = '<span class="code-number">0</span>' + pair[<span class="code-number">1</span>]
+        <span class="code-keyword">for</span> pair <span class="code-keyword">in</span> hi[<span class="code-number">1</span>:]: pair[<span class="code-number">1</span>] = '<span class="code-number">1</span>' + pair[<span class="code-number">1</span>]
+        heapq.heappush(heap, [lo[<span class="code-number">0</span>]+hi[<span class="code-number">0</span>]] + lo[<span class="code-number">1</span>:] + hi[<span class="code-number">1</span>:])
+    
+    <span class="code-keyword">return</span> heap[<span class="code-number">0</span>][<span class="code-number">1</span>:]`
+};
 
-        function init() {
-            const selector = document.getElementById('algoSelector');
-            visualData.algorithms.forEach((algo, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'algo-btn';
-                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                btn.onclick = () => selectAlgorithm(index);
-                selector.appendChild(btn);
-            });
-            document.getElementById('prevBtn').onclick = prevStep;
-            document.getElementById('nextBtn').onclick = nextStep;
-            document.getElementById('playBtn').onclick = togglePlay;
-            document.getElementById('resetBtn').onclick = reset;
-            document.getElementById('speedSlider').oninput = (e) => {
-                speed = 2100 - e.target.value;
-                document.getElementById('speedValue').textContent = speed + 'ms';
-            };
-        }
+const codeLineMap = {
+    "activity_selection": { 1: [0,1,2], 2: [2], 3: [3,4], 4: [6,7], 5: [6,7], 6: [6,7,8,9], 7: [6,7], 8: [6,7], 9: [11] },
+    "coin_change_greedy": { 1: [0,1,2], 2: [4,5,6,7], 3: [4,5,6,7], 4: [4,5,6,7], 5: [4,5,6,7], 6: [4,5,6,7], 7: [4,5,6,7], 8: [9] },
+    "fractional_knapsack": { 1: [0,1,2,3], 2: [2], 3: [5,6,7,8], 4: [5,6,7,8], 5: [9,10,11], 6: [13] },
+    "jump_game": { 1: [0,1], 2: [3,4,5,6,7,8], 3: [3,4,5,6,7,8], 4: [7,8] },
+    "gas_station": { 1: [0,1,2], 2: [4,5,6,7,8], 3: [7,8], 4: [4,5,6,7,8], 5: [7,8], 6: [4,5,6,7,8], 7: [7,8], 8: [4,5,6,7,8], 9: [4,5,6,7,8], 10: [10] },
+    "huffman_encoding": { 1: [0,3,4], 2: [6,7,8,9,10,11], 3: [6,7,8,9,10,11], 4: [6,7,8,9,10,11], 5: [6,7,8,9,10,11], 6: [6,7,8,9,10,11], 7: [13], 8: [13] }
+};
 
-        function selectAlgorithm(index) {
-            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-            currentAlgo = visualData.algorithms[index];
-            currentStep = 0;
-            stopPlay();
-            renderStep();
-            updateControls();
-        }
+const visualData = {"algorithms":[{"algorithm":"activity_selection","name":"Activity Selection","complexity":"O(n log n)","steps":[{"step":1,"description":"Activity Selection: Choose maximum non-overlapping activities. Greedy choice: always pick activity that ends earliest.","action":"init","activities":[{"name":"A1","start":1,"end":4},{"name":"A2","start":3,"end":5},{"name":"A3","start":0,"end":6},{"name":"A4","start":5,"end":7},{"name":"A5","start":3,"end":9},{"name":"A6","start":5,"end":9}]},{"step":2,"description":"Sort activities by end time. A1 ends at 4 (earliest), so it comes first.","action":"sort","sorted":["A1","A2","A3","A4","A5","A6"]},{"step":3,"description":"Select A1 [1,4] - first activity (greedy choice). Set last_end = 4.","action":"select","activity":"A1","selected":["A1"],"lastEnd":4},{"step":4,"description":"Check A2 [3,5]: start 3 < last_end 4. Overlaps! Reject.","action":"reject","activity":"A2","reason":"overlaps"},{"step":5,"description":"Check A3 [0,6]: start 0 < last_end 4. Overlaps! Reject.","action":"reject","activity":"A3","reason":"overlaps"},{"step":6,"description":"Select A4 [5,7]: start 5 >= last_end 4. No overlap! Update last_end = 7.","action":"select","activity":"A4","selected":["A1","A4"],"lastEnd":7},{"step":7,"description":"Check A5 [3,9]: start 3 < last_end 7. Overlaps! Reject.","action":"reject","activity":"A5","reason":"overlaps"},{"step":8,"description":"Check A6 [5,9]: start 5 < last_end 7. Overlaps! Reject.","action":"reject","activity":"A6","reason":"overlaps"},{"step":9,"description":"Complete! Selected 2 activities: A1 and A4. Maximum non-overlapping set.","action":"complete","selected":["A1","A4"],"count":2}]},{"algorithm":"coin_change_greedy","name":"Coin Change","complexity":"O(n)","steps":[{"step":1,"description":"Coin Change: Make 67 cents using fewest coins. Greedy: always use largest coin possible.","action":"init","amount":67,"coins":[25,10,5,1]},{"step":2,"description":"Use quarter (25). Remaining: 67 - 25 = 42 cents.","action":"select","coin":25,"remaining":42,"result":[25]},{"step":3,"description":"Use quarter (25). Remaining: 42 - 25 = 17 cents.","action":"select","coin":25,"remaining":17,"result":[25,25]},{"step":4,"description":"Use dime (10). Remaining: 17 - 10 = 7 cents.","action":"select","coin":10,"remaining":7,"result":[25,25,10]},{"step":5,"description":"Use nickel (5). Remaining: 7 - 5 = 2 cents.","action":"select","coin":5,"remaining":2,"result":[25,25,10,5]},{"step":6,"description":"Use penny (1). Remaining: 2 - 1 = 1 cent.","action":"select","coin":1,"remaining":1,"result":[25,25,10,5,1]},{"step":7,"description":"Use penny (1). Remaining: 1 - 1 = 0 cents.","action":"select","coin":1,"remaining":0,"result":[25,25,10,5,1,1]},{"step":8,"description":"Complete! Used 6 coins: 2 quarters, 1 dime, 1 nickel, 2 pennies.","action":"complete","result":[25,25,10,5,1,1],"count":6}]},{"algorithm":"fractional_knapsack","name":"Fractional Knapsack","complexity":"O(n log n)","steps":[{"step":1,"description":"Fractional Knapsack: Maximize value in capacity 50. Can take fractions of items.","action":"init","capacity":50,"items":[{"value":60,"weight":10,"ratio":6},{"value":100,"weight":20,"ratio":5},{"value":120,"weight":30,"ratio":4}]},{"step":2,"description":"Sort by value/weight ratio. Item0 (ratio 6) > Item1 (ratio 5) > Item2 (ratio 4).","action":"sort","sorted":["Item0 (6.0)","Item1 (5.0)","Item2 (4.0)"]},{"step":3,"description":"Take full Item0: value=60, weight=10. Remaining capacity: 40.","action":"take","item":0,"full":true,"value":60,"capacity":40,"total":60},{"step":4,"description":"Take full Item1: value=100, weight=20. Remaining capacity: 20.","action":"take","item":1,"full":true,"value":100,"capacity":20,"total":160},{"step":5,"description":"Take 2/3 of Item2: value=80, weight=20. Capacity full!","action":"take","item":2,"full":false,"fraction":0.67,"value":80,"capacity":0,"total":240},{"step":6,"description":"Complete! Maximum value = 240. Greedy by ratio gives optimal solution.","action":"complete","totalValue":240}]},{"algorithm":"jump_game","name":"Jump Game","complexity":"O(n)","steps":[{"step":1,"description":"Jump Game: Can we reach the end? Each element = max jump length. Greedy: track farthest reachable.","action":"init","array":[2,3,1,1,4],"target":4},{"step":2,"description":"Position 0: jump=2. Farthest = max(0, 0+2) = 2. Can reach index 2.","action":"update","pos":0,"jump":2,"farthest":2},{"step":3,"description":"Position 1: jump=3. Farthest = max(2, 1+3) = 4. Can reach index 4!","action":"update","pos":1,"jump":3,"farthest":4},{"step":4,"description":"Farthest (4) >= target (4). SUCCESS! We can reach the end.","action":"complete","success":true,"farthest":4}]},{"algorithm":"gas_station","name":"Gas Station","complexity":"O(n)","steps":[{"step":1,"description":"Gas Station: Find starting station to complete circular route. Greedy: if tank < 0, reset start.","action":"init","gas":[1,2,3,4,5],"cost":[3,4,5,1,2]},{"step":2,"description":"Station 0: gas=1, cost=3. Tank = 1-3 = -2. Negative!","action":"visit","station":0,"tank":-2},{"step":3,"description":"Tank < 0. Reset start to station 1, tank to 0.","action":"reset","newStart":1,"tank":0},{"step":4,"description":"Station 1: gas=2, cost=4. Tank = 2-4 = -2. Negative!","action":"visit","station":1,"tank":-2},{"step":5,"description":"Tank < 0. Reset start to station 2.","action":"reset","newStart":2,"tank":0},{"step":6,"description":"Station 2: gas=3, cost=5. Tank = 3-5 = -2. Negative!","action":"visit","station":2,"tank":-2},{"step":7,"description":"Tank < 0. Reset start to station 3.","action":"reset","newStart":3,"tank":0},{"step":8,"description":"Station 3: gas=4, cost=1. Tank = 4-1 = 3. Positive!","action":"visit","station":3,"tank":3},{"step":9,"description":"Station 4: gas=5, cost=2. Tank = 3+5-2 = 6. Still positive!","action":"visit","station":4,"tank":6},{"step":10,"description":"Complete! Start from station 3. Total gas (15) = total cost (15).","action":"complete","startStation":3}]}]};
 
-        function renderStep() {
-            if (!currentAlgo) return;
-            const step = currentAlgo.steps[currentStep];
-            document.getElementById('stepDesc').textContent = step.description;
-            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
-            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+let currentAlgorithm = null;
+let currentStep = 0;
+let isPlaying = false;
+let playInterval = null;
+let cameraRotX = 15;
+let cameraRotY = 0;
+let cameraZoom = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
 
-            const content = document.getElementById('vizContent');
-            
-            switch(currentAlgo.algorithm) {
-                case 'coin_change_greedy':
-                    renderCoinChange(content, step);
-                    break;
-                case 'activity_selection':
-                    renderActivitySelection(content, step);
-                    break;
-                case 'fractional_knapsack':
-                    renderKnapsack(content, step);
-                    break;
-            }
-        }
+const scene = document.getElementById('scene');
+const stage = document.getElementById('stage');
+const greedyContainer = document.getElementById('greedyContainer');
+const codeBlock = document.getElementById('codeBlock');
+const stepDescription = document.getElementById('stepDescription');
+const complexityBadge = document.getElementById('complexityBadge');
+const stateInfo = document.getElementById('stateInfo');
+const progressFill = document.getElementById('progressFill');
+const stepCounter = document.getElementById('stepCounter');
+const playBtn = document.getElementById('playBtn');
+const resultDisplay = document.getElementById('resultDisplay');
 
-        function renderCoinChange(container, step) {
-            const coins = currentAlgo.coins;
-            const selected = step.selected || [];
-            const considering = step.considering;
-            const remaining = step.remaining;
+function initAlgorithmSelector() {
+    const selector = document.getElementById('algoSelector');
+    visualData.algorithms.forEach((algo, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'algo-btn';
+        btn.textContent = algo.name;
+        btn.onclick = () => selectAlgorithm(index);
+        selector.appendChild(btn);
+    });
+}
 
-            let html = '<div class="coins-container">';
-            
-            html += '<div style="color: #888; margin-bottom: 10px;">Available Coins:</div>';
-            html += '<div class="coins-available">';
-            coins.forEach(coin => {
-                const coinClass = coin === considering ? 'considering' : '';
-                const style = coin >= 25 ? 'gold' : coin >= 10 ? 'silver' : 'bronze';
-                html += `<div class="coin ${style} ${coinClass}">${coin}c</div>`;
-            });
-            html += '</div>';
-            
-            html += '<div style="color: #888; margin: 20px 0 10px;">Selected Coins:</div>';
-            html += '<div class="selected-coins">';
-            if (selected.length === 0) {
-                html += '<span style="color: #666;">None yet</span>';
-            } else {
-                selected.forEach(coin => {
-                    const style = coin >= 25 ? 'gold' : coin >= 10 ? 'silver' : 'bronze';
-                    html += `<div class="coin ${style} selected" style="width: 50px; height: 50px; font-size: 0.9em;">${coin}c</div>`;
-                });
-            }
-            html += '</div>';
-            
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Target</div><div class="info-value">${currentAlgo.amount}c</div></div>`;
-            html += `<div class="info-box"><div class="info-label">Remaining</div><div class="info-value">${remaining}c</div></div>`;
-            html += `<div class="info-box"><div class="info-label">Coins Used</div><div class="info-value">${selected.length}</div></div>`;
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function selectAlgorithm(index) {
+    document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+    currentAlgorithm = visualData.algorithms[index];
+    currentStep = 0;
+    stopPlaying();
+    complexityBadge.textContent = currentAlgorithm.complexity;
+    renderCode();
+    renderStep();
+    updateControls();
+}
 
-        function renderActivitySelection(container, step) {
-            const activities = currentAlgo.activities;
-            const selected = step.selected || [];
-            const considering = step.considering;
-            const rejected = step.rejected;
+function renderCode() {
+    const code = codeSnippets[currentAlgorithm.algorithm] || '';
+    const lines = code.split('\n');
+    let html = '';
+    lines.forEach((line, idx) => {
+        html += '<div class="code-line" data-line="' + idx + '">' + line + '</div>';
+    });
+    codeBlock.innerHTML = html;
+}
 
-            let html = '<div class="timeline-container">';
-            html += '<div class="timeline">';
-            
-            // Time axis labels
-            for (let i = 0; i <= 12; i += 2) {
-                html += `<div class="time-label" style="left: ${(i/12)*100}%">${i}</div>`;
-            }
-            html += '<div class="time-axis"></div>';
-            
-            // Activities
-            activities.forEach((act, i) => {
-                const left = (act.start / 12) * 100;
-                const width = ((act.end - act.start) / 12) * 100;
-                const top = 40 + (i % 4) * 35;
-                
-                let actClass = 'available';
-                if (selected.includes(act.id)) actClass = 'selected';
-                else if (act.id === considering) actClass = 'considering';
-                else if (rejected === act.id || (Array.isArray(rejected) && rejected.includes(act.id))) actClass = 'rejected';
-                
-                html += `<div class="activity ${actClass}" style="left: ${left}%; width: ${width}%; top: ${top}px;">${act.id} (${act.start}-${act.end})</div>`;
-            });
-            
-            html += '</div></div>';
-            
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Selected</div><div class="info-value">${selected.join(', ') || 'None'}</div></div>`;
-            html += `<div class="info-box"><div class="info-label">Count</div><div class="info-value">${selected.length}</div></div>`;
-            if (step.last_end) html += `<div class="info-box"><div class="info-label">Last End Time</div><div class="info-value">${step.last_end}</div></div>`;
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function highlightCodeLines(stepNum) {
+    const lineMap = codeLineMap[currentAlgorithm.algorithm] || {};
+    const activeLines = lineMap[stepNum] || [];
+    document.querySelectorAll('.code-line').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (activeLines.includes(idx)) el.classList.add('active');
+    });
+}
 
-        function renderKnapsack(container, step) {
-            const items = currentAlgo.items;
-            const capacity = currentAlgo.capacity;
-            const used = step.used || 0;
-            const value = step.value || 0;
-            const selected = step.selected || [];
-            const considering = step.considering;
+function renderActivitySelection(step) {
+    const activities = currentAlgorithm.steps[0].activities;
+    const selected = step.selected || [];
+    const checking = step.activity;
+    const rejected = [];
+    
+    // Collect rejected activities
+    for (let i = 1; i <= currentStep; i++) {
+        const s = currentAlgorithm.steps[i];
+        if (s.action === 'reject') rejected.push(s.activity);
+    }
+    
+    let html = '<div class="timeline"></div>';
+    
+    activities.forEach((act, idx) => {
+        const left = act.start * 50 + 50;
+        const width = (act.end - act.start) * 50;
+        const top = 80 + idx * 40;
+        
+        let barClass = 'activity-bar';
+        if (selected.includes(act.name)) barClass += ' selected';
+        else if (rejected.includes(act.name)) barClass += ' rejected';
+        else if (act.name === checking) barClass += ' checking';
+        
+        html += '<div class="' + barClass + '" style="left:' + left + 'px;top:' + top + 'px;width:' + width + 'px">' + act.name + ' [' + act.start + '-' + act.end + ']</div>';
+    });
+    
+    // Timeline markers
+    for (let i = 0; i <= 10; i++) {
+        html += '<div class="timeline-marker" style="left:' + (50 + i * 50) + 'px;bottom:46px"></div>';
+        html += '<div class="timeline-label" style="left:' + (50 + i * 50) + 'px">' + i + '</div>';
+    }
+    
+    greedyContainer.innerHTML = html;
+}
 
-            let html = '<div class="knapsack-container">';
-            
-            html += '<div class="items-list">';
-            html += '<div style="color: #888; margin-bottom: 10px;">Items (sorted by value/weight):</div>';
-            items.forEach(item => {
-                const sel = selected.find(s => s.id === item.id);
-                let itemClass = '';
-                if (sel && sel.fraction === 1) itemClass = 'selected';
-                else if (sel && sel.fraction < 1) itemClass = 'partial';
-                
-                html += `<div class="item ${itemClass}" ${item.id === considering ? 'style="border-color: #ffd700;"' : ''}>
-                    <div class="item-icon">${item.id}</div>
-                    <div>
-                        <div>Weight: ${item.weight}kg</div>
-                        <div>Value: $${item.value}</div>
-                        <div style="color: #00ffff;">Ratio: ${item.ratio}</div>
-                        ${sel ? `<div style="color: #00ff00;">Taking: ${(sel.fraction * 100).toFixed(0)}%</div>` : ''}
-                    </div>
-                </div>`;
-            });
-            html += '</div>';
-            
-            html += '<div style="text-align: center;">';
-            html += '<div style="color: #888; margin-bottom: 10px;">Knapsack</div>';
-            html += `<div class="knapsack">
-                <div class="knapsack-fill" style="height: ${(used/capacity)*100}%;"></div>
-                <div class="knapsack-label">${used}/${capacity}kg</div>
-            </div>`;
-            html += '</div>';
-            
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Capacity</div><div class="info-value">${capacity}kg</div></div>`;
-            html += `<div class="info-box"><div class="info-label">Used</div><div class="info-value">${used}kg</div></div>`;
-            html += `<div class="info-box"><div class="info-label">Total Value</div><div class="info-value" style="color:#00ff00;">$${value}</div></div>`;
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function renderCoinChange(step) {
+    const result = step.result || [];
+    const remaining = step.remaining !== undefined ? step.remaining : currentAlgorithm.steps[0].amount;
+    
+    let html = '<div style="position:absolute;top:20px;left:20px;font-size:1.2rem;color:#00ffff">Remaining: ' + remaining + ' cents</div>';
+    
+    // Coin pile
+    result.forEach((coin, idx) => {
+        const x = 100 + (idx % 5) * 60;
+        const y = 150 + Math.floor(idx / 5) * 60;
+        let coinClass = 'coin selected ';
+        if (coin === 25) coinClass += 'quarter';
+        else if (coin === 10) coinClass += 'dime';
+        else if (coin === 5) coinClass += 'nickel';
+        else coinClass += 'penny';
+        
+        html += '<div class="' + coinClass + '" style="left:' + x + 'px;top:' + y + 'px">' + coin + '</div>';
+    });
+    
+    greedyContainer.innerHTML = html;
+}
 
-        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
-        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
-        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
-        function startPlay() {
-            if (!currentAlgo) return;
-            isPlaying = true;
-            document.getElementById('playBtn').textContent = 'Pause';
-            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
-        }
-        function stopPlay() {
-            isPlaying = false;
-            document.getElementById('playBtn').textContent = 'Play';
-            if (playInterval) { clearInterval(playInterval); playInterval = null; }
-        }
-        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
-        function updateControls() {
-            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
-            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
-        }
-        init();
+function renderKnapsack(step) {
+    const items = currentAlgorithm.steps[0].items;
+    const capacity = step.capacity !== undefined ? step.capacity : 50;
+    const total = step.total || 0;
+    
+    let html = '<div style="position:absolute;top:20px;left:20px;color:#00ffff">Capacity: ' + capacity + ' | Value: ' + total + '</div>';
+    
+    items.forEach((item, idx) => {
+        const x = 100 + idx * 150;
+        let boxClass = 'item-box';
+        if (step.item !== undefined && idx < step.item) boxClass += ' taken';
+        else if (step.item === idx && !step.full) boxClass += ' partial';
+        else if (step.item === idx) boxClass += ' taken';
+        
+        html += '<div class="' + boxClass + '" style="left:' + x + 'px;top:120px;width:120px">';
+        html += '<div>Item ' + idx + '</div>';
+        html += '<div>V:' + item.value + ' W:' + item.weight + '</div>';
+        html += '<div>Ratio: ' + item.ratio + '</div>';
+        html += '</div>';
+    });
+    
+    greedyContainer.innerHTML = html;
+}
+
+function renderJumpGame(step) {
+    const array = currentAlgorithm.steps[0].array;
+    const farthest = step.farthest || 0;
+    const pos = step.pos !== undefined ? step.pos : -1;
+    
+    let html = '';
+    array.forEach((val, idx) => {
+        const x = 80 + idx * 80;
+        let style = 'position:absolute;left:' + x + 'px;top:150px;width:60px;height:60px;background:linear-gradient(135deg,#1a1a2e,#0f0f1a);border:2px solid rgba(0,255,255,0.4);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all 0.3s;';
+        
+        if (idx === pos) style += 'border-color:#ffd700;box-shadow:0 0 20px rgba(255,215,0,0.5);';
+        else if (idx <= farthest) style += 'border-color:#00ff88;background:linear-gradient(135deg,#0a2a1a,#0f1f0f);';
+        
+        html += '<div style="' + style + '"><span style="font-size:1.2rem;font-weight:bold">' + val + '</span><span style="font-size:0.7rem;color:#888">[' + idx + ']</span></div>';
+    });
+    
+    html += '<div style="position:absolute;top:100px;left:80px;color:#00ffff">Farthest reachable: ' + farthest + '</div>';
+    
+    greedyContainer.innerHTML = html;
+}
+
+function renderGasStation(step) {
+    const gas = currentAlgorithm.steps[0].gas;
+    const cost = currentAlgorithm.steps[0].cost;
+    const station = step.station !== undefined ? step.station : -1;
+    const newStart = step.newStart !== undefined ? step.newStart : 0;
+    const tank = step.tank !== undefined ? step.tank : 0;
+    
+    let html = '<div style="position:absolute;top:20px;left:20px;color:#00ffff">Tank: ' + tank + ' | Start: ' + newStart + '</div>';
+    
+    gas.forEach((g, idx) => {
+        const angle = (idx / gas.length) * 2 * Math.PI - Math.PI / 2;
+        const x = 250 + Math.cos(angle) * 100;
+        const y = 180 + Math.sin(angle) * 100;
+        
+        let style = 'position:absolute;left:' + x + 'px;top:' + y + 'px;width:70px;height:70px;background:linear-gradient(135deg,#1a1a2e,#0f0f1a);border:2px solid rgba(0,255,255,0.4);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all 0.3s;transform:translate(-50%,-50%);';
+        
+        if (idx === station) style += 'border-color:#ffd700;box-shadow:0 0 20px rgba(255,215,0,0.5);';
+        else if (idx >= newStart && step.action === 'complete') style += 'border-color:#00ff88;';
+        
+        html += '<div style="' + style + '"><span style="font-size:0.8rem">G:' + g + '</span><span style="font-size:0.8rem">C:' + cost[idx] + '</span></div>';
+    });
+    
+    greedyContainer.innerHTML = html;
+}
+
+function renderStep() {
+    if (!currentAlgorithm) return;
+    const step = currentAlgorithm.steps[currentStep];
+    stepDescription.textContent = step.description;
+    highlightCodeLines(step.step);
+    resultDisplay.style.display = 'none';
+    
+    // Render based on algorithm type
+    if (currentAlgorithm.algorithm === 'activity_selection') renderActivitySelection(step);
+    else if (currentAlgorithm.algorithm === 'coin_change_greedy') renderCoinChange(step);
+    else if (currentAlgorithm.algorithm === 'fractional_knapsack') renderKnapsack(step);
+    else if (currentAlgorithm.algorithm === 'jump_game') renderJumpGame(step);
+    else if (currentAlgorithm.algorithm === 'gas_station') renderGasStation(step);
+    
+    // Update state info
+    let info = '';
+    if (step.selected) info += 'Selected: [' + step.selected.join(', ') + ']\n';
+    if (step.result) info += 'Coins: [' + step.result.join(', ') + ']\n';
+    if (step.remaining !== undefined) info += 'Remaining: ' + step.remaining;
+    if (step.total !== undefined) info += 'Total value: ' + step.total;
+    if (step.farthest !== undefined) info += 'Farthest: ' + step.farthest;
+    if (step.tank !== undefined) info += 'Tank: ' + step.tank;
+    stateInfo.textContent = info || '-';
+    
+    if (step.action === 'complete') {
+        resultDisplay.style.display = 'block';
+        if (step.count) resultDisplay.textContent = 'Result: ' + step.count + ' items';
+        else if (step.totalValue) resultDisplay.textContent = 'Max Value: ' + step.totalValue;
+        else if (step.success) resultDisplay.textContent = 'Can reach end!';
+        else if (step.startStation !== undefined) resultDisplay.textContent = 'Start: Station ' + step.startStation;
+        else resultDisplay.textContent = 'Complete!';
+    }
+    
+    progressFill.style.width = ((currentStep + 1) / currentAlgorithm.steps.length * 100) + '%';
+    stepCounter.textContent = 'Step ' + (currentStep + 1) + ' / ' + currentAlgorithm.steps.length;
+}
+
+function updateControls() {
+    document.getElementById('prevBtn').disabled = !currentAlgorithm || currentStep === 0;
+    document.getElementById('nextBtn').disabled = !currentAlgorithm || currentStep >= currentAlgorithm.steps.length - 1;
+    document.getElementById('playBtn').disabled = !currentAlgorithm;
+}
+
+function nextStep() {
+    if (currentAlgorithm && currentStep < currentAlgorithm.steps.length - 1) { currentStep++; renderStep(); updateControls(); }
+    else stopPlaying();
+}
+
+function prevStep() {
+    if (currentAlgorithm && currentStep > 0) { currentStep--; renderStep(); updateControls(); }
+}
+
+function togglePlay() { if (isPlaying) stopPlaying(); else startPlaying(); }
+
+function startPlaying() {
+    isPlaying = true;
+    playBtn.textContent = 'Pause';
+    playBtn.classList.add('playing');
+    playInterval = setInterval(() => {
+        if (currentStep < currentAlgorithm.steps.length - 1) nextStep();
+        else stopPlaying();
+    }, 2200 - document.getElementById('speedSlider').value);
+}
+
+function stopPlaying() {
+    isPlaying = false;
+    playBtn.textContent = 'Play';
+    playBtn.classList.remove('playing');
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+}
+
+function reset() { stopPlaying(); currentStep = 0; renderStep(); updateControls(); }
+
+function updateCamera() {
+    stage.style.transform = 'translateZ(' + cameraZoom + 'px) rotateX(' + cameraRotX + 'deg) rotateY(' + cameraRotY + 'deg)';
+}
+
+scene.addEventListener('mousedown', (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    cameraRotY += (e.clientX - lastMouseX) * 0.5;
+    cameraRotX -= (e.clientY - lastMouseY) * 0.3;
+    cameraRotX = Math.max(-60, Math.min(60, cameraRotX));
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+    updateCamera();
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+scene.addEventListener('wheel', (e) => { e.preventDefault(); cameraZoom += e.deltaY * -0.5; cameraZoom = Math.max(-300, Math.min(200, cameraZoom)); updateCamera(); });
+
+document.getElementById('playBtn').onclick = togglePlay;
+document.getElementById('prevBtn').onclick = prevStep;
+document.getElementById('nextBtn').onclick = nextStep;
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('speedSlider').oninput = () => { if (isPlaying) { stopPlaying(); startPlaying(); } };
+
+initAlgorithmSelector();
+updateCamera();
     </script>
 </body>
 </html>

@@ -7,160 +7,179 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
-            color: #fff;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
-            padding: 30px 0;
-            background: rgba(0, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            margin-bottom: 30px;
+            padding: 25px 0;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            margin-bottom: 25px;
         }
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2rem;
             background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            animation: gradient-shift 3s linear infinite;
         }
-        .subtitle { color: #888; font-size: 1.1em; }
+        @keyframes gradient-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .subtitle { color: #888; font-size: 1rem; margin-top: 8px; }
         .algorithm-selector {
             display: flex;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
         }
         .algo-btn {
-            padding: 12px 20px;
-            background: rgba(0, 255, 255, 0.1);
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(0, 255, 255, 0.3);
             color: #00ffff;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-        .algo-btn:hover, .algo-btn.active {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-        .visualization-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            min-height: 500px;
-        }
-        .step-description {
-            text-align: center;
-            font-size: 1.2em;
-            color: #00ffff;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .control-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
-            border: none;
+        .algo-btn:hover { border-color: #00ffff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+        .algo-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
             color: #000;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease;
         }
-        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
-        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
-
-        /* Heap Visualization */
-        .heap-container {
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
+        .visualization-area {
+            background: radial-gradient(ellipse at center, #0f0f1a 0%, #050508 70%, #000 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        .scene {
+            width: 100%;
+            height: 400px;
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .scene:active { cursor: grabbing; }
+        .stage {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+            transition: transform 0.1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .viz-container {
+            transform-style: preserve-3d;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30px;
-            padding: 20px;
+            gap: 20px;
         }
         .heap-tree {
-            width: 100%;
-            max-width: 800px;
+            position: relative;
+            width: 500px;
+            height: 250px;
+            transform-style: preserve-3d;
         }
-        .heap-svg {
-            width: 100%;
-            height: 300px;
-        }
-        .heap-svg line {
-            stroke: #00ffff;
-            stroke-width: 2;
-        }
-        .heap-svg circle {
-            fill: #1a1a3a;
-            stroke: #00ffff;
-            stroke-width: 3;
-            transition: all 0.3s ease;
-        }
-        .heap-svg circle.root {
-            stroke: #ffd700;
-            filter: drop-shadow(0 0 10px #ffd700);
-        }
-        .heap-svg circle.current {
-            fill: #00ff0033;
-            stroke: #00ff00;
-            filter: drop-shadow(0 0 15px #00ff00);
-        }
-        .heap-svg circle.swapping {
-            fill: #ff00ff33;
-            stroke: #ff00ff;
-            filter: drop-shadow(0 0 15px #ff00ff);
-        }
-        .heap-svg circle.comparing {
-            fill: #ff660033;
-            stroke: #ff6600;
-        }
-        .heap-svg circle.new-node {
-            fill: #ffd70033;
-            stroke: #ffd700;
-            animation: pulse 0.5s infinite;
-        }
-        .heap-svg text {
-            fill: #fff;
-            font-size: 14px;
-            font-weight: bold;
-            text-anchor: middle;
-            dominant-baseline: central;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* Array representation */
-        .heap-array {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        .array-cell {
+        .heap-node {
+            position: absolute;
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
-            border: 2px solid #00ffff;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+            border: 3px solid rgba(0, 255, 255, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #fff;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2), 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+        .heap-node.root {
+            border-color: #ffd700;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+        }
+        .heap-node.active {
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            transform: scale(1.15);
+        }
+        .heap-node.swapping {
+            border-color: #ff00ff;
+            animation: swap-pulse 0.5s ease-out;
+        }
+        @keyframes swap-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        .heap-node.inserting {
+            border-color: #00ff88;
+            animation: insert-drop 0.5s ease-out;
+        }
+        @keyframes insert-drop {
+            0% { transform: translateY(-50px) scale(0); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .heap-node.extracted {
+            border-color: #ff6b6b;
+            animation: extract-rise 0.5s ease-out forwards;
+        }
+        @keyframes extract-rise {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(0); opacity: 0; }
+        }
+        .heap-node.comparing {
+            border-color: #ffd700;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+        }
+        .heap-edge {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.3), rgba(0, 255, 255, 0.5));
+            transform-origin: left center;
+            pointer-events: none;
+        }
+        .heap-edge.active {
+            background: linear-gradient(90deg, #00ffff, #00ffff);
+            height: 3px;
+        }
+        .array-display {
+            display: flex;
+            gap: 5px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .array-cell {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 2px solid rgba(0, 255, 255, 0.3);
             border-radius: 8px;
             display: flex;
             flex-direction: column;
@@ -168,301 +187,587 @@
             justify-content: center;
             transition: all 0.3s ease;
         }
-        .array-cell.current {
-            border-color: #00ff00;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        .array-cell.active {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        .array-cell.sorted {
+            border-color: #00ff88;
+            background: linear-gradient(135deg, #0a2a1a, #0f1f0f);
         }
         .array-cell.swapping {
             border-color: #ff00ff;
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+            transform: scale(1.1);
         }
-        .cell-value { font-weight: bold; font-size: 1.1em; }
-        .cell-index { font-size: 0.7em; color: #888; }
-
-        /* Info Panel */
-        .info-panel {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            flex-wrap: wrap;
+        .cell-value { font-size: 0.95rem; font-weight: bold; color: #fff; }
+        .cell-index { font-size: 0.6rem; color: #888; }
+        .code-panel {
+            background: linear-gradient(135deg, #0d0d15, #1a1a25);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 15px;
+            max-height: 280px;
+            overflow-y: auto;
         }
-        .info-box {
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px 25px;
-            text-align: center;
-        }
-        .info-label { color: #888; font-size: 0.9em; }
-        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
-
-        .speed-control {
+        .code-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 8px;
         }
-        .speed-label { color: #888; }
-        .speed-slider {
-            width: 150px;
-            -webkit-appearance: none;
-            height: 6px;
+        .code-title::before { content: "</>"; color: #ff00ff; font-weight: bold; }
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: pre;
+        }
+        .code-line.active {
             background: rgba(0, 255, 255, 0.2);
+            border-left: 3px solid #00ffff;
+        }
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-number { color: #bd93f9; }
+        .code-comment { color: #6272a4; }
+        .code-variable { color: #8be9fd; }
+        .info-panel {
+            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+        }
+        .panel-section { margin-bottom: 20px; }
+        .panel-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 2px;
+        }
+        .step-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e0e0e0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+        }
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+            border: 1px solid rgba(255, 0, 255, 0.4);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        .heap-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover:not(:disabled) { background: linear-gradient(135deg, #00ffff, #0088aa); color: #000; }
+        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .control-btn.playing { background: linear-gradient(135deg, #ff00ff, #aa0088); border-color: #ff00ff; }
+        .speed-control { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .speed-label { color: #888; font-size: 0.85rem; }
+        .speed-slider {
+            width: 100px;
+            height: 5px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
             border-radius: 3px;
         }
         .speed-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #00ffff;
+            width: 16px;
+            height: 16px;
+            background: #fff;
             border-radius: 50%;
             cursor: pointer;
+        }
+        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; font-size: 0.85rem; margin-top: 8px; }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+        .legend-color { width: 14px; height: 14px; border-radius: 50%; border: 2px solid; }
+        .result-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #00ff88;
+            font-weight: bold;
+            display: none;
+        }
+        .camera-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Heaps & Priority Queues</h1>
-        <p class="subtitle">Interactive 3D Visualization</p>
+        <p class="subtitle">Interactive 3D Visualization with Code - Drag to rotate, scroll to zoom</p>
     </header>
     <div class="container">
         <div class="algorithm-selector" id="algoSelector"></div>
-        <div class="visualization-area">
-            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
-            <div id="vizContent"></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
-        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
-        <div class="controls">
-            <button class="control-btn" id="prevBtn" disabled>Previous</button>
-            <button class="control-btn" id="playBtn">Play</button>
-            <button class="control-btn" id="nextBtn" disabled>Next</button>
-            <button class="control-btn" id="resetBtn">Reset</button>
-        </div>
-        <div class="speed-control">
-            <span class="speed-label">Speed:</span>
-            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
-            <span class="speed-label" id="speedValue">800ms</span>
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="scene" id="scene">
+                        <div class="stage" id="stage">
+                            <div class="viz-container" id="vizContainer"></div>
+                        </div>
+                        <div class="result-display" id="resultDisplay"></div>
+                        <div class="camera-hint">Drag to rotate | Scroll to zoom</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" id="prevBtn">Prev</button>
+                        <button class="control-btn" id="playBtn">Play</button>
+                        <button class="control-btn" id="nextBtn">Next</button>
+                        <button class="control-btn" id="resetBtn">Reset</button>
+                        <div class="speed-control">
+                            <span class="speed-label">Speed:</span>
+                            <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" value="800">
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+                </div>
+                <div class="code-panel">
+                    <div class="code-title">Python Code</div>
+                    <div class="code-block" id="codeBlock"></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="panel-section">
+                    <div class="panel-title">Current Step</div>
+                    <div class="step-description" id="stepDescription">Select an algorithm to begin</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Complexity</div>
+                    <div class="complexity-badge" id="complexityBadge">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Heap State</div>
+                    <div class="heap-info" id="heapInfo">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Legend</div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color" style="border-color:#ffd700;background:rgba(255,215,0,0.2)"></div><span>Root/Compare</span></div>
+                        <div class="legend-item"><div class="legend-color" style="border-color:#00ffff;background:rgba(0,255,255,0.2)"></div><span>Active</span></div>
+                        <div class="legend-item"><div class="legend-color" style="border-color:#ff00ff;background:rgba(255,0,255,0.2)"></div><span>Swapping</span></div>
+                        <div class="legend-item"><div class="legend-color" style="border-color:#00ff88;background:rgba(0,255,136,0.2)"></div><span>Inserted/Sorted</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <script>
-        const visualData = {
-            "world": "07_heaps_and_priority_queues",
-            "algorithms": [
-                {
-                    "algorithm": "max_heap_insert",
-                    "description": "Insert elements into Max Heap with heapify-up",
-                    "steps": [
-                        {"step": 1, "description": "Start with empty max heap, insert 10", "heap": [10], "current": 0, "action": "insert"},
-                        {"step": 2, "description": "Insert 20, compare with parent 10", "heap": [10, 20], "current": 1, "comparing": 0, "action": "compare"},
-                        {"step": 3, "description": "20 > 10, swap! Heapify up", "heap": [20, 10], "swapping": [0, 1], "action": "swap"},
-                        {"step": 4, "description": "Insert 15", "heap": [20, 10, 15], "current": 2, "action": "insert"},
-                        {"step": 5, "description": "15 < 20, no swap needed", "heap": [20, 10, 15], "current": 2, "comparing": 0, "action": "compare"},
-                        {"step": 6, "description": "Insert 30, compare with parent 10", "heap": [20, 10, 15, 30], "current": 3, "comparing": 1, "action": "compare"},
-                        {"step": 7, "description": "30 > 10, swap!", "heap": [20, 30, 15, 10], "swapping": [1, 3], "action": "swap"},
-                        {"step": 8, "description": "30 > 20, swap with root!", "heap": [30, 20, 15, 10], "swapping": [0, 1], "action": "swap"},
-                        {"step": 9, "description": "Insert 25", "heap": [30, 20, 15, 10, 25], "current": 4, "action": "insert"},
-                        {"step": 10, "description": "25 > 20, swap!", "heap": [30, 25, 15, 10, 20], "swapping": [1, 4], "action": "swap"},
-                        {"step": 11, "description": "Max heap complete", "heap": [30, 25, 15, 10, 20], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "max_heap_extract",
-                    "description": "Extract maximum from Max Heap with heapify-down",
-                    "steps": [
-                        {"step": 1, "description": "Max heap state: extract max (30)", "heap": [30, 25, 15, 10, 20], "current": 0, "action": "highlight_max"},
-                        {"step": 2, "description": "Move last element (20) to root", "heap": [20, 25, 15, 10], "current": 0, "action": "move_last"},
-                        {"step": 3, "description": "Heapify down: compare 20 with children 25, 15", "heap": [20, 25, 15, 10], "current": 0, "comparing": [1, 2], "action": "compare"},
-                        {"step": 4, "description": "25 is largest child, 25 > 20, swap!", "heap": [25, 20, 15, 10], "swapping": [0, 1], "action": "swap"},
-                        {"step": 5, "description": "Compare 20 with child 10", "heap": [25, 20, 15, 10], "current": 1, "comparing": [3], "action": "compare"},
-                        {"step": 6, "description": "20 > 10, heap property restored", "heap": [25, 20, 15, 10], "action": "complete"},
-                        {"step": 7, "description": "Extracted value: 30", "heap": [25, 20, 15, 10], "extracted": 30, "action": "result"}
-                    ]
-                },
-                {
-                    "algorithm": "min_heap_operations",
-                    "description": "Min Heap - smallest element at root",
-                    "steps": [
-                        {"step": 1, "description": "Build min heap: insert 50", "heap": [50], "current": 0, "action": "insert"},
-                        {"step": 2, "description": "Insert 30, 30 < 50, swap!", "heap": [30, 50], "swapping": [0, 1], "action": "swap"},
-                        {"step": 3, "description": "Insert 40, 40 > 30, no swap", "heap": [30, 50, 40], "current": 2, "action": "insert"},
-                        {"step": 4, "description": "Insert 10, 10 < 50, swap!", "heap": [30, 10, 40, 50], "swapping": [1, 3], "action": "swap"},
-                        {"step": 5, "description": "10 < 30, swap with root!", "heap": [10, 30, 40, 50], "swapping": [0, 1], "action": "swap"},
-                        {"step": 6, "description": "Insert 20, 20 < 30, swap!", "heap": [10, 20, 40, 50, 30], "swapping": [1, 4], "action": "swap"},
-                        {"step": 7, "description": "Min heap complete - 10 at root", "heap": [10, 20, 40, 50, 30], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "heapify_array",
-                    "description": "Build heap from array in O(n) time",
-                    "steps": [
-                        {"step": 1, "description": "Array to heapify: [4, 10, 3, 5, 1]", "heap": [4, 10, 3, 5, 1], "action": "init"},
-                        {"step": 2, "description": "Start from last non-leaf (index 1)", "heap": [4, 10, 3, 5, 1], "current": 1, "action": "start"},
-                        {"step": 3, "description": "Compare 10 with children 5, 1", "heap": [4, 10, 3, 5, 1], "current": 1, "comparing": [3, 4], "action": "compare"},
-                        {"step": 4, "description": "10 > both children, no swap needed", "heap": [4, 10, 3, 5, 1], "current": 1, "action": "no_swap"},
-                        {"step": 5, "description": "Move to index 0 (root)", "heap": [4, 10, 3, 5, 1], "current": 0, "action": "move"},
-                        {"step": 6, "description": "Compare 4 with children 10, 3", "heap": [4, 10, 3, 5, 1], "current": 0, "comparing": [1, 2], "action": "compare"},
-                        {"step": 7, "description": "10 > 4, swap!", "heap": [10, 4, 3, 5, 1], "swapping": [0, 1], "action": "swap"},
-                        {"step": 8, "description": "Continue heapify at index 1", "heap": [10, 4, 3, 5, 1], "current": 1, "comparing": [3, 4], "action": "compare"},
-                        {"step": 9, "description": "5 > 4, swap!", "heap": [10, 5, 3, 4, 1], "swapping": [1, 3], "action": "swap"},
-                        {"step": 10, "description": "Heapify complete - valid max heap", "heap": [10, 5, 3, 4, 1], "action": "complete"}
-                    ]
-                }
-            ]
-        };
+const codeSnippets = {
+    "heap_insert": `<span class="code-keyword">def</span> <span class="code-function">insert</span>(<span class="code-variable">self</span>, val):
+    <span class="code-variable">self</span>.heap.append(val)  <span class="code-comment"># Add at end</span>
+    <span class="code-variable">self</span>._bubble_up(len(<span class="code-variable">self</span>.heap) - <span class="code-number">1</span>)
 
-        let currentAlgo = null;
-        let currentStep = 0;
-        let isPlaying = false;
-        let playInterval = null;
-        let speed = 800;
+<span class="code-keyword">def</span> <span class="code-function">_bubble_up</span>(<span class="code-variable">self</span>, i):
+    <span class="code-keyword">while</span> i > <span class="code-number">0</span>:
+        parent = (i - <span class="code-number">1</span>) // <span class="code-number">2</span>
+        <span class="code-keyword">if</span> <span class="code-variable">self</span>.heap[i] > <span class="code-variable">self</span>.heap[parent]:
+            <span class="code-comment"># Swap with parent</span>
+            <span class="code-variable">self</span>.heap[i], <span class="code-variable">self</span>.heap[parent] = \\
+                <span class="code-variable">self</span>.heap[parent], <span class="code-variable">self</span>.heap[i]
+            i = parent
+        <span class="code-keyword">else</span>:
+            <span class="code-keyword">break</span>  <span class="code-comment"># Heap property satisfied</span>`,
+    "heap_extract_max": `<span class="code-keyword">def</span> <span class="code-function">extract_max</span>(<span class="code-variable">self</span>):
+    max_val = <span class="code-variable">self</span>.heap[<span class="code-number">0</span>]  <span class="code-comment"># Save root</span>
+    <span class="code-variable">self</span>.heap[<span class="code-number">0</span>] = <span class="code-variable">self</span>.heap.pop()  <span class="code-comment"># Move last to root</span>
+    <span class="code-variable">self</span>._bubble_down(<span class="code-number">0</span>)
+    <span class="code-keyword">return</span> max_val
 
-        function init() {
-            const selector = document.getElementById('algoSelector');
-            visualData.algorithms.forEach((algo, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'algo-btn';
-                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                btn.onclick = () => selectAlgorithm(index);
-                selector.appendChild(btn);
-            });
-            document.getElementById('prevBtn').onclick = prevStep;
-            document.getElementById('nextBtn').onclick = nextStep;
-            document.getElementById('playBtn').onclick = togglePlay;
-            document.getElementById('resetBtn').onclick = reset;
-            document.getElementById('speedSlider').oninput = (e) => {
-                speed = 2100 - e.target.value;
-                document.getElementById('speedValue').textContent = speed + 'ms';
-            };
+<span class="code-keyword">def</span> <span class="code-function">_bubble_down</span>(<span class="code-variable">self</span>, i):
+    <span class="code-keyword">while</span> <span class="code-number">2</span>*i + <span class="code-number">1</span> < len(<span class="code-variable">self</span>.heap):
+        left = <span class="code-number">2</span>*i + <span class="code-number">1</span>
+        right = <span class="code-number">2</span>*i + <span class="code-number">2</span>
+        largest = i
+        <span class="code-keyword">if</span> <span class="code-variable">self</span>.heap[left] > <span class="code-variable">self</span>.heap[largest]:
+            largest = left
+        <span class="code-keyword">if</span> right < len(<span class="code-variable">self</span>.heap) <span class="code-keyword">and</span> \\
+           <span class="code-variable">self</span>.heap[right] > <span class="code-variable">self</span>.heap[largest]:
+            largest = right
+        <span class="code-keyword">if</span> largest != i:
+            <span class="code-variable">self</span>.heap[i], <span class="code-variable">self</span>.heap[largest] = \\
+                <span class="code-variable">self</span>.heap[largest], <span class="code-variable">self</span>.heap[i]
+            i = largest
+        <span class="code-keyword">else</span>:
+            <span class="code-keyword">break</span>`,
+    "heapify": `<span class="code-keyword">def</span> <span class="code-function">heapify</span>(arr):
+    n = len(arr)
+    <span class="code-comment"># Start from last non-leaf node</span>
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(n//<span class="code-number">2</span> - <span class="code-number">1</span>, -<span class="code-number">1</span>, -<span class="code-number">1</span>):
+        _bubble_down(arr, i, n)
+
+<span class="code-keyword">def</span> <span class="code-function">_bubble_down</span>(arr, i, n):
+    largest = i
+    left = <span class="code-number">2</span>*i + <span class="code-number">1</span>
+    right = <span class="code-number">2</span>*i + <span class="code-number">2</span>
+    <span class="code-keyword">if</span> left < n <span class="code-keyword">and</span> arr[left] > arr[largest]:
+        largest = left
+    <span class="code-keyword">if</span> right < n <span class="code-keyword">and</span> arr[right] > arr[largest]:
+        largest = right
+    <span class="code-keyword">if</span> largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        _bubble_down(arr, largest, n)`,
+    "heap_sort": `<span class="code-keyword">def</span> <span class="code-function">heap_sort</span>(arr):
+    n = len(arr)
+    <span class="code-comment"># Build max heap</span>
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(n//<span class="code-number">2</span> - <span class="code-number">1</span>, -<span class="code-number">1</span>, -<span class="code-number">1</span>):
+        heapify(arr, i, n)
+    
+    <span class="code-comment"># Extract elements one by one</span>
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(n-<span class="code-number">1</span>, <span class="code-number">0</span>, -<span class="code-number">1</span>):
+        arr[<span class="code-number">0</span>], arr[i] = arr[i], arr[<span class="code-number">0</span>]  <span class="code-comment"># Swap</span>
+        heapify(arr, <span class="code-number">0</span>, i)  <span class="code-comment"># Heapify reduced</span>`,
+    "k_largest_elements": `<span class="code-keyword">import</span> heapq
+
+<span class="code-keyword">def</span> <span class="code-function">k_largest</span>(nums, k):
+    <span class="code-comment"># Use min-heap of size k</span>
+    min_heap = []
+    
+    <span class="code-keyword">for</span> num <span class="code-keyword">in</span> nums:
+        <span class="code-keyword">if</span> len(min_heap) < k:
+            heapq.heappush(min_heap, num)
+        <span class="code-keyword">elif</span> num > min_heap[<span class="code-number">0</span>]:
+            heapq.heapreplace(min_heap, num)
+    
+    <span class="code-keyword">return</span> sorted(min_heap, reverse=<span class="code-keyword">True</span>)`,
+    "priority_queue_scheduling": `<span class="code-keyword">import</span> heapq
+
+<span class="code-keyword">def</span> <span class="code-function">schedule_tasks</span>(tasks):
+    <span class="code-comment"># Max-heap: negate priority</span>
+    pq = [(-p, task) <span class="code-keyword">for</span> task, p <span class="code-keyword">in</span> tasks]
+    heapq.heapify(pq)
+    
+    order = []
+    <span class="code-keyword">while</span> pq:
+        priority, task = heapq.heappop(pq)
+        order.append(task)
+    
+    <span class="code-keyword">return</span> order`
+};
+
+const codeLineMap = {
+    "heap_insert": { 1: [0], 2: [1,2], 3: [5,6,7], 4: [8,9,10,11], 5: [5,6,7], 6: [13] },
+    "heap_extract_max": { 1: [0,1], 2: [2], 3: [2,3], 4: [8,9,10,11,12,13], 5: [16,17,18], 6: [8,9,10,11,12,13], 7: [16,17,18], 8: [4] },
+    "heapify": { 1: [0,1], 2: [2,3], 3: [6,7,8,9,10,11,12,13,14], 4: [6,7,8,9,10,11,12,13,14], 5: [6,7,8,9,10,11,12,13,14], 6: [6,7,8,9,10,11,12,13,14], 7: [0] },
+    "heap_sort": { 1: [0,1,2,3,4], 2: [6,7,8,9], 3: [6,7,8,9], 4: [6,7,8,9], 5: [6,7,8,9], 6: [0] },
+    "k_largest_elements": { 1: [0,1,2,3], 2: [5,6], 3: [5,6], 4: [5,6], 5: [7,8], 6: [7,8,9], 7: [7,8,9], 8: [7,8], 9: [11] },
+    "priority_queue_scheduling": { 1: [0,1,2,3,4], 2: [6,7,8], 3: [6,7,8], 4: [6,7,8], 5: [6,7,8], 6: [10] }
+};
+
+const visualData = {"algorithms":[{"algorithm":"heap_insert","name":"Heap Insert","complexity":"O(log n)","steps":[{"step":1,"description":"Insert 85 into max-heap [90,80,70,60,50]. In a max-heap, parent is always >= children.","action":"start","value":85,"heap":[90,80,70,60,50]},{"step":2,"description":"Place 85 at the end (index 5). Complete binary tree property maintained.","action":"place","value":85,"index":5,"heap":[90,80,70,60,50,85]},{"step":3,"description":"Compare 85 with parent at index 2 (value 70). Since 85 > 70, we need to swap (bubble up).","action":"compare","current":5,"parent":2,"heap":[90,80,70,60,50,85]},{"step":4,"description":"Swap 85 and 70. Element bubbles up toward root.","action":"swap","indices":[5,2],"heap":[90,80,85,60,50,70]},{"step":5,"description":"Compare 85 with parent at index 0 (value 90). Since 85 < 90, heap property satisfied!","action":"compare","current":2,"parent":0,"heap":[90,80,85,60,50,70]},{"step":6,"description":"Insert complete! 85 found its correct position. Heap property maintained throughout.","action":"complete","heap":[90,80,85,60,50,70]}]},{"algorithm":"heap_extract_max","name":"Extract Max","complexity":"O(log n)","steps":[{"step":1,"description":"Extract maximum from heap. In max-heap, max is always at root (index 0).","action":"start","heap":[90,80,70,60,50,40,30]},{"step":2,"description":"Remove root (90). This leaves a hole at the top.","action":"remove","value":90,"heap":[null,80,70,60,50,40,30]},{"step":3,"description":"Move last element (30) to root. This maintains complete tree property.","action":"move_last","value":30,"heap":[30,80,70,60,50,40]},{"step":4,"description":"Compare 30 with children (80, 70). Larger child is 80. Since 30 < 80, swap needed.","action":"compare","current":0,"children":[1,2],"larger":1,"heap":[30,80,70,60,50,40]},{"step":5,"description":"Swap 30 and 80. Element bubbles down.","action":"swap","indices":[0,1],"heap":[80,30,70,60,50,40]},{"step":6,"description":"Compare 30 with children (60, 50). Larger child is 60. Since 30 < 60, swap needed.","action":"compare","current":1,"children":[3,4],"larger":3,"heap":[80,30,70,60,50,40]},{"step":7,"description":"Swap 30 and 60. Continue bubbling down.","action":"swap","indices":[1,3],"heap":[80,60,70,30,50,40]},{"step":8,"description":"30 is now a leaf (no children). Extract complete! Returned 90.","action":"complete","extracted":90,"heap":[80,60,70,30,50,40]}]},{"algorithm":"heapify","name":"Build Heap","complexity":"O(n)","steps":[{"step":1,"description":"Build max-heap from unsorted array [30,50,80,20,60,40,90]. O(n) time!","action":"init","array":[30,50,80,20,60,40,90]},{"step":2,"description":"Start from last non-leaf: index = n/2 - 1 = 2. Work backwards to root.","action":"find_start","index":2,"heap":[30,50,80,20,60,40,90]},{"step":3,"description":"Bubble down index 2 (80). Children are 40, 90. Swap with 90.","action":"bubble_down","index":2,"heap":[30,50,90,20,60,40,80]},{"step":4,"description":"Bubble down index 1 (50). Children are 20, 60. Swap with 60.","action":"bubble_down","index":1,"heap":[30,60,90,20,50,40,80]},{"step":5,"description":"Bubble down index 0 (30). Children are 60, 90. Swap with 90.","action":"bubble_down","index":0,"heap":[90,60,30,20,50,40,80]},{"step":6,"description":"Continue bubble down for 30. Children are 40, 80. Swap with 80.","action":"bubble_down","index":2,"heap":[90,60,80,20,50,40,30]},{"step":7,"description":"Heapify complete! Valid max-heap built in O(n) time.","action":"complete","heap":[90,60,80,20,50,40,30]}]},{"algorithm":"heap_sort","name":"Heap Sort","complexity":"O(n log n)","steps":[{"step":1,"description":"Heap Sort: Build max-heap, then repeatedly extract max. Array: [4,10,3,5,1]","action":"heapify","array":[4,10,3,5,1],"heap":[10,5,3,4,1]},{"step":2,"description":"Swap root (10) with last element. 10 is now sorted. Heapify remaining.","action":"swap_extract","swap":[0,4],"heap":[1,5,3,4],"sorted":[10]},{"step":3,"description":"After heapify: [5,4,3,1]. Swap root (5) with last.","action":"swap_extract","swap":[0,3],"heap":[1,4,3],"sorted":[5,10]},{"step":4,"description":"After heapify: [4,1,3]. Swap root (4) with last.","action":"swap_extract","swap":[0,2],"heap":[3,1],"sorted":[4,5,10]},{"step":5,"description":"After heapify: [3,1]. Swap root (3) with last.","action":"swap_extract","swap":[0,1],"heap":[1],"sorted":[3,4,5,10]},{"step":6,"description":"Heap Sort complete! Array sorted: [1,3,4,5,10]","action":"complete","sorted":[1,3,4,5,10]}]},{"algorithm":"k_largest_elements","name":"K Largest","complexity":"O(n log k)","steps":[{"step":1,"description":"Find 3 largest in [5,2,9,1,7,6,3]. Use min-heap of size k=3.","action":"init","stream":[5,2,9,1,7,6,3],"k":3,"heap":[]},{"step":2,"description":"Process 5: heap has space, insert. Min-heap: [5]","action":"insert","value":5,"heap":[5]},{"step":3,"description":"Process 2: heap has space, insert. Min-heap: [2,5]","action":"insert","value":2,"heap":[2,5]},{"step":4,"description":"Process 9: heap has space, insert. Min-heap: [2,5,9]. Now full!","action":"insert","value":9,"heap":[2,5,9]},{"step":5,"description":"Process 1: 1 < heap min (2). Skip - can't be in top 3.","action":"skip","value":1,"heap":[2,5,9]},{"step":6,"description":"Process 7: 7 > heap min (2). Replace 2 with 7. Min-heap: [5,7,9]","action":"replace","value":7,"removed":2,"heap":[5,7,9]},{"step":7,"description":"Process 6: 6 > heap min (5). Replace 5 with 6. Min-heap: [6,7,9]","action":"replace","value":6,"removed":5,"heap":[6,7,9]},{"step":8,"description":"Process 3: 3 < heap min (6). Skip.","action":"skip","value":3,"heap":[6,7,9]},{"step":9,"description":"Complete! K largest elements: [9, 7, 6]","action":"complete","result":[9,7,6]}]}]};
+
+let currentAlgorithm = null;
+let currentStep = 0;
+let isPlaying = false;
+let playInterval = null;
+let cameraRotX = 15;
+let cameraRotY = 0;
+let cameraZoom = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const scene = document.getElementById('scene');
+const stage = document.getElementById('stage');
+const vizContainer = document.getElementById('vizContainer');
+const codeBlock = document.getElementById('codeBlock');
+const stepDescription = document.getElementById('stepDescription');
+const complexityBadge = document.getElementById('complexityBadge');
+const heapInfo = document.getElementById('heapInfo');
+const progressFill = document.getElementById('progressFill');
+const stepCounter = document.getElementById('stepCounter');
+const playBtn = document.getElementById('playBtn');
+const resultDisplay = document.getElementById('resultDisplay');
+
+function initAlgorithmSelector() {
+    const selector = document.getElementById('algoSelector');
+    visualData.algorithms.forEach((algo, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'algo-btn';
+        btn.textContent = algo.name;
+        btn.onclick = () => selectAlgorithm(index);
+        selector.appendChild(btn);
+    });
+}
+
+function selectAlgorithm(index) {
+    document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+    currentAlgorithm = visualData.algorithms[index];
+    currentStep = 0;
+    stopPlaying();
+    complexityBadge.textContent = currentAlgorithm.complexity;
+    renderCode();
+    renderStep();
+    updateControls();
+}
+
+function renderCode() {
+    const code = codeSnippets[currentAlgorithm.algorithm] || '';
+    const lines = code.split('\n');
+    let html = '';
+    lines.forEach((line, idx) => {
+        html += '<div class="code-line" data-line="' + idx + '">' + line + '</div>';
+    });
+    codeBlock.innerHTML = html;
+}
+
+function highlightCodeLines(stepNum) {
+    const lineMap = codeLineMap[currentAlgorithm.algorithm] || {};
+    const activeLines = lineMap[stepNum] || [];
+    document.querySelectorAll('.code-line').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (activeLines.includes(idx)) el.classList.add('active');
+    });
+}
+
+function getHeapNodePositions(heap) {
+    const positions = [];
+    const width = 450;
+    const levelHeight = 70;
+    
+    heap.forEach((val, idx) => {
+        if (val === null) return;
+        const level = Math.floor(Math.log2(idx + 1));
+        const levelStart = Math.pow(2, level) - 1;
+        const posInLevel = idx - levelStart;
+        const nodesInLevel = Math.pow(2, level);
+        const spacing = width / (nodesInLevel + 1);
+        const x = spacing * (posInLevel + 1) - width/2 + 25;
+        const y = 20 + level * levelHeight;
+        positions.push({ x, y, val, idx });
+    });
+    return positions;
+}
+
+function renderHeapTree(heap, step) {
+    const positions = getHeapNodePositions(heap);
+    let html = '<div class="heap-tree">';
+    
+    // Draw edges
+    heap.forEach((val, idx) => {
+        if (val === null || idx === 0) return;
+        const parentIdx = Math.floor((idx - 1) / 2);
+        const pos = positions.find(p => p.idx === idx);
+        const parentPos = positions.find(p => p.idx === parentIdx);
+        if (pos && parentPos) {
+            const dx = pos.x - parentPos.x;
+            const dy = pos.y - parentPos.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            let edgeClass = 'heap-edge';
+            if (step.indices && (step.indices.includes(idx) || step.indices.includes(parentIdx))) {
+                edgeClass += ' active';
+            }
+            html += '<div class="' + edgeClass + '" style="left:' + (parentPos.x + 225) + 'px;top:' + (parentPos.y + 25) + 'px;width:' + length + 'px;transform:rotate(' + angle + 'deg)"></div>';
         }
+    });
+    
+    // Draw nodes
+    positions.forEach(pos => {
+        let nodeClass = 'heap-node';
+        if (pos.idx === 0) nodeClass += ' root';
+        if (step.current === pos.idx || step.index === pos.idx) nodeClass += ' active';
+        if (step.indices && step.indices.includes(pos.idx)) nodeClass += ' swapping';
+        if (step.parent === pos.idx || step.larger === pos.idx) nodeClass += ' comparing';
+        if (step.action === 'place' && step.index === pos.idx) nodeClass += ' inserting';
+        if (step.action === 'remove' && pos.idx === 0) nodeClass += ' extracted';
+        
+        html += '<div class="' + nodeClass + '" style="left:' + (pos.x + 200) + 'px;top:' + pos.y + 'px">' + pos.val + '</div>';
+    });
+    
+    html += '</div>';
+    return html;
+}
 
-        function selectAlgorithm(index) {
-            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-            currentAlgo = visualData.algorithms[index];
-            currentStep = 0;
-            stopPlay();
-            renderStep();
-            updateControls();
-        }
+function renderArrayDisplay(heap, step) {
+    let html = '<div class="array-display">';
+    const sorted = step.sorted || [];
+    
+    heap.forEach((val, idx) => {
+        if (val === null) return;
+        let cellClass = 'array-cell';
+        if (step.current === idx || step.index === idx) cellClass += ' active';
+        if (step.indices && step.indices.includes(idx)) cellClass += ' swapping';
+        html += '<div class="' + cellClass + '"><span class="cell-value">' + val + '</span><span class="cell-index">[' + idx + ']</span></div>';
+    });
+    
+    if (sorted.length > 0) {
+        html += '<span style="color:#888;margin:0 10px">|</span>';
+        sorted.forEach(val => {
+            html += '<div class="array-cell sorted"><span class="cell-value">' + val + '</span></div>';
+        });
+    }
+    
+    html += '</div>';
+    return html;
+}
 
-        function getHeapNodePositions(heap) {
-            const positions = [];
-            const levels = Math.ceil(Math.log2(heap.length + 1));
-            const width = 700;
-            const height = 250;
-            const startY = 40;
-            
-            heap.forEach((val, i) => {
-                const level = Math.floor(Math.log2(i + 1));
-                const levelStart = Math.pow(2, level) - 1;
-                const posInLevel = i - levelStart;
-                const nodesInLevel = Math.pow(2, level);
-                const spacing = width / (nodesInLevel + 1);
-                
-                positions.push({
-                    val: val,
-                    x: 50 + spacing * (posInLevel + 1),
-                    y: startY + level * 60,
-                    index: i
-                });
-            });
-            return positions;
-        }
+function renderStep() {
+    if (!currentAlgorithm) return;
+    const step = currentAlgorithm.steps[currentStep];
+    stepDescription.textContent = step.description;
+    highlightCodeLines(step.step);
+    resultDisplay.style.display = 'none';
+    
+    const heap = step.heap || step.array || [];
+    let html = renderHeapTree(heap.filter(v => v !== null), step);
+    html += renderArrayDisplay(heap.filter(v => v !== null), step);
+    
+    vizContainer.innerHTML = html;
+    
+    heapInfo.textContent = 'Heap: [' + heap.filter(v => v !== null).join(', ') + ']';
+    if (step.sorted) {
+        heapInfo.textContent += ' | Sorted: [' + step.sorted.join(', ') + ']';
+    }
+    
+    if (step.action === 'complete') {
+        resultDisplay.style.display = 'block';
+        if (step.extracted) resultDisplay.textContent = 'Extracted: ' + step.extracted;
+        else if (step.result) resultDisplay.textContent = 'Result: [' + step.result.join(', ') + ']';
+        else if (step.sorted) resultDisplay.textContent = 'Sorted: [' + step.sorted.join(', ') + ']';
+        else resultDisplay.textContent = 'Complete!';
+    }
+    
+    progressFill.style.width = ((currentStep + 1) / currentAlgorithm.steps.length * 100) + '%';
+    stepCounter.textContent = 'Step ' + (currentStep + 1) + ' / ' + currentAlgorithm.steps.length;
+}
 
-        function renderStep() {
-            if (!currentAlgo) return;
-            const step = currentAlgo.steps[currentStep];
-            document.getElementById('stepDesc').textContent = step.description;
-            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
-            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+function updateControls() {
+    document.getElementById('prevBtn').disabled = !currentAlgorithm || currentStep === 0;
+    document.getElementById('nextBtn').disabled = !currentAlgorithm || currentStep >= currentAlgorithm.steps.length - 1;
+    document.getElementById('playBtn').disabled = !currentAlgorithm;
+}
 
-            const content = document.getElementById('vizContent');
-            renderHeap(content, step);
-        }
+function nextStep() {
+    if (currentAlgorithm && currentStep < currentAlgorithm.steps.length - 1) { currentStep++; renderStep(); updateControls(); }
+    else stopPlaying();
+}
 
-        function renderHeap(container, step) {
-            const heap = step.heap || [];
-            const current = step.current;
-            const swapping = step.swapping || [];
-            const comparing = step.comparing || [];
-            const positions = getHeapNodePositions(heap);
+function prevStep() {
+    if (currentAlgorithm && currentStep > 0) { currentStep--; renderStep(); updateControls(); }
+}
 
-            let html = '<div class="heap-container">';
-            
-            // Tree visualization
-            html += '<div class="heap-tree"><svg class="heap-svg" viewBox="0 0 800 280">';
-            
-            // Draw edges
-            positions.forEach((node, i) => {
-                const leftChild = 2 * i + 1;
-                const rightChild = 2 * i + 2;
-                if (leftChild < positions.length) {
-                    html += `<line x1="${node.x}" y1="${node.y}" x2="${positions[leftChild].x}" y2="${positions[leftChild].y}"/>`;
-                }
-                if (rightChild < positions.length) {
-                    html += `<line x1="${node.x}" y1="${node.y}" x2="${positions[rightChild].x}" y2="${positions[rightChild].y}"/>`;
-                }
-            });
-            
-            // Draw nodes
-            positions.forEach((node, i) => {
-                let nodeClass = '';
-                if (swapping.includes(i)) nodeClass = 'swapping';
-                else if (i === current) nodeClass = 'current';
-                else if (comparing.includes && comparing.includes(i)) nodeClass = 'comparing';
-                else if (i === 0) nodeClass = 'root';
-                
-                html += `<circle cx="${node.x}" cy="${node.y}" r="25" class="${nodeClass}"/>`;
-                html += `<text x="${node.x}" y="${node.y}">${node.val}</text>`;
-            });
-            
-            html += '</svg></div>';
-            
-            // Array representation
-            html += '<div style="text-align: center; color: #888; margin-bottom: 10px;">Array Representation:</div>';
-            html += '<div class="heap-array">';
-            heap.forEach((val, i) => {
-                let cellClass = '';
-                if (swapping.includes(i)) cellClass = 'swapping';
-                else if (i === current) cellClass = 'current';
-                html += `<div class="array-cell ${cellClass}"><div class="cell-value">${val}</div><div class="cell-index">[${i}]</div></div>`;
-            });
-            html += '</div>';
-            
-            html += '</div>';
-            
-            // Info panel
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Heap Size</div><div class="info-value">${heap.length}</div></div>`;
-            if (heap.length > 0) html += `<div class="info-box"><div class="info-label">Root (Max/Min)</div><div class="info-value">${heap[0]}</div></div>`;
-            if (step.extracted !== undefined) html += `<div class="info-box"><div class="info-label">Extracted</div><div class="info-value" style="color:#ffd700;">${step.extracted}</div></div>`;
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function togglePlay() { if (isPlaying) stopPlaying(); else startPlaying(); }
 
-        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
-        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
-        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
-        function startPlay() {
-            if (!currentAlgo) return;
-            isPlaying = true;
-            document.getElementById('playBtn').textContent = 'Pause';
-            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
-        }
-        function stopPlay() {
-            isPlaying = false;
-            document.getElementById('playBtn').textContent = 'Play';
-            if (playInterval) { clearInterval(playInterval); playInterval = null; }
-        }
-        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
-        function updateControls() {
-            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
-            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
-        }
-        init();
+function startPlaying() {
+    isPlaying = true;
+    playBtn.textContent = 'Pause';
+    playBtn.classList.add('playing');
+    playInterval = setInterval(() => {
+        if (currentStep < currentAlgorithm.steps.length - 1) nextStep();
+        else stopPlaying();
+    }, 2200 - document.getElementById('speedSlider').value);
+}
+
+function stopPlaying() {
+    isPlaying = false;
+    playBtn.textContent = 'Play';
+    playBtn.classList.remove('playing');
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+}
+
+function reset() { stopPlaying(); currentStep = 0; renderStep(); updateControls(); }
+
+function updateCamera() {
+    stage.style.transform = 'translateZ(' + cameraZoom + 'px) rotateX(' + cameraRotX + 'deg) rotateY(' + cameraRotY + 'deg)';
+}
+
+scene.addEventListener('mousedown', (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    cameraRotY += (e.clientX - lastMouseX) * 0.5;
+    cameraRotX -= (e.clientY - lastMouseY) * 0.3;
+    cameraRotX = Math.max(-60, Math.min(60, cameraRotX));
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+    updateCamera();
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+scene.addEventListener('wheel', (e) => { e.preventDefault(); cameraZoom += e.deltaY * -0.5; cameraZoom = Math.max(-300, Math.min(200, cameraZoom)); updateCamera(); });
+
+document.getElementById('playBtn').onclick = togglePlay;
+document.getElementById('prevBtn').onclick = prevStep;
+document.getElementById('nextBtn').onclick = nextStep;
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('speedSlider').oninput = () => { if (isPlaying) { stopPlaying(); startPlaying(); } };
+
+initAlgorithmSelector();
+updateCamera();
     </script>
 </body>
 </html>
