@@ -7,475 +7,683 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
-            color: #fff;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
-            padding: 30px 0;
-            background: rgba(0, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            margin-bottom: 30px;
+            padding: 25px 0;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            margin-bottom: 25px;
         }
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2rem;
             background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            animation: gradient-shift 3s linear infinite;
         }
-        .subtitle { color: #888; font-size: 1.1em; }
+        @keyframes gradient-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .subtitle { color: #888; font-size: 1rem; margin-top: 8px; }
         .algorithm-selector {
             display: flex;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
         }
         .algo-btn {
-            padding: 12px 20px;
-            background: rgba(0, 255, 255, 0.1);
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(0, 255, 255, 0.3);
             color: #00ffff;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-        .algo-btn:hover, .algo-btn.active {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-        .visualization-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            min-height: 400px;
-        }
-        .step-description {
-            text-align: center;
-            font-size: 1.2em;
-            color: #00ffff;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .control-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
-            border: none;
+        .algo-btn:hover { border-color: #00ffff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+        .algo-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
             color: #000;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease;
         }
-        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
-        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
-
-        /* Array Visualization */
-        .array-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
-            padding: 20px;
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
         }
-        .array-row {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .array-cell {
-            width: 60px;
-            height: 70px;
-            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
-            border: 3px solid #00ffff;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.4s ease;
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
+        .visualization-area {
+            background: radial-gradient(ellipse at center, #0f0f1a 0%, #050508 70%, #000 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            overflow: hidden;
             position: relative;
         }
-        .array-cell.current {
-            border-color: #ffd700;
-            background: linear-gradient(135deg, #ffd70033, #cc990033);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-            transform: scale(1.1);
+        .scene {
+            width: 100%;
+            height: 380px;
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
         }
-        .array-cell.found {
-            border-color: #00ff00;
-            background: linear-gradient(135deg, #00ff0033, #00880033);
-            box-shadow: 0 0 40px rgba(0, 255, 0, 0.6);
-            transform: scale(1.15);
+        .scene:active { cursor: grabbing; }
+        .stage {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+            transition: transform 0.1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .array-cell.eliminated {
-            border-color: #666;
-            background: linear-gradient(135deg, #33333333, #22222233);
-            opacity: 0.4;
+        .array-container {
+            display: flex;
+            gap: 8px;
+            transform-style: preserve-3d;
+            padding: 20px;
         }
-        .array-cell.in-range {
+        .array-cell {
+            width: 55px;
+            height: 70px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.1), 0 8px 20px rgba(0, 0, 0, 0.5);
+            transform-style: preserve-3d;
+        }
+        .array-cell.active {
             border-color: #00ffff;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            transform: translateZ(20px) scale(1.1);
         }
         .array-cell.mid {
             border-color: #ff00ff;
-            background: linear-gradient(135deg, #ff00ff33, #88008833);
-            box-shadow: 0 0 25px rgba(255, 0, 255, 0.4);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+            transform: translateZ(15px) scale(1.05);
+        }
+        .array-cell.found {
+            border-color: #00ff88;
+            background: linear-gradient(135deg, #0a2a1a 0%, #0f1f0f 100%);
+            box-shadow: 0 0 35px rgba(0, 255, 136, 0.7);
+            transform: translateZ(25px) scale(1.15);
+        }
+        .array-cell.eliminated {
+            opacity: 0.3;
+            transform: translateZ(-20px) scale(0.9);
+        }
+        .array-cell.in-range {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+        .array-cell.checked {
+            border-color: #888;
+            opacity: 0.6;
         }
         .cell-value {
-            font-size: 1.3em;
+            font-size: 1.1rem;
             font-weight: bold;
+            color: #fff;
         }
         .cell-index {
-            font-size: 0.7em;
+            font-size: 0.7rem;
             color: #888;
-            margin-top: 5px;
+            margin-top: 4px;
         }
-        .pointer-label {
+        .target-display {
             position: absolute;
-            top: -25px;
-            font-size: 0.75em;
+            top: 15px;
+            left: 15px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(255, 0, 255, 0.1));
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #ff00ff;
             font-weight: bold;
-            padding: 2px 8px;
-            border-radius: 4px;
-            white-space: nowrap;
         }
-        .pointer-label.left { background: #00ff00; color: #000; }
-        .pointer-label.right { background: #ff3333; color: #fff; }
-        .pointer-label.mid { background: #ff00ff; color: #fff; }
-
-        /* Spotlight effect for linear search */
-        .spotlight {
+        .pointers-display {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%);
-            animation: spotlight 0.5s ease;
-        }
-        @keyframes spotlight {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Info Panel */
-        .info-panel {
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 0.85rem;
         }
-        .info-box {
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px 25px;
-            text-align: center;
+        .pointer {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-family: monospace;
         }
-        .info-label { color: #888; font-size: 0.9em; }
-        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
-
-        .speed-control {
+        .pointer.low { background: rgba(0, 255, 255, 0.2); color: #00ffff; }
+        .pointer.mid { background: rgba(255, 0, 255, 0.2); color: #ff00ff; }
+        .pointer.high { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
+        .code-panel {
+            background: linear-gradient(135deg, #0d0d15, #1a1a25);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 15px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .code-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 8px;
         }
-        .speed-label { color: #888; }
-        .speed-slider {
-            width: 150px;
-            -webkit-appearance: none;
-            height: 6px;
+        .code-title::before { content: "</>"; color: #ff00ff; font-weight: bold; }
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: pre;
+        }
+        .code-line.active {
             background: rgba(0, 255, 255, 0.2);
+            border-left: 3px solid #00ffff;
+        }
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-number { color: #bd93f9; }
+        .code-comment { color: #6272a4; }
+        .code-variable { color: #8be9fd; }
+        .info-panel {
+            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+        }
+        .panel-section { margin-bottom: 20px; }
+        .panel-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 2px;
+        }
+        .step-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e0e0e0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+        }
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+            border: 1px solid rgba(255, 0, 255, 0.4);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        .search-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover:not(:disabled) { background: linear-gradient(135deg, #00ffff, #0088aa); color: #000; }
+        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .control-btn.playing { background: linear-gradient(135deg, #ff00ff, #aa0088); border-color: #ff00ff; }
+        .speed-control { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .speed-label { color: #888; font-size: 0.85rem; }
+        .speed-slider {
+            width: 100px;
+            height: 5px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
             border-radius: 3px;
         }
         .speed-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #00ffff;
+            width: 16px;
+            height: 16px;
+            background: #fff;
             border-radius: 50%;
             cursor: pointer;
         }
-
-        .target-display {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 215, 0, 0.1);
-            border: 2px solid #ffd700;
-            border-radius: 10px;
-            display: inline-block;
+        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; font-size: 0.85rem; margin-top: 8px; }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
         }
-        .target-label { color: #888; font-size: 0.9em; }
-        .target-value { color: #ffd700; font-size: 1.5em; font-weight: bold; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; border: 2px solid; }
+        .result-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #00ff88;
+            font-weight: bold;
+            display: none;
+        }
+        .camera-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Searching Algorithms</h1>
-        <p class="subtitle">Interactive 3D Visualization</p>
+        <p class="subtitle">Interactive 3D Visualization with Code - Drag to rotate, scroll to zoom</p>
     </header>
     <div class="container">
         <div class="algorithm-selector" id="algoSelector"></div>
-        <div class="visualization-area">
-            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
-            <div id="vizContent"></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
-        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
-        <div class="controls">
-            <button class="control-btn" id="prevBtn" disabled>Previous</button>
-            <button class="control-btn" id="playBtn">Play</button>
-            <button class="control-btn" id="nextBtn" disabled>Next</button>
-            <button class="control-btn" id="resetBtn">Reset</button>
-        </div>
-        <div class="speed-control">
-            <span class="speed-label">Speed:</span>
-            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
-            <span class="speed-label" id="speedValue">800ms</span>
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="scene" id="scene">
+                        <div class="stage" id="stage">
+                            <div class="array-container" id="arrayContainer"></div>
+                        </div>
+                        <div class="target-display" id="targetDisplay">Target: -</div>
+                        <div class="pointers-display" id="pointersDisplay"></div>
+                        <div class="result-display" id="resultDisplay"></div>
+                        <div class="camera-hint">Drag to rotate | Scroll to zoom</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" id="prevBtn">Prev</button>
+                        <button class="control-btn" id="playBtn">Play</button>
+                        <button class="control-btn" id="nextBtn">Next</button>
+                        <button class="control-btn" id="resetBtn">Reset</button>
+                        <div class="speed-control">
+                            <span class="speed-label">Speed:</span>
+                            <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" value="800">
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+                </div>
+                <div class="code-panel">
+                    <div class="code-title">Python Code</div>
+                    <div class="code-block" id="codeBlock"></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="panel-section">
+                    <div class="panel-title">Current Step</div>
+                    <div class="step-description" id="stepDescription">Select an algorithm to begin</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Complexity</div>
+                    <div class="complexity-badge" id="complexityBadge">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Search State</div>
+                    <div class="search-info" id="searchInfo">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Legend</div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color" style="border-color:#00ffff;background:rgba(0,255,255,0.2)"></div><span>Current</span></div>
+                        <div class="legend-item"><div class="legend-color" style="border-color:#ff00ff;background:rgba(255,0,255,0.2)"></div><span>Mid</span></div>
+                        <div class="legend-item"><div class="legend-color" style="border-color:#00ff88;background:rgba(0,255,136,0.2)"></div><span>Found</span></div>
+                        <div class="legend-item"><div class="legend-color" style="border-color:#888;background:rgba(136,136,136,0.2)"></div><span>Eliminated</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <script>
-        const visualData = {
-            "world": "09_searching_algorithms",
-            "algorithms": [
-                {
-                    "algorithm": "linear_search",
-                    "description": "Linear Search - scan each element sequentially",
-                    "array": [34, 7, 23, 32, 5, 62, 14, 28, 45, 19],
-                    "target": 62,
-                    "steps": [
-                        {"step": 1, "description": "Search for 62 in unsorted array", "current": null, "comparisons": 0, "action": "init"},
-                        {"step": 2, "description": "Check index 0: 34 != 62", "current": 0, "comparisons": 1, "action": "compare"},
-                        {"step": 3, "description": "Check index 1: 7 != 62", "current": 1, "comparisons": 2, "action": "compare"},
-                        {"step": 4, "description": "Check index 2: 23 != 62", "current": 2, "comparisons": 3, "action": "compare"},
-                        {"step": 5, "description": "Check index 3: 32 != 62", "current": 3, "comparisons": 4, "action": "compare"},
-                        {"step": 6, "description": "Check index 4: 5 != 62", "current": 4, "comparisons": 5, "action": "compare"},
-                        {"step": 7, "description": "Check index 5: 62 == 62 FOUND!", "current": 5, "found": true, "comparisons": 6, "action": "found"},
-                        {"step": 8, "description": "Element 62 found at index 5", "current": 5, "found": true, "comparisons": 6, "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "binary_search",
-                    "description": "Binary Search - divide and conquer on sorted array",
-                    "array": [5, 7, 14, 19, 23, 28, 32, 34, 45, 62],
-                    "target": 28,
-                    "steps": [
-                        {"step": 1, "description": "Search for 28 in sorted array", "left": 0, "right": 9, "mid": null, "comparisons": 0, "action": "init"},
-                        {"step": 2, "description": "Calculate mid = (0+9)/2 = 4", "left": 0, "right": 9, "mid": 4, "comparisons": 0, "action": "calc_mid"},
-                        {"step": 3, "description": "Compare: arr[4]=23 < 28, search right half", "left": 0, "right": 9, "mid": 4, "comparisons": 1, "eliminated": [0,1,2,3,4], "action": "compare"},
-                        {"step": 4, "description": "New range: left=5, right=9", "left": 5, "right": 9, "mid": null, "comparisons": 1, "eliminated": [0,1,2,3,4], "action": "narrow"},
-                        {"step": 5, "description": "Calculate mid = (5+9)/2 = 7", "left": 5, "right": 9, "mid": 7, "comparisons": 1, "eliminated": [0,1,2,3,4], "action": "calc_mid"},
-                        {"step": 6, "description": "Compare: arr[7]=34 > 28, search left half", "left": 5, "right": 9, "mid": 7, "comparisons": 2, "eliminated": [0,1,2,3,4,7,8,9], "action": "compare"},
-                        {"step": 7, "description": "New range: left=5, right=6", "left": 5, "right": 6, "mid": null, "comparisons": 2, "eliminated": [0,1,2,3,4,7,8,9], "action": "narrow"},
-                        {"step": 8, "description": "Calculate mid = (5+6)/2 = 5", "left": 5, "right": 6, "mid": 5, "comparisons": 2, "eliminated": [0,1,2,3,4,7,8,9], "action": "calc_mid"},
-                        {"step": 9, "description": "Compare: arr[5]=28 == 28 FOUND!", "left": 5, "right": 6, "mid": 5, "found": true, "comparisons": 3, "action": "found"},
-                        {"step": 10, "description": "Element 28 found at index 5 in 3 comparisons", "found": true, "comparisons": 3, "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "binary_search_not_found",
-                    "description": "Binary Search - element not in array",
-                    "array": [5, 7, 14, 19, 23, 28, 32, 34, 45, 62],
-                    "target": 15,
-                    "steps": [
-                        {"step": 1, "description": "Search for 15 in sorted array", "left": 0, "right": 9, "mid": null, "comparisons": 0, "action": "init"},
-                        {"step": 2, "description": "mid = 4, arr[4]=23 > 15, go left", "left": 0, "right": 9, "mid": 4, "comparisons": 1, "eliminated": [4,5,6,7,8,9], "action": "compare"},
-                        {"step": 3, "description": "New range: left=0, right=3", "left": 0, "right": 3, "mid": null, "comparisons": 1, "eliminated": [4,5,6,7,8,9], "action": "narrow"},
-                        {"step": 4, "description": "mid = 1, arr[1]=7 < 15, go right", "left": 0, "right": 3, "mid": 1, "comparisons": 2, "eliminated": [0,1,4,5,6,7,8,9], "action": "compare"},
-                        {"step": 5, "description": "New range: left=2, right=3", "left": 2, "right": 3, "mid": null, "comparisons": 2, "eliminated": [0,1,4,5,6,7,8,9], "action": "narrow"},
-                        {"step": 6, "description": "mid = 2, arr[2]=14 < 15, go right", "left": 2, "right": 3, "mid": 2, "comparisons": 3, "eliminated": [0,1,2,4,5,6,7,8,9], "action": "compare"},
-                        {"step": 7, "description": "New range: left=3, right=3", "left": 3, "right": 3, "mid": null, "comparisons": 3, "eliminated": [0,1,2,4,5,6,7,8,9], "action": "narrow"},
-                        {"step": 8, "description": "mid = 3, arr[3]=19 > 15, go left", "left": 3, "right": 3, "mid": 3, "comparisons": 4, "eliminated": [0,1,2,3,4,5,6,7,8,9], "action": "compare"},
-                        {"step": 9, "description": "left > right: Element 15 NOT FOUND", "left": 4, "right": 3, "not_found": true, "comparisons": 4, "action": "not_found"}
-                    ]
-                },
-                {
-                    "algorithm": "jump_search",
-                    "description": "Jump Search - jump ahead by sqrt(n) steps",
-                    "array": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31],
-                    "target": 21,
-                    "jump_size": 4,
-                    "steps": [
-                        {"step": 1, "description": "Search for 21, jump size = sqrt(16) = 4", "current": null, "jump": 4, "comparisons": 0, "action": "init"},
-                        {"step": 2, "description": "Jump to index 0: arr[0]=1 < 21", "current": 0, "comparisons": 1, "action": "jump"},
-                        {"step": 3, "description": "Jump to index 4: arr[4]=9 < 21", "current": 4, "comparisons": 2, "action": "jump"},
-                        {"step": 4, "description": "Jump to index 8: arr[8]=17 < 21", "current": 8, "comparisons": 3, "action": "jump"},
-                        {"step": 5, "description": "Jump to index 12: arr[12]=25 > 21, stop jumping", "current": 12, "comparisons": 4, "block_start": 8, "block_end": 12, "action": "stop_jump"},
-                        {"step": 6, "description": "Linear search in block [8-12]: check 17", "current": 8, "comparisons": 5, "block_start": 8, "block_end": 12, "action": "linear"},
-                        {"step": 7, "description": "Check index 9: arr[9]=19 != 21", "current": 9, "comparisons": 6, "block_start": 8, "block_end": 12, "action": "linear"},
-                        {"step": 8, "description": "Check index 10: arr[10]=21 == 21 FOUND!", "current": 10, "found": true, "comparisons": 7, "action": "found"}
-                    ]
-                }
-            ]
-        };
+const codeSnippets = {
+    "linear_search": `<span class="code-keyword">def</span> <span class="code-function">linear_search</span>(arr, target):
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(len(arr)):
+        <span class="code-keyword">if</span> arr[i] == target:
+            <span class="code-keyword">return</span> i  <span class="code-comment"># Found!</span>
+    <span class="code-keyword">return</span> -<span class="code-number">1</span>  <span class="code-comment"># Not found</span>`,
+    "binary_search": `<span class="code-keyword">def</span> <span class="code-function">binary_search</span>(arr, target):
+    low, high = <span class="code-number">0</span>, len(arr) - <span class="code-number">1</span>
+    
+    <span class="code-keyword">while</span> low <= high:
+        mid = (low + high) // <span class="code-number">2</span>
+        
+        <span class="code-keyword">if</span> arr[mid] == target:
+            <span class="code-keyword">return</span> mid  <span class="code-comment"># Found!</span>
+        <span class="code-keyword">elif</span> arr[mid] < target:
+            low = mid + <span class="code-number">1</span>  <span class="code-comment"># Search right</span>
+        <span class="code-keyword">else</span>:
+            high = mid - <span class="code-number">1</span>  <span class="code-comment"># Search left</span>
+    
+    <span class="code-keyword">return</span> -<span class="code-number">1</span>  <span class="code-comment"># Not found</span>`,
+    "binary_search_not_found": `<span class="code-keyword">def</span> <span class="code-function">binary_search</span>(arr, target):
+    low, high = <span class="code-number">0</span>, len(arr) - <span class="code-number">1</span>
+    
+    <span class="code-keyword">while</span> low <= high:
+        mid = (low + high) // <span class="code-number">2</span>
+        
+        <span class="code-keyword">if</span> arr[mid] == target:
+            <span class="code-keyword">return</span> mid
+        <span class="code-keyword">elif</span> arr[mid] < target:
+            low = mid + <span class="code-number">1</span>
+        <span class="code-keyword">else</span>:
+            high = mid - <span class="code-number">1</span>
+    
+    <span class="code-keyword">return</span> -<span class="code-number">1</span>  <span class="code-comment"># low > high, not found</span>`,
+    "first_last_occurrence": `<span class="code-keyword">def</span> <span class="code-function">find_first</span>(arr, target):
+    low, high, result = <span class="code-number">0</span>, len(arr)-<span class="code-number">1</span>, -<span class="code-number">1</span>
+    <span class="code-keyword">while</span> low <= high:
+        mid = (low + high) // <span class="code-number">2</span>
+        <span class="code-keyword">if</span> arr[mid] == target:
+            result = mid  <span class="code-comment"># Save and go left</span>
+            high = mid - <span class="code-number">1</span>
+        <span class="code-keyword">elif</span> arr[mid] < target:
+            low = mid + <span class="code-number">1</span>
+        <span class="code-keyword">else</span>:
+            high = mid - <span class="code-number">1</span>
+    <span class="code-keyword">return</span> result`,
+    "search_rotated_array": `<span class="code-keyword">def</span> <span class="code-function">search_rotated</span>(arr, target):
+    low, high = <span class="code-number">0</span>, len(arr) - <span class="code-number">1</span>
+    
+    <span class="code-keyword">while</span> low <= high:
+        mid = (low + high) // <span class="code-number">2</span>
+        <span class="code-keyword">if</span> arr[mid] == target:
+            <span class="code-keyword">return</span> mid
+        
+        <span class="code-comment"># Check which half is sorted</span>
+        <span class="code-keyword">if</span> arr[low] <= arr[mid]:  <span class="code-comment"># Left sorted</span>
+            <span class="code-keyword">if</span> arr[low] <= target < arr[mid]:
+                high = mid - <span class="code-number">1</span>
+            <span class="code-keyword">else</span>:
+                low = mid + <span class="code-number">1</span>
+        <span class="code-keyword">else</span>:  <span class="code-comment"># Right sorted</span>
+            <span class="code-keyword">if</span> arr[mid] < target <= arr[high]:
+                low = mid + <span class="code-number">1</span>
+            <span class="code-keyword">else</span>:
+                high = mid - <span class="code-number">1</span>`,
+    "bst_search": `<span class="code-keyword">def</span> <span class="code-function">search_bst</span>(root, target):
+    curr = root
+    
+    <span class="code-keyword">while</span> curr:
+        <span class="code-keyword">if</span> target == curr.val:
+            <span class="code-keyword">return</span> curr  <span class="code-comment"># Found!</span>
+        <span class="code-keyword">elif</span> target < curr.val:
+            curr = curr.left  <span class="code-comment"># Go left</span>
+        <span class="code-keyword">else</span>:
+            curr = curr.right  <span class="code-comment"># Go right</span>
+    
+    <span class="code-keyword">return</span> <span class="code-keyword">None</span>  <span class="code-comment"># Not found</span>`
+};
 
-        let currentAlgo = null;
-        let currentStep = 0;
-        let isPlaying = false;
-        let playInterval = null;
-        let speed = 800;
+const codeLineMap = {
+    "linear_search": { 1: [0], 2: [1,2], 3: [1,2], 4: [1,2], 5: [1,2], 6: [1,2], 7: [3] },
+    "binary_search": { 1: [0,1], 2: [4], 3: [6,7,8,9,10,11], 4: [6,7,8,9], 5: [4], 6: [6,7,10,11], 7: [6,7,8,9], 8: [4], 9: [6,7,8,9], 10: [6,7,8,9], 11: [7] },
+    "binary_search_not_found": { 1: [0,1], 2: [4,5,8,9], 3: [4,5,10,11], 4: [4,5,10,11], 5: [13] },
+    "first_last_occurrence": { 1: [0,1], 2: [2,3,4,5,6], 3: [2,3,7,8], 4: [2,3,4,5,6], 5: [10], 6: [2,3,4,5,6], 7: [2,3,4,5,6], 8: [10], 9: [10] },
+    "search_rotated_array": { 1: [0,1], 2: [3,4], 3: [8,9], 4: [9,10,11,12,13], 5: [3,4], 6: [3,4], 7: [14,15,16,17,18], 8: [5,6] },
+    "bst_search": { 1: [0,1], 2: [3,4,5,6,7,8,9], 3: [3,4,7,8], 4: [3,4,5,6,9,10], 5: [3,4,7,8], 6: [5,6] }
+};
 
-        function init() {
-            const selector = document.getElementById('algoSelector');
-            visualData.algorithms.forEach((algo, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'algo-btn';
-                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                btn.onclick = () => selectAlgorithm(index);
-                selector.appendChild(btn);
-            });
-            document.getElementById('prevBtn').onclick = prevStep;
-            document.getElementById('nextBtn').onclick = nextStep;
-            document.getElementById('playBtn').onclick = togglePlay;
-            document.getElementById('resetBtn').onclick = reset;
-            document.getElementById('speedSlider').oninput = (e) => {
-                speed = 2100 - e.target.value;
-                document.getElementById('speedValue').textContent = speed + 'ms';
-            };
-        }
+const visualData = {"algorithms":[{"algorithm":"linear_search","name":"Linear Search","complexity":"O(n)","array":[23,45,12,67,34,89,56,78,90,11],"target":89,"steps":[{"step":1,"description":"Linear search: check each element one by one until we find target 89.","action":"init","target":89,"index":-1},{"step":2,"description":"Check index 0: value 23. Is 23 == 89? No. Move to next.","action":"check","index":0,"value":23},{"step":3,"description":"Check index 1: value 45. Is 45 == 89? No. Move to next.","action":"check","index":1,"value":45},{"step":4,"description":"Check index 2: value 12. Is 12 == 89? No. Move to next.","action":"check","index":2,"value":12},{"step":5,"description":"Check index 3: value 67. Is 67 == 89? No. Move to next.","action":"check","index":3,"value":67},{"step":6,"description":"Check index 4: value 34. Is 34 == 89? No. Move to next.","action":"check","index":4,"value":34},{"step":7,"description":"Check index 5: value 89. Is 89 == 89? YES! Found at index 5.","action":"found","index":5,"value":89,"comparisons":6}]},{"algorithm":"binary_search","name":"Binary Search","complexity":"O(log n)","array":[11,23,34,45,56,67,78,89,90,95],"target":78,"steps":[{"step":1,"description":"Binary search for 78 in sorted array. Set low=0, high=9.","action":"init","target":78,"low":0,"high":9},{"step":2,"description":"Calculate mid = (0+9)/2 = 4. Value at mid is 56.","action":"calc_mid","low":0,"high":9,"mid":4,"midValue":56},{"step":3,"description":"Compare: 56 < 78. Target is in RIGHT half. Set low = mid + 1 = 5.","action":"compare","mid":4,"midValue":56,"comparison":"<","newLow":5},{"step":4,"description":"Eliminate left half [0-4]. New search space [5-9].","action":"eliminate","eliminated":[0,1,2,3,4],"low":5,"high":9},{"step":5,"description":"Calculate mid = (5+9)/2 = 7. Value at mid is 89.","action":"calc_mid","low":5,"high":9,"mid":7,"midValue":89},{"step":6,"description":"Compare: 89 > 78. Target is in LEFT half. Set high = mid - 1 = 6.","action":"compare","mid":7,"midValue":89,"comparison":">","newHigh":6},{"step":7,"description":"Eliminate right portion [7-9]. New search space [5-6].","action":"eliminate","eliminated":[0,1,2,3,4,7,8,9],"low":5,"high":6},{"step":8,"description":"Calculate mid = (5+6)/2 = 5. Value at mid is 67.","action":"calc_mid","low":5,"high":6,"mid":5,"midValue":67},{"step":9,"description":"Compare: 67 < 78. Target is in RIGHT half. Set low = mid + 1 = 6.","action":"compare","mid":5,"midValue":67,"comparison":"<","newLow":6},{"step":10,"description":"Search space narrowed to single element at index 6.","action":"eliminate","eliminated":[0,1,2,3,4,5,7,8,9],"low":6,"high":6},{"step":11,"description":"Found 78 at index 6! Only 4 comparisons vs 7 for linear search.","action":"found","index":6,"value":78,"comparisons":4}]},{"algorithm":"binary_search_not_found","name":"Binary Search (Not Found)","complexity":"O(log n)","array":[10,20,30,40,50,60,70,80,90,100],"target":55,"steps":[{"step":1,"description":"Search for 55 (not in array). Binary search will prove it's missing.","action":"init","target":55,"low":0,"high":9},{"step":2,"description":"Mid=4, value=50. 50 < 55, search right. Set low=5.","action":"compare","mid":4,"midValue":50,"comparison":"<","low":5,"high":9,"eliminated":[0,1,2,3,4]},{"step":3,"description":"Mid=7, value=80. 80 > 55, search left. Set high=6.","action":"compare","mid":7,"midValue":80,"comparison":">","low":5,"high":6,"eliminated":[0,1,2,3,4,7,8,9]},{"step":4,"description":"Mid=5, value=60. 60 > 55, search left. Set high=4.","action":"compare","mid":5,"midValue":60,"comparison":">","low":5,"high":4,"eliminated":[0,1,2,3,4,5,6,7,8,9]},{"step":5,"description":"low (5) > high (4). Search space empty. 55 NOT FOUND!","action":"not_found","low":5,"high":4,"insertPos":5}]},{"algorithm":"search_rotated_array","name":"Rotated Array Search","complexity":"O(log n)","array":[4,5,6,7,0,1,2],"target":0,"steps":[{"step":1,"description":"Search for 0 in rotated sorted array [4,5,6,7,0,1,2]. Pivot at index 4.","action":"init","target":0,"low":0,"high":6},{"step":2,"description":"Mid=3, value=7. Check which half is sorted.","action":"calc_mid","low":0,"high":6,"mid":3,"midValue":7},{"step":3,"description":"Left half [4,5,6,7] is sorted (arr[0]=4 <= arr[3]=7).","action":"identify","sorted":"left","range":[0,3]},{"step":4,"description":"Is 0 in sorted range [4,7]? No (0 < 4). Search RIGHT half.","action":"check_range","target":0,"range":[4,7],"inRange":false,"newLow":4},{"step":5,"description":"New search space [4-6]. Eliminated left half.","action":"eliminate","eliminated":[0,1,2,3],"low":4,"high":6},{"step":6,"description":"Mid=5, value=1. Check which half is sorted.","action":"calc_mid","low":4,"high":6,"mid":5,"midValue":1},{"step":7,"description":"Left half [0,1] is sorted. Is 0 in range [0,1]? Yes! Search LEFT.","action":"check_range","target":0,"range":[0,1],"inRange":true,"newHigh":4},{"step":8,"description":"Found 0 at index 4! Binary search works on rotated arrays too.","action":"found","index":4,"value":0}]}]};
 
-        function selectAlgorithm(index) {
-            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-            currentAlgo = visualData.algorithms[index];
-            currentStep = 0;
-            stopPlay();
-            renderStep();
-            updateControls();
-        }
+let currentAlgorithm = null;
+let currentStep = 0;
+let isPlaying = false;
+let playInterval = null;
+let cameraRotX = 10;
+let cameraRotY = 0;
+let cameraZoom = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
 
-        function renderStep() {
-            if (!currentAlgo) return;
-            const step = currentAlgo.steps[currentStep];
-            document.getElementById('stepDesc').textContent = step.description;
-            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
-            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+const scene = document.getElementById('scene');
+const stage = document.getElementById('stage');
+const arrayContainer = document.getElementById('arrayContainer');
+const codeBlock = document.getElementById('codeBlock');
+const stepDescription = document.getElementById('stepDescription');
+const complexityBadge = document.getElementById('complexityBadge');
+const searchInfo = document.getElementById('searchInfo');
+const targetDisplay = document.getElementById('targetDisplay');
+const pointersDisplay = document.getElementById('pointersDisplay');
+const progressFill = document.getElementById('progressFill');
+const stepCounter = document.getElementById('stepCounter');
+const playBtn = document.getElementById('playBtn');
+const resultDisplay = document.getElementById('resultDisplay');
 
-            const content = document.getElementById('vizContent');
-            renderSearch(content, step);
-        }
+function initAlgorithmSelector() {
+    const selector = document.getElementById('algoSelector');
+    visualData.algorithms.forEach((algo, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'algo-btn';
+        btn.textContent = algo.name;
+        btn.onclick = () => selectAlgorithm(index);
+        selector.appendChild(btn);
+    });
+}
 
-        function renderSearch(container, step) {
-            const array = currentAlgo.array;
-            const target = currentAlgo.target;
-            const current = step.current;
-            const left = step.left;
-            const right = step.right;
-            const mid = step.mid;
-            const found = step.found;
-            const eliminated = step.eliminated || [];
-            const notFound = step.not_found;
+function selectAlgorithm(index) {
+    document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+    currentAlgorithm = visualData.algorithms[index];
+    currentStep = 0;
+    stopPlaying();
+    complexityBadge.textContent = currentAlgorithm.complexity;
+    targetDisplay.textContent = 'Target: ' + currentAlgorithm.target;
+    renderCode();
+    renderStep();
+    updateControls();
+}
 
-            let html = '<div class="array-container">';
-            
-            // Target display
-            html += `<div class="target-display">
-                <div class="target-label">Searching for:</div>
-                <div class="target-value">${target}</div>
-            </div>`;
-            
-            // Array visualization
-            html += '<div class="array-row">';
-            array.forEach((val, i) => {
-                let cellClass = '';
-                let pointerHtml = '';
-                
-                if (found && i === current) {
-                    cellClass = 'found';
-                } else if (i === current) {
-                    cellClass = 'current';
-                } else if (i === mid) {
-                    cellClass = 'mid';
-                } else if (eliminated.includes(i)) {
-                    cellClass = 'eliminated';
-                } else if (left !== undefined && right !== undefined && i >= left && i <= right) {
-                    cellClass = 'in-range';
-                }
-                
-                // Pointer labels for binary search
-                if (left !== undefined && i === left) {
-                    pointerHtml += '<span class="pointer-label left">L</span>';
-                }
-                if (right !== undefined && i === right) {
-                    pointerHtml += '<span class="pointer-label right">R</span>';
-                }
-                if (mid !== undefined && i === mid) {
-                    pointerHtml += '<span class="pointer-label mid">M</span>';
-                }
-                
-                html += `<div class="array-cell ${cellClass}">
-                    ${pointerHtml}
-                    <div class="cell-value">${val}</div>
-                    <div class="cell-index">[${i}]</div>
-                </div>`;
-            });
-            html += '</div>';
-            
-            html += '</div>';
-            
-            // Info panel
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Comparisons</div><div class="info-value">${step.comparisons || 0}</div></div>`;
-            if (currentAlgo.algorithm.includes('binary')) {
-                html += `<div class="info-box"><div class="info-label">Complexity</div><div class="info-value">O(log n)</div></div>`;
-            } else if (currentAlgo.algorithm.includes('linear')) {
-                html += `<div class="info-box"><div class="info-label">Complexity</div><div class="info-value">O(n)</div></div>`;
-            } else if (currentAlgo.algorithm.includes('jump')) {
-                html += `<div class="info-box"><div class="info-label">Complexity</div><div class="info-value">O(√n)</div></div>`;
-            }
-            if (found) {
-                html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#00ff00;">FOUND at [${current}]</div></div>`;
-            }
-            if (notFound) {
-                html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#ff3333;">NOT FOUND</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function renderCode() {
+    const code = codeSnippets[currentAlgorithm.algorithm] || '';
+    const lines = code.split('\n');
+    let html = '';
+    lines.forEach((line, idx) => {
+        html += '<div class="code-line" data-line="' + idx + '">' + line + '</div>';
+    });
+    codeBlock.innerHTML = html;
+}
 
-        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
-        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
-        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
-        function startPlay() {
-            if (!currentAlgo) return;
-            isPlaying = true;
-            document.getElementById('playBtn').textContent = 'Pause';
-            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
-        }
-        function stopPlay() {
-            isPlaying = false;
-            document.getElementById('playBtn').textContent = 'Play';
-            if (playInterval) { clearInterval(playInterval); playInterval = null; }
-        }
-        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
-        function updateControls() {
-            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
-            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
-        }
-        init();
+function highlightCodeLines(stepNum) {
+    const lineMap = codeLineMap[currentAlgorithm.algorithm] || {};
+    const activeLines = lineMap[stepNum] || [];
+    document.querySelectorAll('.code-line').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (activeLines.includes(idx)) el.classList.add('active');
+    });
+}
+
+function renderArray(step) {
+    const array = currentAlgorithm.array;
+    const eliminated = step.eliminated || [];
+    const currentIndex = step.index;
+    const mid = step.mid;
+    const low = step.low;
+    const high = step.high;
+    const found = step.action === 'found';
+    
+    let html = '';
+    array.forEach((val, idx) => {
+        let cellClass = 'array-cell';
+        if (found && idx === step.index) cellClass += ' found';
+        else if (idx === mid) cellClass += ' mid';
+        else if (idx === currentIndex) cellClass += ' active';
+        else if (eliminated.includes(idx)) cellClass += ' eliminated';
+        else if (low !== undefined && high !== undefined && idx >= low && idx <= high) cellClass += ' in-range';
+        
+        html += '<div class="' + cellClass + '"><span class="cell-value">' + val + '</span><span class="cell-index">[' + idx + ']</span></div>';
+    });
+    arrayContainer.innerHTML = html;
+    
+    // Update pointers display
+    let pointers = '';
+    if (low !== undefined) pointers += '<span class="pointer low">low=' + low + '</span>';
+    if (mid !== undefined) pointers += '<span class="pointer mid">mid=' + mid + '</span>';
+    if (high !== undefined) pointers += '<span class="pointer high">high=' + high + '</span>';
+    pointersDisplay.innerHTML = pointers;
+}
+
+function renderStep() {
+    if (!currentAlgorithm) return;
+    const step = currentAlgorithm.steps[currentStep];
+    stepDescription.textContent = step.description;
+    highlightCodeLines(step.step);
+    resultDisplay.style.display = 'none';
+    
+    renderArray(step);
+    
+    // Update search info
+    let info = '';
+    if (step.comparison) info += 'Comparison: ' + step.midValue + ' ' + step.comparison + ' ' + currentAlgorithm.target + '\n';
+    if (step.comparisons) info += 'Total comparisons: ' + step.comparisons;
+    if (step.insertPos !== undefined) info += 'Insert position: ' + step.insertPos;
+    searchInfo.textContent = info || 'Searching...';
+    
+    if (step.action === 'found') {
+        resultDisplay.style.display = 'block';
+        resultDisplay.textContent = 'Found at index ' + step.index + '!';
+    } else if (step.action === 'not_found') {
+        resultDisplay.style.display = 'block';
+        resultDisplay.style.borderColor = '#ff6b6b';
+        resultDisplay.style.color = '#ff6b6b';
+        resultDisplay.textContent = 'Not Found!';
+    }
+    
+    progressFill.style.width = ((currentStep + 1) / currentAlgorithm.steps.length * 100) + '%';
+    stepCounter.textContent = 'Step ' + (currentStep + 1) + ' / ' + currentAlgorithm.steps.length;
+}
+
+function updateControls() {
+    document.getElementById('prevBtn').disabled = !currentAlgorithm || currentStep === 0;
+    document.getElementById('nextBtn').disabled = !currentAlgorithm || currentStep >= currentAlgorithm.steps.length - 1;
+    document.getElementById('playBtn').disabled = !currentAlgorithm;
+}
+
+function nextStep() {
+    if (currentAlgorithm && currentStep < currentAlgorithm.steps.length - 1) { currentStep++; renderStep(); updateControls(); }
+    else stopPlaying();
+}
+
+function prevStep() {
+    if (currentAlgorithm && currentStep > 0) { currentStep--; renderStep(); updateControls(); }
+}
+
+function togglePlay() { if (isPlaying) stopPlaying(); else startPlaying(); }
+
+function startPlaying() {
+    isPlaying = true;
+    playBtn.textContent = 'Pause';
+    playBtn.classList.add('playing');
+    playInterval = setInterval(() => {
+        if (currentStep < currentAlgorithm.steps.length - 1) nextStep();
+        else stopPlaying();
+    }, 2200 - document.getElementById('speedSlider').value);
+}
+
+function stopPlaying() {
+    isPlaying = false;
+    playBtn.textContent = 'Play';
+    playBtn.classList.remove('playing');
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+}
+
+function reset() { stopPlaying(); currentStep = 0; renderStep(); updateControls(); }
+
+function updateCamera() {
+    stage.style.transform = 'translateZ(' + cameraZoom + 'px) rotateX(' + cameraRotX + 'deg) rotateY(' + cameraRotY + 'deg)';
+}
+
+scene.addEventListener('mousedown', (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    cameraRotY += (e.clientX - lastMouseX) * 0.5;
+    cameraRotX -= (e.clientY - lastMouseY) * 0.3;
+    cameraRotX = Math.max(-60, Math.min(60, cameraRotX));
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+    updateCamera();
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+scene.addEventListener('wheel', (e) => { e.preventDefault(); cameraZoom += e.deltaY * -0.5; cameraZoom = Math.max(-300, Math.min(200, cameraZoom)); updateCamera(); });
+
+document.getElementById('playBtn').onclick = togglePlay;
+document.getElementById('prevBtn').onclick = prevStep;
+document.getElementById('nextBtn').onclick = nextStep;
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('speedSlider').oninput = () => { if (isPlaying) { stopPlaying(); startPlaying(); } };
+
+initAlgorithmSelector();
+updateCamera();
     </script>
 </body>
 </html>

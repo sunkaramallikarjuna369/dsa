@@ -7,765 +7,830 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
-            color: #fff;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
-            padding: 30px 0;
-            background: rgba(0, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            margin-bottom: 30px;
+            padding: 25px 0;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            margin-bottom: 25px;
         }
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2rem;
             background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            animation: gradient-shift 3s linear infinite;
         }
-        .subtitle { color: #888; font-size: 1.1em; }
+        @keyframes gradient-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .subtitle { color: #888; font-size: 1rem; margin-top: 8px; }
         .algorithm-selector {
             display: flex;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
         }
         .algo-btn {
-            padding: 12px 20px;
-            background: rgba(0, 255, 255, 0.1);
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(0, 255, 255, 0.3);
             color: #00ffff;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-        .algo-btn:hover, .algo-btn.active {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-        .visualization-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            min-height: 500px;
-        }
-        .step-description {
-            text-align: center;
-            font-size: 1.2em;
-            color: #00ffff;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .control-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
-            border: none;
+        .algo-btn:hover { border-color: #00ffff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+        .algo-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
             color: #000;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease;
         }
-        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
-        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
-
-        /* Trie Visualization */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
+        .visualization-area {
+            background: radial-gradient(ellipse at center, #0f0f1a 0%, #050508 70%, #000 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        .scene {
+            width: 100%;
+            height: 380px;
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .scene:active { cursor: grabbing; }
+        .stage {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+            transition: transform 0.1s ease-out;
+            position: relative;
+        }
+        .structure-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .trie-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
-            padding: 20px;
+            gap: 30px;
         }
-        .trie-svg {
-            width: 100%;
-            max-width: 800px;
-            height: 350px;
+        .trie-level {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
         }
-        .trie-svg line {
-            stroke: #00ffff;
-            stroke-width: 2;
-            transition: all 0.3s ease;
-        }
-        .trie-svg line.active {
-            stroke: #00ff00;
-            stroke-width: 3;
-            filter: drop-shadow(0 0 5px #00ff00);
-        }
-        .trie-svg circle {
-            fill: #1a1a3a;
-            stroke: #00ffff;
-            stroke-width: 2;
-            transition: all 0.3s ease;
-        }
-        .trie-svg circle.root {
-            stroke: #ffd700;
-            stroke-width: 3;
-        }
-        .trie-svg circle.current {
-            fill: #ffd70033;
-            stroke: #ffd700;
-            filter: drop-shadow(0 0 15px #ffd700);
-        }
-        .trie-svg circle.word-end {
-            fill: #00ff0033;
-            stroke: #00ff00;
-        }
-        .trie-svg circle.found {
-            fill: #00ff0066;
-            stroke: #00ff00;
-            filter: drop-shadow(0 0 20px #00ff00);
-        }
-        .trie-svg text {
-            fill: #fff;
-            font-size: 14px;
+        .trie-node {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
             font-weight: bold;
-            text-anchor: middle;
-            dominant-baseline: central;
+            color: #00ffff;
+            transition: all 0.3s ease;
+            position: relative;
         }
-        .trie-svg text.edge-label {
-            fill: #00ffff;
-            font-size: 12px;
+        .trie-node.root {
+            background: linear-gradient(135deg, #ff00ff, #aa0088);
+            color: #fff;
         }
-
-        /* Segment Tree */
-        .segment-container {
+        .trie-node.current {
+            background: linear-gradient(135deg, #ffd700, #cc9900);
+            color: #000;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+            transform: scale(1.15);
+        }
+        .trie-node.path {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        .trie-node.word-end::after {
+            content: "";
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            border: 3px solid #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        .segment-tree {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
         }
-        .array-display {
+        .tree-level {
             display: flex;
-            gap: 5px;
+            gap: 10px;
             justify-content: center;
         }
-        .array-cell {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
-            border: 2px solid #00ffff;
+        .tree-node {
+            min-width: 50px;
+            height: 40px;
+            padding: 0 10px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 1px solid rgba(0, 255, 255, 0.4);
             border-radius: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
+        .tree-node .value { color: #00ffff; font-weight: bold; }
+        .tree-node .range { color: #888; font-size: 0.65rem; }
+        .tree-node.current {
+            background: linear-gradient(135deg, #ffd700, #cc9900);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        .tree-node.current .value { color: #000; }
+        .tree-node.included {
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+        .tree-node.included .value { color: #000; }
+        .tree-node.partial {
+            border-color: #ff00ff;
+            border-width: 2px;
+        }
+        .array-display {
+            display: flex;
+            gap: 5px;
+            margin-top: 15px;
+        }
+        .array-cell {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        .array-cell .idx { color: #666; font-size: 0.65rem; }
+        .array-cell .val { color: #00ffff; font-weight: bold; }
         .array-cell.in-range {
-            border-color: #00ff00;
-            background: linear-gradient(135deg, #00ff0022, #00880022);
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(0, 255, 255, 0.1));
+            border-color: #00ffff;
         }
-        .array-cell.updating {
-            border-color: #ffd700;
-            background: linear-gradient(135deg, #ffd70022, #cc990022);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        .array-cell.updated {
+            background: linear-gradient(135deg, #ffd700, #cc9900);
         }
-        .cell-value { font-weight: bold; }
-        .cell-index { font-size: 0.7em; color: #888; }
-
-        .segment-tree-svg {
-            width: 100%;
-            max-width: 900px;
-            height: 280px;
-        }
-        .segment-tree-svg rect {
-            fill: #1a1a3a;
-            stroke: #00ffff;
-            stroke-width: 2;
-            transition: all 0.3s ease;
-        }
-        .segment-tree-svg rect.active {
-            fill: #ffd70033;
-            stroke: #ffd700;
-            filter: drop-shadow(0 0 10px #ffd700);
-        }
-        .segment-tree-svg rect.in-range {
-            fill: #00ff0033;
-            stroke: #00ff00;
-        }
-        .segment-tree-svg rect.updating {
-            fill: #ff00ff33;
-            stroke: #ff00ff;
-            filter: drop-shadow(0 0 10px #ff00ff);
-        }
-        .segment-tree-svg line {
-            stroke: #00ffff;
-            stroke-width: 1;
-        }
-        .segment-tree-svg text {
-            fill: #fff;
-            font-size: 11px;
-            text-anchor: middle;
-        }
-        .segment-tree-svg text.range {
-            fill: #888;
-            font-size: 9px;
-        }
-
-        /* Fenwick Tree */
+        .array-cell.updated .val { color: #000; }
         .fenwick-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
         }
-        .fenwick-array {
+        .bit-array {
             display: flex;
             gap: 5px;
         }
-        .fenwick-cell {
-            width: 60px;
-            height: 70px;
-            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
-            border: 2px solid #00ffff;
-            border-radius: 8px;
+        .bit-cell {
+            width: 50px;
+            height: 60px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            font-size: 0.75rem;
             transition: all 0.3s ease;
-            position: relative;
         }
-        .fenwick-cell.active {
-            border-color: #ffd700;
-            background: linear-gradient(135deg, #ffd70033, #cc990033);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        .bit-cell .idx { color: #666; }
+        .bit-cell .binary { color: #ff00ff; font-family: monospace; }
+        .bit-cell .val { color: #00ffff; font-weight: bold; }
+        .bit-cell.active {
+            background: linear-gradient(135deg, #ffd700, #cc9900);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
         }
-        .fenwick-cell.summed {
-            border-color: #00ff00;
-            background: linear-gradient(135deg, #00ff0033, #00880033);
+        .bit-cell.active .val { color: #000; }
+        .code-panel {
+            background: linear-gradient(135deg, #0d0d15, #1a1a25);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 15px;
+            max-height: 280px;
+            overflow-y: auto;
         }
-        .fenwick-cell .bit-value {
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-        .fenwick-cell .bit-index {
-            font-size: 0.7em;
-            color: #888;
-        }
-        .fenwick-cell .bit-range {
-            font-size: 0.6em;
+        .code-title {
+            font-size: 0.8rem;
             color: #00ffff;
-            position: absolute;
-            bottom: 3px;
-        }
-
-        /* Word list */
-        .word-list {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .word-item {
-            padding: 8px 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid #00ffff;
-            border-radius: 8px;
-            font-family: monospace;
-        }
-        .word-item.found {
-            border-color: #00ff00;
-            background: rgba(0, 255, 0, 0.2);
-        }
-        .word-item.prefix {
-            border-color: #ffd700;
-            background: rgba(255, 215, 0, 0.2);
-        }
-
-        /* Info Panel */
-        .info-panel {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .info-box {
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px 25px;
-            text-align: center;
-        }
-        .info-label { color: #888; font-size: 0.9em; }
-        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
-
-        .speed-control {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 8px;
         }
-        .speed-label { color: #888; }
-        .speed-slider {
-            width: 150px;
-            -webkit-appearance: none;
-            height: 6px;
+        .code-title::before { content: "</>"; color: #ff00ff; font-weight: bold; }
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: pre;
+        }
+        .code-line.active {
             background: rgba(0, 255, 255, 0.2);
+            border-left: 3px solid #00ffff;
+        }
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-number { color: #bd93f9; }
+        .code-comment { color: #6272a4; }
+        .code-variable { color: #8be9fd; }
+        .code-string { color: #f1fa8c; }
+        .info-panel {
+            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+        }
+        .panel-section { margin-bottom: 20px; }
+        .panel-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 2px;
+        }
+        .step-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e0e0e0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+        }
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+            border: 1px solid rgba(255, 0, 255, 0.4);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        .state-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover:not(:disabled) { background: linear-gradient(135deg, #00ffff, #0088aa); color: #000; }
+        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .control-btn.playing { background: linear-gradient(135deg, #ff00ff, #aa0088); border-color: #ff00ff; }
+        .speed-control { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .speed-label { color: #888; font-size: 0.85rem; }
+        .speed-slider {
+            width: 100px;
+            height: 5px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
             border-radius: 3px;
         }
         .speed-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #00ffff;
+            width: 16px;
+            height: 16px;
+            background: #fff;
             border-radius: 50%;
             cursor: pointer;
         }
-
-        .query-display {
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 215, 0, 0.1);
-            border: 2px solid #ffd700;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; font-size: 0.85rem; margin-top: 8px; }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
         }
-        .query-label { color: #888; }
-        .query-value { color: #ffd700; font-size: 1.3em; font-weight: bold; font-family: monospace; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+        .result-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #00ff88;
+            font-weight: bold;
+            display: none;
+        }
+        .camera-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Advanced Structures</h1>
-        <p class="subtitle">Tries, Segment Trees & Fenwick Trees</p>
+        <h1>Advanced Data Structures</h1>
+        <p class="subtitle">Tries, Segment Trees, Fenwick Trees - Drag to rotate, scroll to zoom</p>
     </header>
     <div class="container">
         <div class="algorithm-selector" id="algoSelector"></div>
-        <div class="visualization-area">
-            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
-            <div id="vizContent"></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
-        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
-        <div class="controls">
-            <button class="control-btn" id="prevBtn" disabled>Previous</button>
-            <button class="control-btn" id="playBtn">Play</button>
-            <button class="control-btn" id="nextBtn" disabled>Next</button>
-            <button class="control-btn" id="resetBtn">Reset</button>
-        </div>
-        <div class="speed-control">
-            <span class="speed-label">Speed:</span>
-            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
-            <span class="speed-label" id="speedValue">800ms</span>
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="scene" id="scene">
+                        <div class="stage" id="stage">
+                            <div class="structure-container" id="structureContainer"></div>
+                        </div>
+                        <div class="result-display" id="resultDisplay"></div>
+                        <div class="camera-hint">Drag to rotate | Scroll to zoom</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" id="prevBtn">Prev</button>
+                        <button class="control-btn" id="playBtn">Play</button>
+                        <button class="control-btn" id="nextBtn">Next</button>
+                        <button class="control-btn" id="resetBtn">Reset</button>
+                        <div class="speed-control">
+                            <span class="speed-label">Speed:</span>
+                            <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" value="800">
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+                </div>
+                <div class="code-panel">
+                    <div class="code-title">Python Code</div>
+                    <div class="code-block" id="codeBlock"></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="panel-section">
+                    <div class="panel-title">Current Step</div>
+                    <div class="step-description" id="stepDescription">Select an algorithm to begin</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Complexity</div>
+                    <div class="complexity-badge" id="complexityBadge">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">State</div>
+                    <div class="state-info" id="stateInfo">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Legend</div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#ffd700,#996600)"></div><span>Current</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#00ffff,#006688)"></div><span>Path/Visited</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#00ff88,#006633)"></div><span>Result</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <script>
-        const visualData = {
-            "world": "14_advanced_structures",
-            "algorithms": [
-                {
-                    "algorithm": "trie_insert_search",
-                    "description": "Trie - insert and search words",
-                    "words": ["cat", "car", "card", "care"],
-                    "steps": [
-                        {"step": 1, "description": "Build a Trie with words: cat, car, card, care", "trie": {"root": {}}, "action": "init"},
-                        {"step": 2, "description": "Insert 'cat': traverse c -> a -> t", "word": "cat", "path": ["c", "a", "t"], "current": "c", "action": "insert"},
-                        {"step": 3, "description": "Insert 'cat': mark 't' as word end", "word": "cat", "path": ["c", "a", "t"], "current": "t", "word_end": true, "action": "mark_end"},
-                        {"step": 4, "description": "Insert 'car': c, a exist, add 'r'", "word": "car", "path": ["c", "a", "r"], "current": "r", "action": "insert"},
-                        {"step": 5, "description": "Insert 'card': c, a, r exist, add 'd'", "word": "card", "path": ["c", "a", "r", "d"], "current": "d", "action": "insert"},
-                        {"step": 6, "description": "Insert 'care': c, a, r exist, add 'e'", "word": "care", "path": ["c", "a", "r", "e"], "current": "e", "action": "insert"},
-                        {"step": 7, "description": "Trie built! Now search for 'car'", "query": "car", "action": "search_start"},
-                        {"step": 8, "description": "Search 'car': follow c -> a -> r", "query": "car", "path": ["c", "a", "r"], "current": "r", "action": "search"},
-                        {"step": 9, "description": "'car' found! (r is marked as word end)", "query": "car", "found": true, "action": "found"},
-                        {"step": 10, "description": "Search prefix 'ca': find all words starting with 'ca'", "query": "ca", "prefix_words": ["cat", "car", "card", "care"], "action": "prefix_search"}
-                    ]
-                },
-                {
-                    "algorithm": "segment_tree_range_sum",
-                    "description": "Segment Tree - range sum queries",
-                    "array": [1, 3, 5, 7, 9, 11],
-                    "steps": [
-                        {"step": 1, "description": "Build segment tree for array [1, 3, 5, 7, 9, 11]", "array": [1, 3, 5, 7, 9, 11], "tree": [36, 9, 27, 4, 5, 16, 11, 1, 3, null, null, 7, 9, null, null], "action": "init"},
-                        {"step": 2, "description": "Tree structure: root stores sum of entire array (36)", "tree": [36, 9, 27, 4, 5, 16, 11, 1, 3, null, null, 7, 9, null, null], "active": [0], "action": "explain"},
-                        {"step": 3, "description": "Left child [0-2] = 9, Right child [3-5] = 27", "tree": [36, 9, 27, 4, 5, 16, 11, 1, 3, null, null, 7, 9, null, null], "active": [1, 2], "action": "explain"},
-                        {"step": 4, "description": "Query: sum of range [1, 4]", "query_range": [1, 4], "action": "query_start"},
-                        {"step": 5, "description": "Start at root, range [0-5] overlaps [1-4]", "active": [0], "query_range": [1, 4], "action": "query"},
-                        {"step": 6, "description": "Go left [0-2]: partially overlaps, go deeper", "active": [1], "query_range": [1, 4], "action": "query"},
-                        {"step": 7, "description": "Node [1-2] fully in range, add 5+3=8", "active": [4], "in_range": [4], "partial_sum": 8, "action": "add"},
-                        {"step": 8, "description": "Go right [3-5]: partially overlaps", "active": [2], "query_range": [1, 4], "action": "query"},
-                        {"step": 9, "description": "Node [3-4] fully in range, add 7+9=16", "active": [5], "in_range": [5], "partial_sum": 24, "action": "add"},
-                        {"step": 10, "description": "Sum of range [1,4] = 3+5+7+9 = 24", "result": 24, "query_range": [1, 4], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "fenwick_tree_prefix_sum",
-                    "description": "Fenwick Tree (BIT) - prefix sums",
-                    "array": [3, 2, -1, 6, 5, 4, -3, 3, 7, 2],
-                    "steps": [
-                        {"step": 1, "description": "Build Fenwick Tree for prefix sums", "array": [3, 2, -1, 6, 5, 4, -3, 3, 7, 2], "bit": [0, 3, 5, -1, 10, 5, 9, -3, 19, 7, 9], "action": "init"},
-                        {"step": 2, "description": "BIT[i] stores sum of specific range based on binary representation", "bit": [0, 3, 5, -1, 10, 5, 9, -3, 19, 7, 9], "action": "explain"},
-                        {"step": 3, "description": "Query: prefix sum up to index 7", "query_index": 7, "action": "query_start"},
-                        {"step": 4, "description": "Start at index 7 (binary: 111)", "current": 7, "bit_repr": "111", "sum": 0, "action": "query"},
-                        {"step": 5, "description": "Add BIT[7] = -3, flip rightmost 1: 7 -> 6", "current": 7, "add": -3, "sum": -3, "next": 6, "action": "add"},
-                        {"step": 6, "description": "Add BIT[6] = 9, flip rightmost 1: 6 -> 4", "current": 6, "add": 9, "sum": 6, "next": 4, "action": "add"},
-                        {"step": 7, "description": "Add BIT[4] = 10, flip rightmost 1: 4 -> 0", "current": 4, "add": 10, "sum": 16, "next": 0, "action": "add"},
-                        {"step": 8, "description": "Index 0 reached. Prefix sum[0..7] = 16", "result": 16, "action": "complete"},
-                        {"step": 9, "description": "Verify: 3+2+(-1)+6+5+4+(-3)+3 = 19... wait, let me recalculate", "action": "verify"},
-                        {"step": 10, "description": "Prefix sum[0..6] = 3+2-1+6+5+4-3 = 16. Correct!", "result": 16, "verified": true, "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "segment_tree_update",
-                    "description": "Segment Tree - point update",
-                    "array": [1, 3, 5, 7, 9, 11],
-                    "steps": [
-                        {"step": 1, "description": "Update index 2 from 5 to 10 (+5)", "array": [1, 3, 5, 7, 9, 11], "update_index": 2, "old_val": 5, "new_val": 10, "action": "init"},
-                        {"step": 2, "description": "Start at root, propagate update down", "active": [0], "action": "update"},
-                        {"step": 3, "description": "Index 2 is in left subtree [0-2]", "active": [1], "action": "update"},
-                        {"step": 4, "description": "Index 2 is in right child of [0-2]", "active": [4], "action": "update"},
-                        {"step": 5, "description": "Reached leaf node [2-2], update 5 -> 10", "active": [4], "updating": true, "action": "update_leaf"},
-                        {"step": 6, "description": "Propagate back: update parent [0-2]: 9 -> 14", "active": [1], "updating": true, "action": "propagate"},
-                        {"step": 7, "description": "Propagate back: update root [0-5]: 36 -> 41", "active": [0], "updating": true, "action": "propagate"},
-                        {"step": 8, "description": "Update complete! New tree reflects change", "array": [1, 3, 10, 7, 9, 11], "tree": [41, 14, 27, 4, 10, 16, 11, 1, 3, null, null, 7, 9, null, null], "action": "complete"}
-                    ]
-                }
-            ]
-        };
+const codeSnippets = {
+    "trie_insert": `<span class="code-keyword">class</span> <span class="code-function">TrieNode</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):
+        self.children = {}
+        self.is_end = <span class="code-keyword">False</span>
 
-        let currentAlgo = null;
-        let currentStep = 0;
-        let isPlaying = false;
-        let playInterval = null;
-        let speed = 800;
+<span class="code-keyword">class</span> <span class="code-function">Trie</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):
+        self.root = TrieNode()
+    
+    <span class="code-keyword">def</span> <span class="code-function">insert</span>(self, word):
+        node = self.root
+        <span class="code-keyword">for</span> char <span class="code-keyword">in</span> word:
+            <span class="code-keyword">if</span> char <span class="code-keyword">not in</span> node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end = <span class="code-keyword">True</span>`,
+    "trie_search": `<span class="code-keyword">def</span> <span class="code-function">search</span>(self, word):
+    node = self.root
+    <span class="code-keyword">for</span> char <span class="code-keyword">in</span> word:
+        <span class="code-keyword">if</span> char <span class="code-keyword">not in</span> node.children:
+            <span class="code-keyword">return</span> <span class="code-keyword">False</span>
+        node = node.children[char]
+    <span class="code-keyword">return</span> node.is_end`,
+    "segment_tree_build": `<span class="code-keyword">class</span> <span class="code-function">SegmentTree</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, arr):
+        self.n = len(arr)
+        self.tree = [<span class="code-number">0</span>] * (<span class="code-number">4</span> * self.n)
+        self._build(arr, <span class="code-number">0</span>, <span class="code-number">0</span>, self.n - <span class="code-number">1</span>)
+    
+    <span class="code-keyword">def</span> <span class="code-function">_build</span>(self, arr, node, start, end):
+        <span class="code-keyword">if</span> start == end:
+            self.tree[node] = arr[start]
+        <span class="code-keyword">else</span>:
+            mid = (start + end) // <span class="code-number">2</span>
+            self._build(arr, <span class="code-number">2</span>*node+<span class="code-number">1</span>, start, mid)
+            self._build(arr, <span class="code-number">2</span>*node+<span class="code-number">2</span>, mid+<span class="code-number">1</span>, end)
+            self.tree[node] = self.tree[<span class="code-number">2</span>*node+<span class="code-number">1</span>] + self.tree[<span class="code-number">2</span>*node+<span class="code-number">2</span>]`,
+    "segment_tree_query": `<span class="code-keyword">def</span> <span class="code-function">query</span>(self, L, R):
+    <span class="code-keyword">return</span> self._query(<span class="code-number">0</span>, <span class="code-number">0</span>, self.n-<span class="code-number">1</span>, L, R)
 
-        function init() {
-            const selector = document.getElementById('algoSelector');
-            visualData.algorithms.forEach((algo, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'algo-btn';
-                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                btn.onclick = () => selectAlgorithm(index);
-                selector.appendChild(btn);
-            });
-            document.getElementById('prevBtn').onclick = prevStep;
-            document.getElementById('nextBtn').onclick = nextStep;
-            document.getElementById('playBtn').onclick = togglePlay;
-            document.getElementById('resetBtn').onclick = reset;
-            document.getElementById('speedSlider').oninput = (e) => {
-                speed = 2100 - e.target.value;
-                document.getElementById('speedValue').textContent = speed + 'ms';
-            };
+<span class="code-keyword">def</span> <span class="code-function">_query</span>(self, node, start, end, L, R):
+    <span class="code-keyword">if</span> R < start <span class="code-keyword">or</span> L > end:
+        <span class="code-keyword">return</span> <span class="code-number">0</span>  <span class="code-comment"># No overlap</span>
+    <span class="code-keyword">if</span> L <= start <span class="code-keyword">and</span> end <= R:
+        <span class="code-keyword">return</span> self.tree[node]  <span class="code-comment"># Full overlap</span>
+    mid = (start + end) // <span class="code-number">2</span>
+    left = self._query(<span class="code-number">2</span>*node+<span class="code-number">1</span>, start, mid, L, R)
+    right = self._query(<span class="code-number">2</span>*node+<span class="code-number">2</span>, mid+<span class="code-number">1</span>, end, L, R)
+    <span class="code-keyword">return</span> left + right`,
+    "fenwick_update": `<span class="code-keyword">class</span> <span class="code-function">FenwickTree</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, n):
+        self.n = n
+        self.tree = [<span class="code-number">0</span>] * (n + <span class="code-number">1</span>)
+    
+    <span class="code-keyword">def</span> <span class="code-function">update</span>(self, i, delta):
+        i += <span class="code-number">1</span>  <span class="code-comment"># 1-indexed</span>
+        <span class="code-keyword">while</span> i <= self.n:
+            self.tree[i] += delta
+            i += i & (-i)  <span class="code-comment"># Add LSB</span>`,
+    "fenwick_query": `<span class="code-keyword">def</span> <span class="code-function">prefix_sum</span>(self, i):
+    i += <span class="code-number">1</span>  <span class="code-comment"># 1-indexed</span>
+    total = <span class="code-number">0</span>
+    <span class="code-keyword">while</span> i > <span class="code-number">0</span>:
+        total += self.tree[i]
+        i -= i & (-i)  <span class="code-comment"># Remove LSB</span>
+    <span class="code-keyword">return</span> total`
+};
+
+const codeLineMap = {
+    "trie_insert": { 1: [9,10], 2: [11,12,13], 3: [11,12,13,14], 4: [11,12,13,14], 5: [11,12,13,14], 6: [11,12,13,14], 7: [15] },
+    "trie_search": { 1: [0,1], 2: [2,3,4,5], 3: [2,3,4,5], 4: [2,3,4,5], 5: [6] },
+    "segment_tree_build": { 1: [0,1,2,3], 2: [6,7], 3: [8,9,10,11,12], 4: [8,9,10,11,12], 5: [12] },
+    "segment_tree_query": { 1: [0,1], 2: [3,4,5,6,7], 3: [3,4,5,6,7], 4: [3,4,5,6,7], 5: [7], 6: [7], 7: [3,4,5,6,7], 8: [7], 9: [11] },
+    "fenwick_update": { 1: [5,6], 2: [7,8,9], 3: [7,8,9], 4: [7,8,9] },
+    "fenwick_query": { 1: [0,1,2], 2: [3,4,5], 3: [6] }
+};
+
+const visualData = {"algorithms":[{"algorithm":"trie_insert","name":"Trie Insert","complexity":"O(m)","steps":[{"step":1,"description":"Trie: Tree for storing strings. Each node is a character. Insert 'apple'.","action":"init","word":"apple","path":""},{"step":2,"description":"Create node for 'a'. First character of 'apple'.","action":"create","char":"a","path":"a"},{"step":3,"description":"Create node for 'p'. Path: a -> p.","action":"create","char":"p","path":"ap"},{"step":4,"description":"Create node for 'p'. Path: a -> p -> p.","action":"create","char":"p","path":"app"},{"step":5,"description":"Create node for 'l'. Path: a -> p -> p -> l.","action":"create","char":"l","path":"appl"},{"step":6,"description":"Create node for 'e'. Path: a -> p -> p -> l -> e.","action":"create","char":"e","path":"apple"},{"step":7,"description":"Mark 'e' as word end. 'apple' is now in the trie!","action":"mark_end","path":"apple"}]},{"algorithm":"trie_search","name":"Trie Search","complexity":"O(m)","steps":[{"step":1,"description":"Search for 'app' in trie containing ['apple', 'app', 'application'].","action":"init","word":"app"},{"step":2,"description":"Follow edge 'a'. Found! Continue.","action":"traverse","char":"a","path":"a"},{"step":3,"description":"Follow edge 'p'. Found! Continue.","action":"traverse","char":"p","path":"ap"},{"step":4,"description":"Follow edge 'p'. Found! Reached end of search word.","action":"traverse","char":"p","path":"app"},{"step":5,"description":"Check is_end flag. TRUE! 'app' exists in trie.","action":"found","path":"app","is_end":true}]},{"algorithm":"segment_tree_build","name":"Segment Tree Build","complexity":"O(n)","steps":[{"step":1,"description":"Build segment tree for range sum queries on [1, 3, 5, 7, 9, 11].","action":"init","array":[1,3,5,7,9,11]},{"step":2,"description":"Create leaf nodes: each element becomes a leaf.","action":"leaves","leaves":[1,3,5,7,9,11]},{"step":3,"description":"Build level 2: Sum pairs. [1+3=4, 5+7=12, 9+11=20].","action":"level","nodes":[4,12,20],"ranges":["[0-1]","[2-3]","[4-5]"]},{"step":4,"description":"Build level 1: [4+12=16, 20]. Combine subtrees.","action":"level","nodes":[16,20],"ranges":["[0-3]","[4-5]"]},{"step":5,"description":"Build root: 16+20=36. Root covers entire array [0-5].","action":"root","value":36,"range":"[0-5]"}]},{"algorithm":"segment_tree_query","name":"Segment Tree Query","complexity":"O(log n)","steps":[{"step":1,"description":"Query sum of range [1, 4] on array [1, 3, 5, 7, 9, 11].","action":"init","query":[1,4],"array":[1,3,5,7,9,11]},{"step":2,"description":"Start at root [0-5]=36. Partial overlap with [1,4]. Go deeper.","action":"visit","range":[0,5],"value":36,"overlap":"partial"},{"step":3,"description":"Check left child [0-2]. Partial overlap. Go deeper.","action":"visit","range":[0,2],"overlap":"partial"},{"step":4,"description":"Check [0-1]. Partial overlap (only index 1 in query).","action":"visit","range":[0,1],"overlap":"partial"},{"step":5,"description":"Get leaf [1]=3. Full overlap. Add to result. Sum=3.","action":"get","range":[1,1],"value":3,"sum":3},{"step":6,"description":"Get [2]=5. Full overlap. Add to result. Sum=8.","action":"get","range":[2,2],"value":5,"sum":8},{"step":7,"description":"Check right child [3-5]. Partial overlap.","action":"visit","range":[3,5],"overlap":"partial"},{"step":8,"description":"Get [3-4]=16. Full overlap! Add to result. Sum=24.","action":"get","range":[3,4],"value":16,"sum":24},{"step":9,"description":"Complete! Sum[1,4] = 3 + 5 + 16 = 24.","action":"complete","result":24}]},{"algorithm":"fenwick_update","name":"Fenwick Update","complexity":"O(log n)","steps":[{"step":1,"description":"Fenwick Tree (BIT): Update index 3 by +5. Uses binary representation.","action":"init","index":3,"delta":5},{"step":2,"description":"Update BIT[4] (1-indexed). Binary: 0100. LSB=4. Next: 4+4=8.","action":"update","index":4,"binary":"0100","lsb":4},{"step":3,"description":"Update BIT[8]. Binary: 1000. LSB=8. Next: 8+8=16 > n. Stop.","action":"update","index":8,"binary":"1000","lsb":8},{"step":4,"description":"Complete! Updated positions [4, 8]. O(log n) updates.","action":"complete","positions":[4,8]}]},{"algorithm":"fenwick_query","name":"Fenwick Query","complexity":"O(log n)","steps":[{"step":1,"description":"Query prefix sum [0, 7]. Start at index 8 (1-indexed).","action":"init","index":7},{"step":2,"description":"Add BIT[8]. Binary: 1000. LSB=8. Next: 8-8=0. Stop.","action":"add","index":8,"binary":"1000","lsb":8},{"step":3,"description":"Complete! Prefix sum from single position. O(log n) query.","action":"complete","positions":[8]}]}]};
+
+let currentAlgorithm = null;
+let currentStep = 0;
+let isPlaying = false;
+let playInterval = null;
+let cameraRotX = 15;
+let cameraRotY = 0;
+let cameraZoom = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const scene = document.getElementById('scene');
+const stage = document.getElementById('stage');
+const structureContainer = document.getElementById('structureContainer');
+const codeBlock = document.getElementById('codeBlock');
+const stepDescription = document.getElementById('stepDescription');
+const complexityBadge = document.getElementById('complexityBadge');
+const stateInfo = document.getElementById('stateInfo');
+const progressFill = document.getElementById('progressFill');
+const stepCounter = document.getElementById('stepCounter');
+const playBtn = document.getElementById('playBtn');
+const resultDisplay = document.getElementById('resultDisplay');
+
+function initAlgorithmSelector() {
+    const selector = document.getElementById('algoSelector');
+    visualData.algorithms.forEach((algo, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'algo-btn';
+        btn.textContent = algo.name;
+        btn.onclick = () => selectAlgorithm(index);
+        selector.appendChild(btn);
+    });
+}
+
+function selectAlgorithm(index) {
+    document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+    currentAlgorithm = visualData.algorithms[index];
+    currentStep = 0;
+    stopPlaying();
+    complexityBadge.textContent = currentAlgorithm.complexity;
+    renderCode();
+    renderStep();
+    updateControls();
+}
+
+function renderCode() {
+    const code = codeSnippets[currentAlgorithm.algorithm] || '';
+    const lines = code.split('\n');
+    let html = '';
+    lines.forEach((line, idx) => {
+        html += '<div class="code-line" data-line="' + idx + '">' + line + '</div>';
+    });
+    codeBlock.innerHTML = html;
+}
+
+function highlightCodeLines(stepNum) {
+    const lineMap = codeLineMap[currentAlgorithm.algorithm] || {};
+    const activeLines = lineMap[stepNum] || [];
+    document.querySelectorAll('.code-line').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (activeLines.includes(idx)) el.classList.add('active');
+    });
+}
+
+function renderTrie(step) {
+    const path = step.path || '';
+    const isEnd = step.action === 'mark_end' || step.action === 'found';
+    
+    let html = '<div class="trie-container">';
+    
+    // Root
+    html += '<div class="trie-level"><div class="trie-node root">*</div></div>';
+    
+    // Build path nodes
+    if (path.length > 0) {
+        for (let i = 0; i < path.length; i++) {
+            const char = path[i];
+            const isCurrent = i === path.length - 1;
+            let nodeClass = 'trie-node';
+            if (isCurrent) nodeClass += ' current';
+            else nodeClass += ' path';
+            if (isCurrent && isEnd) nodeClass += ' word-end';
+            
+            html += '<div class="trie-level"><div class="' + nodeClass + '">' + char + '</div></div>';
         }
+    }
+    
+    html += '</div>';
+    structureContainer.innerHTML = html;
+}
 
-        function selectAlgorithm(index) {
-            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-            currentAlgo = visualData.algorithms[index];
-            currentStep = 0;
-            stopPlay();
-            renderStep();
-            updateControls();
-        }
+function renderSegmentTree(step) {
+    const array = [1, 3, 5, 7, 9, 11];
+    const query = step.query || null;
+    const currentRange = step.range || null;
+    const isComplete = step.action === 'complete';
+    const sum = step.sum || 0;
+    
+    let html = '<div class="segment-tree">';
+    
+    // Root level
+    let rootClass = 'tree-node';
+    if (currentRange && currentRange[0] === 0 && currentRange[1] === 5) rootClass += ' current';
+    if (isComplete) rootClass += ' included';
+    html += '<div class="tree-level"><div class="' + rootClass + '"><div class="value">36</div><div class="range">[0-5]</div></div></div>';
+    
+    // Level 1
+    html += '<div class="tree-level">';
+    let l1Class1 = 'tree-node';
+    let l1Class2 = 'tree-node';
+    if (currentRange && currentRange[0] === 0 && currentRange[1] <= 3) l1Class1 += ' current';
+    if (currentRange && currentRange[0] >= 3 && currentRange[1] === 5) l1Class2 += ' current';
+    html += '<div class="' + l1Class1 + '"><div class="value">16</div><div class="range">[0-3]</div></div>';
+    html += '<div class="' + l1Class2 + '"><div class="value">20</div><div class="range">[4-5]</div></div>';
+    html += '</div>';
+    
+    // Level 2
+    html += '<div class="tree-level">';
+    const l2Ranges = [[0,1], [2,3], [4,5]];
+    const l2Values = [4, 12, 20];
+    l2Ranges.forEach((r, i) => {
+        let cls = 'tree-node';
+        if (currentRange && currentRange[0] === r[0] && currentRange[1] === r[1]) cls += ' current';
+        if (step.action === 'get' && currentRange && currentRange[0] >= r[0] && currentRange[1] <= r[1]) cls += ' included';
+        html += '<div class="' + cls + '"><div class="value">' + l2Values[i] + '</div><div class="range">[' + r[0] + '-' + r[1] + ']</div></div>';
+    });
+    html += '</div>';
+    
+    // Leaves
+    html += '<div class="tree-level">';
+    array.forEach((val, i) => {
+        let cls = 'tree-node';
+        if (currentRange && currentRange[0] === i && currentRange[1] === i) cls += ' current';
+        if (query && i >= query[0] && i <= query[1]) cls += ' included';
+        html += '<div class="' + cls + '"><div class="value">' + val + '</div><div class="range">[' + i + ']</div></div>';
+    });
+    html += '</div>';
+    
+    // Array display
+    html += '<div class="array-display">';
+    array.forEach((val, i) => {
+        let cls = 'array-cell';
+        if (query && i >= query[0] && i <= query[1]) cls += ' in-range';
+        html += '<div class="' + cls + '"><div class="idx">' + i + '</div><div class="val">' + val + '</div></div>';
+    });
+    html += '</div>';
+    
+    html += '</div>';
+    structureContainer.innerHTML = html;
+}
 
-        function renderStep() {
-            if (!currentAlgo) return;
-            const step = currentAlgo.steps[currentStep];
-            document.getElementById('stepDesc').textContent = step.description;
-            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
-            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+function renderFenwick(step) {
+    const size = 10;
+    const activeIndex = step.index || null;
+    const isComplete = step.action === 'complete';
+    
+    let html = '<div class="fenwick-container">';
+    
+    html += '<div style="color:#888;font-size:0.9rem;margin-bottom:10px">Fenwick Tree (Binary Indexed Tree)</div>';
+    
+    html += '<div class="bit-array">';
+    for (let i = 1; i <= 8; i++) {
+        let cls = 'bit-cell';
+        if (activeIndex === i) cls += ' active';
+        const binary = i.toString(2).padStart(4, '0');
+        const lsb = i & (-i);
+        html += '<div class="' + cls + '"><div class="idx">' + i + '</div><div class="binary">' + binary + '</div><div class="val">LSB=' + lsb + '</div></div>';
+    }
+    html += '</div>';
+    
+    if (step.binary) {
+        html += '<div style="margin-top:20px;padding:15px;background:rgba(0,0,0,0.3);border-radius:8px">';
+        html += '<div style="color:#00ffff">Current: ' + step.index + ' (binary: ' + step.binary + ')</div>';
+        html += '<div style="color:#ff00ff">LSB: ' + step.lsb + '</div>';
+        html += '</div>';
+    }
+    
+    html += '</div>';
+    structureContainer.innerHTML = html;
+}
 
-            const content = document.getElementById('vizContent');
-            
-            switch(currentAlgo.algorithm) {
-                case 'trie_insert_search':
-                    renderTrie(content, step);
-                    break;
-                case 'segment_tree_range_sum':
-                case 'segment_tree_update':
-                    renderSegmentTree(content, step);
-                    break;
-                case 'fenwick_tree_prefix_sum':
-                    renderFenwickTree(content, step);
-                    break;
-            }
-        }
+function renderStep() {
+    if (!currentAlgorithm) return;
+    const step = currentAlgorithm.steps[currentStep];
+    stepDescription.textContent = step.description;
+    highlightCodeLines(step.step);
+    resultDisplay.style.display = 'none';
+    
+    // Render based on algorithm type
+    const algo = currentAlgorithm.algorithm;
+    if (algo.startsWith('trie')) renderTrie(step);
+    else if (algo.startsWith('segment')) renderSegmentTree(step);
+    else if (algo.startsWith('fenwick')) renderFenwick(step);
+    
+    // Update state info
+    let info = '';
+    if (step.path !== undefined) info += 'Path: "' + step.path + '"\n';
+    if (step.char) info += 'Character: ' + step.char + '\n';
+    if (step.range) info += 'Range: [' + step.range.join(', ') + ']\n';
+    if (step.value !== undefined) info += 'Value: ' + step.value + '\n';
+    if (step.sum !== undefined) info += 'Running sum: ' + step.sum + '\n';
+    if (step.result !== undefined) info += 'Result: ' + step.result;
+    if (step.binary) info += 'Binary: ' + step.binary + '\nLSB: ' + step.lsb;
+    stateInfo.textContent = info || '-';
+    
+    if (step.action === 'complete' || step.action === 'found' || step.action === 'mark_end') {
+        resultDisplay.style.display = 'block';
+        if (step.result !== undefined) resultDisplay.textContent = 'Result: ' + step.result;
+        else if (step.is_end) resultDisplay.textContent = 'Found!';
+        else resultDisplay.textContent = 'Complete!';
+    }
+    
+    progressFill.style.width = ((currentStep + 1) / currentAlgorithm.steps.length * 100) + '%';
+    stepCounter.textContent = 'Step ' + (currentStep + 1) + ' / ' + currentAlgorithm.steps.length;
+}
 
-        function renderTrie(container, step) {
-            const words = currentAlgo.words;
-            const path = step.path || [];
-            const current = step.current;
-            const query = step.query || step.word;
-            const found = step.found;
-            const prefixWords = step.prefix_words || [];
+function updateControls() {
+    document.getElementById('prevBtn').disabled = !currentAlgorithm || currentStep === 0;
+    document.getElementById('nextBtn').disabled = !currentAlgorithm || currentStep >= currentAlgorithm.steps.length - 1;
+    document.getElementById('playBtn').disabled = !currentAlgorithm;
+}
 
-            // Simple trie visualization
-            const trieNodes = [
-                {id: 'root', char: '*', x: 400, y: 30, children: ['c']},
-                {id: 'c', char: 'c', x: 400, y: 100, children: ['a']},
-                {id: 'a', char: 'a', x: 400, y: 170, children: ['t', 'r']},
-                {id: 't', char: 't', x: 300, y: 240, children: [], wordEnd: true},
-                {id: 'r', char: 'r', x: 500, y: 240, children: ['d', 'e'], wordEnd: true},
-                {id: 'd', char: 'd', x: 450, y: 310, children: [], wordEnd: true},
-                {id: 'e', char: 'e', x: 550, y: 310, children: [], wordEnd: true}
-            ];
+function nextStep() {
+    if (currentAlgorithm && currentStep < currentAlgorithm.steps.length - 1) { currentStep++; renderStep(); updateControls(); }
+    else stopPlaying();
+}
 
-            let html = '<div class="trie-container">';
-            
-            if (query) {
-                html += `<div class="query-display">
-                    <div class="query-label">${step.action.includes('search') || step.action === 'found' ? 'Searching:' : 'Inserting:'}</div>
-                    <div class="query-value">"${query}"</div>
-                </div>`;
-            }
-            
-            html += '<svg class="trie-svg" viewBox="0 0 800 350">';
-            
-            // Draw edges
-            trieNodes.forEach(node => {
-                node.children.forEach(childId => {
-                    const child = trieNodes.find(n => n.id === childId);
-                    if (child) {
-                        const isActive = path.includes(node.char) && path.includes(child.char);
-                        html += `<line x1="${node.x}" y1="${node.y + 20}" x2="${child.x}" y2="${child.y - 20}" class="${isActive ? 'active' : ''}"/>`;
-                        // Edge label
-                        const midX = (node.x + child.x) / 2;
-                        const midY = (node.y + child.y) / 2;
-                        html += `<text x="${midX + 15}" y="${midY}" class="edge-label">${child.char}</text>`;
-                    }
-                });
-            });
-            
-            // Draw nodes
-            trieNodes.forEach(node => {
-                let nodeClass = '';
-                if (node.id === 'root') nodeClass = 'root';
-                else if (node.char === current) nodeClass = 'current';
-                else if (found && path.includes(node.char)) nodeClass = 'found';
-                else if (node.wordEnd) nodeClass = 'word-end';
-                
-                html += `<circle cx="${node.x}" cy="${node.y}" r="20" class="${nodeClass}"/>`;
-                html += `<text x="${node.x}" y="${node.y}">${node.char}</text>`;
-            });
-            
-            html += '</svg>';
-            
-            // Word list
-            html += '<div style="color: #888; margin: 10px 0;">Words in Trie:</div>';
-            html += '<div class="word-list">';
-            words.forEach(w => {
-                let wordClass = '';
-                if (found && w === query) wordClass = 'found';
-                else if (prefixWords.includes(w)) wordClass = 'prefix';
-                html += `<div class="word-item ${wordClass}">${w}</div>`;
-            });
-            html += '</div>';
-            
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Words Stored</div><div class="info-value">${words.length}</div></div>`;
-            if (found) {
-                html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#00ff00;">FOUND</div></div>`;
-            }
-            if (prefixWords.length > 0) {
-                html += `<div class="info-box"><div class="info-label">Prefix Matches</div><div class="info-value">${prefixWords.length}</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function prevStep() {
+    if (currentAlgorithm && currentStep > 0) { currentStep--; renderStep(); updateControls(); }
+}
 
-        function renderSegmentTree(container, step) {
-            const array = step.array || currentAlgo.array;
-            const tree = step.tree || [36, 9, 27, 4, 5, 16, 11, 1, 3, null, null, 7, 9, null, null];
-            const active = step.active || [];
-            const inRange = step.in_range || [];
-            const queryRange = step.query_range;
-            const result = step.result;
+function togglePlay() { if (isPlaying) stopPlaying(); else startPlaying(); }
 
-            let html = '<div class="segment-container">';
-            
-            // Query display
-            if (queryRange) {
-                html += `<div class="query-display">
-                    <div class="query-label">Query Range:</div>
-                    <div class="query-value">[${queryRange[0]}, ${queryRange[1]}]</div>
-                </div>`;
-            }
-            
-            // Original array
-            html += '<div style="color: #888; margin-bottom: 10px;">Original Array:</div>';
-            html += '<div class="array-display">';
-            array.forEach((val, i) => {
-                let cellClass = '';
-                if (queryRange && i >= queryRange[0] && i <= queryRange[1]) cellClass = 'in-range';
-                if (step.update_index === i) cellClass = 'updating';
-                html += `<div class="array-cell ${cellClass}">
-                    <div class="cell-value">${val}</div>
-                    <div class="cell-index">[${i}]</div>
-                </div>`;
-            });
-            html += '</div>';
-            
-            // Segment tree visualization
-            html += '<div style="color: #888; margin: 20px 0 10px;">Segment Tree:</div>';
-            html += '<svg class="segment-tree-svg" viewBox="0 0 900 280">';
-            
-            // Tree layout
-            const treeLayout = [
-                {idx: 0, x: 450, y: 30, range: '[0-5]'},
-                {idx: 1, x: 250, y: 90, range: '[0-2]'},
-                {idx: 2, x: 650, y: 90, range: '[3-5]'},
-                {idx: 3, x: 150, y: 150, range: '[0-1]'},
-                {idx: 4, x: 350, y: 150, range: '[2-2]'},
-                {idx: 5, x: 550, y: 150, range: '[3-4]'},
-                {idx: 6, x: 750, y: 150, range: '[5-5]'},
-                {idx: 7, x: 100, y: 210, range: '[0-0]'},
-                {idx: 8, x: 200, y: 210, range: '[1-1]'},
-                {idx: 11, x: 500, y: 210, range: '[3-3]'},
-                {idx: 12, x: 600, y: 210, range: '[4-4]'}
-            ];
-            
-            // Draw edges
-            const edges = [[0,1], [0,2], [1,3], [1,4], [2,5], [2,6], [3,7], [3,8], [5,11], [5,12]];
-            edges.forEach(([p, c]) => {
-                const parent = treeLayout.find(n => n.idx === p);
-                const child = treeLayout.find(n => n.idx === c);
-                if (parent && child) {
-                    html += `<line x1="${parent.x}" y1="${parent.y + 20}" x2="${child.x}" y2="${child.y - 15}"/>`;
-                }
-            });
-            
-            // Draw nodes
-            treeLayout.forEach(node => {
-                if (tree[node.idx] === null) return;
-                let rectClass = '';
-                if (active.includes(node.idx)) rectClass = 'active';
-                if (inRange.includes(node.idx)) rectClass = 'in-range';
-                if (step.updating && active.includes(node.idx)) rectClass = 'updating';
-                
-                html += `<rect x="${node.x - 30}" y="${node.y - 15}" width="60" height="30" rx="5" class="${rectClass}"/>`;
-                html += `<text x="${node.x}" y="${node.y + 3}">${tree[node.idx]}</text>`;
-                html += `<text x="${node.x}" y="${node.y + 22}" class="range">${node.range}</text>`;
-            });
-            
-            html += '</svg>';
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            if (step.partial_sum !== undefined) {
-                html += `<div class="info-box"><div class="info-label">Partial Sum</div><div class="info-value">${step.partial_sum}</div></div>`;
-            }
-            if (result !== undefined) {
-                html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#00ff00;">${result}</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function startPlaying() {
+    isPlaying = true;
+    playBtn.textContent = 'Pause';
+    playBtn.classList.add('playing');
+    playInterval = setInterval(() => {
+        if (currentStep < currentAlgorithm.steps.length - 1) nextStep();
+        else stopPlaying();
+    }, 2200 - document.getElementById('speedSlider').value);
+}
 
-        function renderFenwickTree(container, step) {
-            const array = currentAlgo.array;
-            const bit = step.bit || [0, 3, 5, -1, 10, 5, 9, -3, 19, 7, 9];
-            const current = step.current;
-            const sum = step.sum;
-            const result = step.result;
-            const queryIndex = step.query_index;
+function stopPlaying() {
+    isPlaying = false;
+    playBtn.textContent = 'Play';
+    playBtn.classList.remove('playing');
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+}
 
-            let html = '<div class="fenwick-container">';
-            
-            if (queryIndex !== undefined) {
-                html += `<div class="query-display">
-                    <div class="query-label">Prefix Sum Query:</div>
-                    <div class="query-value">sum[0..${queryIndex}]</div>
-                </div>`;
-            }
-            
-            // Original array
-            html += '<div style="color: #888; margin-bottom: 10px;">Original Array:</div>';
-            html += '<div class="array-display">';
-            array.forEach((val, i) => {
-                html += `<div class="array-cell">
-                    <div class="cell-value">${val}</div>
-                    <div class="cell-index">[${i}]</div>
-                </div>`;
-            });
-            html += '</div>';
-            
-            // BIT array
-            html += '<div style="color: #888; margin: 20px 0 10px;">Fenwick Tree (BIT) - 1-indexed:</div>';
-            html += '<div class="fenwick-array">';
-            for (let i = 1; i < bit.length; i++) {
-                let cellClass = '';
-                if (i === current) cellClass = 'active';
-                else if (step.summed && step.summed.includes(i)) cellClass = 'summed';
-                
-                // Calculate range this BIT index covers
-                const lowbit = i & (-i);
-                const rangeStart = i - lowbit + 1;
-                const rangeEnd = i;
-                
-                html += `<div class="fenwick-cell ${cellClass}">
-                    <div class="bit-value">${bit[i]}</div>
-                    <div class="bit-index">BIT[${i}]</div>
-                    <div class="bit-range">[${rangeStart}-${rangeEnd}]</div>
-                </div>`;
-            }
-            html += '</div>';
-            
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            if (step.bit_repr) {
-                html += `<div class="info-box"><div class="info-label">Binary</div><div class="info-value">${step.bit_repr}</div></div>`;
-            }
-            if (sum !== undefined) {
-                html += `<div class="info-box"><div class="info-label">Running Sum</div><div class="info-value">${sum}</div></div>`;
-            }
-            if (step.add !== undefined) {
-                html += `<div class="info-box"><div class="info-label">Adding</div><div class="info-value">${step.add >= 0 ? '+' : ''}${step.add}</div></div>`;
-            }
-            if (result !== undefined) {
-                html += `<div class="info-box"><div class="info-label">Result</div><div class="info-value" style="color:#00ff00;">${result}</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function reset() { stopPlaying(); currentStep = 0; renderStep(); updateControls(); }
 
-        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
-        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
-        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
-        function startPlay() {
-            if (!currentAlgo) return;
-            isPlaying = true;
-            document.getElementById('playBtn').textContent = 'Pause';
-            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
-        }
-        function stopPlay() {
-            isPlaying = false;
-            document.getElementById('playBtn').textContent = 'Play';
-            if (playInterval) { clearInterval(playInterval); playInterval = null; }
-        }
-        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
-        function updateControls() {
-            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
-            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
-        }
-        init();
+function updateCamera() {
+    stage.style.transform = 'translateZ(' + cameraZoom + 'px) rotateX(' + cameraRotX + 'deg) rotateY(' + cameraRotY + 'deg)';
+}
+
+scene.addEventListener('mousedown', (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    cameraRotY += (e.clientX - lastMouseX) * 0.5;
+    cameraRotX -= (e.clientY - lastMouseY) * 0.3;
+    cameraRotX = Math.max(-60, Math.min(60, cameraRotX));
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+    updateCamera();
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+scene.addEventListener('wheel', (e) => { e.preventDefault(); cameraZoom += e.deltaY * -0.5; cameraZoom = Math.max(-300, Math.min(200, cameraZoom)); updateCamera(); });
+
+document.getElementById('playBtn').onclick = togglePlay;
+document.getElementById('prevBtn').onclick = prevStep;
+document.getElementById('nextBtn').onclick = nextStep;
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('speedSlider').oninput = () => { if (isPlaying) { stopPlaying(); startPlaying(); } };
+
+initAlgorithmSelector();
+updateCamera();
     </script>
 </body>
 </html>

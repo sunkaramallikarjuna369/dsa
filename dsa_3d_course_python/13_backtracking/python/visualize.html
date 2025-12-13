@@ -7,552 +7,884 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
-            color: #fff;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
-            padding: 30px 0;
-            background: rgba(0, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            margin-bottom: 30px;
+            padding: 25px 0;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            margin-bottom: 25px;
         }
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2rem;
             background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            animation: gradient-shift 3s linear infinite;
         }
-        .subtitle { color: #888; font-size: 1.1em; }
+        @keyframes gradient-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .subtitle { color: #888; font-size: 1rem; margin-top: 8px; }
         .algorithm-selector {
             display: flex;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
         }
         .algo-btn {
-            padding: 12px 20px;
-            background: rgba(0, 255, 255, 0.1);
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(0, 255, 255, 0.3);
             color: #00ffff;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-        .algo-btn:hover, .algo-btn.active {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-        .visualization-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            min-height: 500px;
-        }
-        .step-description {
-            text-align: center;
-            font-size: 1.2em;
-            color: #00ffff;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .control-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
-            border: none;
+        .algo-btn:hover { border-color: #00ffff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+        .algo-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
             color: #000;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease;
         }
-        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
-        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
-
-        /* N-Queens Board */
-        .board-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
             gap: 20px;
-            padding: 20px;
+        }
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
+        .visualization-area {
+            background: radial-gradient(ellipse at center, #0f0f1a 0%, #050508 70%, #000 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        .scene {
+            width: 100%;
+            height: 380px;
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .scene:active { cursor: grabbing; }
+        .stage {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+            transition: transform 0.1s ease-out;
+            position: relative;
+        }
+        .backtrack-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .chess-board {
             display: grid;
             gap: 2px;
-            background: #333;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            transform-style: preserve-3d;
         }
-        .board-cell {
+        .chess-cell {
             width: 60px;
             height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2em;
+            font-size: 1.8rem;
             transition: all 0.3s ease;
+            border-radius: 4px;
         }
-        .board-cell.light { background: #f0d9b5; }
-        .board-cell.dark { background: #b58863; }
-        .board-cell.queen {
-            background: linear-gradient(135deg, #00ff0044, #00880044);
+        .chess-cell.light { background: linear-gradient(135deg, #2a2a3e, #1a1a2e); }
+        .chess-cell.dark { background: linear-gradient(135deg, #1a1a2e, #0f0f1a); }
+        .chess-cell.queen {
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
         }
-        .board-cell.current {
-            background: linear-gradient(135deg, #ffd70066, #cc990066);
-            box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.5);
+        .chess-cell.conflict {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(255, 0, 0, 0.1));
+            box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.4);
         }
-        .board-cell.conflict {
-            background: linear-gradient(135deg, #ff333366, #cc000066);
+        .chess-cell.trying {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
         }
-        .board-cell.safe {
-            background: linear-gradient(135deg, #00ffff33, #00888833);
+        .chess-cell.solution {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 255, 136, 0.1));
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
         }
-
-        /* Subset/Permutation visualization */
+        .maze-grid {
+            display: grid;
+            gap: 2px;
+            transform-style: preserve-3d;
+        }
+        .maze-cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+        .maze-cell.wall {
+            background: linear-gradient(135deg, #333, #111);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+        .maze-cell.path {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .maze-cell.visited {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(0, 255, 255, 0.1));
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        .maze-cell.current {
+            background: linear-gradient(135deg, #ffd700, #cc9900);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+        .maze-cell.goal {
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+        }
+        .maze-cell.start {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
+        }
         .subset-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
         }
-        .elements-row {
+        .current-set {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 10px;
+            min-width: 150px;
             justify-content: center;
         }
-        .element {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #1a1a3a, #0a0a2a);
-            border: 3px solid #00ffff;
-            border-radius: 10px;
+        .set-element {
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: linear-gradient(135deg, #00ffff, #0088aa);
+            color: #000;
             font-weight: bold;
-            font-size: 1.2em;
+            border-radius: 8px;
             transition: all 0.3s ease;
         }
-        .element.included {
-            border-color: #00ff00;
-            background: linear-gradient(135deg, #00ff0033, #00880033);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        .set-element.adding {
+            animation: pulse-add 0.5s ease;
         }
-        .element.considering {
-            border-color: #ffd700;
-            background: linear-gradient(135deg, #ffd70033, #cc990033);
-            animation: pulse 0.5s infinite;
-        }
-        .element.excluded {
-            opacity: 0.4;
-            border-color: #666;
-        }
-        @keyframes pulse {
+        @keyframes pulse-add {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .current-subset {
-            display: flex;
-            gap: 10px;
-            padding: 15px 30px;
-            background: rgba(0, 255, 0, 0.1);
-            border: 2px solid #00ff00;
-            border-radius: 10px;
-            min-width: 200px;
-            justify-content: center;
+            50% { transform: scale(1.2); }
         }
         .results-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
+            max-width: 400px;
             justify-content: center;
-            max-width: 600px;
         }
         .result-item {
-            padding: 8px 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid #00ffff;
-            border-radius: 8px;
-            font-family: monospace;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #00ff88;
         }
-
-        /* Decision Tree */
-        .tree-container {
-            width: 100%;
-            overflow-x: auto;
+        .code-panel {
+            background: linear-gradient(135deg, #0d0d15, #1a1a25);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 15px;
+            max-height: 280px;
+            overflow-y: auto;
         }
-        .tree-svg {
-            width: 100%;
-            min-width: 600px;
-            height: 300px;
-        }
-        .tree-svg line {
-            stroke: #00ffff;
-            stroke-width: 2;
-        }
-        .tree-svg line.backtrack {
-            stroke: #ff3333;
-            stroke-dasharray: 5,5;
-        }
-        .tree-svg circle {
-            fill: #1a1a3a;
-            stroke: #00ffff;
-            stroke-width: 2;
-        }
-        .tree-svg circle.current {
-            fill: #ffd70033;
-            stroke: #ffd700;
-            filter: drop-shadow(0 0 10px #ffd700);
-        }
-        .tree-svg circle.visited {
-            fill: #00ff0033;
-            stroke: #00ff00;
-        }
-        .tree-svg circle.backtracked {
-            fill: #ff333333;
-            stroke: #ff3333;
-        }
-        .tree-svg text {
-            fill: #fff;
-            font-size: 12px;
-            text-anchor: middle;
-        }
-
-        /* Info Panel */
-        .info-panel {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .info-box {
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px 25px;
-            text-align: center;
-        }
-        .info-label { color: #888; font-size: 0.9em; }
-        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
-
-        .speed-control {
+        .code-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 8px;
         }
-        .speed-label { color: #888; }
-        .speed-slider {
-            width: 150px;
-            -webkit-appearance: none;
-            height: 6px;
+        .code-title::before { content: "</>"; color: #ff00ff; font-weight: bold; }
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: pre;
+        }
+        .code-line.active {
             background: rgba(0, 255, 255, 0.2);
+            border-left: 3px solid #00ffff;
+        }
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-number { color: #bd93f9; }
+        .code-comment { color: #6272a4; }
+        .code-variable { color: #8be9fd; }
+        .info-panel {
+            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+        }
+        .panel-section { margin-bottom: 20px; }
+        .panel-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 2px;
+        }
+        .step-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e0e0e0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+        }
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+            border: 1px solid rgba(255, 0, 255, 0.4);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        .state-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover:not(:disabled) { background: linear-gradient(135deg, #00ffff, #0088aa); color: #000; }
+        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .control-btn.playing { background: linear-gradient(135deg, #ff00ff, #aa0088); border-color: #ff00ff; }
+        .speed-control { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .speed-label { color: #888; font-size: 0.85rem; }
+        .speed-slider {
+            width: 100px;
+            height: 5px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
             border-radius: 3px;
         }
         .speed-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #00ffff;
+            width: 16px;
+            height: 16px;
+            background: #fff;
             border-radius: 50%;
             cursor: pointer;
         }
-
-        .phase-indicator {
-            text-align: center;
-            padding: 10px 20px;
+        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; font-size: 0.85rem; margin-top: 8px; }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
-            font-weight: bold;
-            margin-bottom: 15px;
         }
-        .phase-indicator.choose { background: rgba(0, 255, 0, 0.2); color: #00ff00; }
-        .phase-indicator.explore { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
-        .phase-indicator.unchoose { background: rgba(255, 51, 51, 0.2); color: #ff3333; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+        .result-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #00ff88;
+            font-weight: bold;
+            display: none;
+        }
+        .camera-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Backtracking</h1>
-        <p class="subtitle">Interactive 3D Visualization</p>
+        <h1>Backtracking Algorithms</h1>
+        <p class="subtitle">Interactive 3D Visualization with Code - Drag to rotate, scroll to zoom</p>
     </header>
     <div class="container">
         <div class="algorithm-selector" id="algoSelector"></div>
-        <div class="visualization-area">
-            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
-            <div id="vizContent"></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
-        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
-        <div class="controls">
-            <button class="control-btn" id="prevBtn" disabled>Previous</button>
-            <button class="control-btn" id="playBtn">Play</button>
-            <button class="control-btn" id="nextBtn" disabled>Next</button>
-            <button class="control-btn" id="resetBtn">Reset</button>
-        </div>
-        <div class="speed-control">
-            <span class="speed-label">Speed:</span>
-            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
-            <span class="speed-label" id="speedValue">800ms</span>
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="scene" id="scene">
+                        <div class="stage" id="stage">
+                            <div class="backtrack-container" id="backtrackContainer"></div>
+                        </div>
+                        <div class="result-display" id="resultDisplay"></div>
+                        <div class="camera-hint">Drag to rotate | Scroll to zoom</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" id="prevBtn">Prev</button>
+                        <button class="control-btn" id="playBtn">Play</button>
+                        <button class="control-btn" id="nextBtn">Next</button>
+                        <button class="control-btn" id="resetBtn">Reset</button>
+                        <div class="speed-control">
+                            <span class="speed-label">Speed:</span>
+                            <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" value="800">
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+                </div>
+                <div class="code-panel">
+                    <div class="code-title">Python Code</div>
+                    <div class="code-block" id="codeBlock"></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="panel-section">
+                    <div class="panel-title">Current Step</div>
+                    <div class="step-description" id="stepDescription">Select an algorithm to begin</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Complexity</div>
+                    <div class="complexity-badge" id="complexityBadge">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">State</div>
+                    <div class="state-info" id="stateInfo">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Legend</div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#ffd700,#996600)"></div><span>Trying</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#ff4444,#992222)"></div><span>Conflict</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#00ff88,#006633)"></div><span>Solution</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <script>
-        const visualData = {
-            "world": "13_backtracking",
-            "algorithms": [
-                {
-                    "algorithm": "n_queens_4x4",
-                    "description": "N-Queens Problem - place 4 queens on 4x4 board",
-                    "n": 4,
-                    "steps": [
-                        {"step": 1, "description": "Place 4 queens so none attack each other", "board": [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]], "action": "init"},
-                        {"step": 2, "description": "Try placing queen in row 0, col 0", "board": [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]], "current": [0,0], "phase": "choose", "action": "place"},
-                        {"step": 3, "description": "Row 1: col 0,1 attacked. Try col 2", "board": [[1,0,0,0],[0,0,1,0],[0,0,0,0],[0,0,0,0]], "current": [1,2], "conflicts": [[1,0],[1,1]], "phase": "choose", "action": "place"},
-                        {"step": 4, "description": "Row 2: all positions attacked! Backtrack", "board": [[1,0,0,0],[0,0,1,0],[0,0,0,0],[0,0,0,0]], "conflicts": [[2,0],[2,1],[2,2],[2,3]], "phase": "unchoose", "action": "conflict"},
-                        {"step": 5, "description": "Backtrack: remove queen from row 1, try col 3", "board": [[1,0,0,0],[0,0,0,1],[0,0,0,0],[0,0,0,0]], "current": [1,3], "phase": "choose", "action": "place"},
-                        {"step": 6, "description": "Row 2: try col 1", "board": [[1,0,0,0],[0,0,0,1],[0,1,0,0],[0,0,0,0]], "current": [2,1], "phase": "choose", "action": "place"},
-                        {"step": 7, "description": "Row 3: all positions attacked! Backtrack more", "board": [[1,0,0,0],[0,0,0,1],[0,1,0,0],[0,0,0,0]], "conflicts": [[3,0],[3,1],[3,2],[3,3]], "phase": "unchoose", "action": "conflict"},
-                        {"step": 8, "description": "Backtrack to row 0, try col 1", "board": [[0,1,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]], "current": [0,1], "phase": "choose", "action": "place"},
-                        {"step": 9, "description": "Row 1: try col 3", "board": [[0,1,0,0],[0,0,0,1],[0,0,0,0],[0,0,0,0]], "current": [1,3], "phase": "choose", "action": "place"},
-                        {"step": 10, "description": "Row 2: try col 0", "board": [[0,1,0,0],[0,0,0,1],[1,0,0,0],[0,0,0,0]], "current": [2,0], "phase": "choose", "action": "place"},
-                        {"step": 11, "description": "Row 3: try col 2 - SUCCESS!", "board": [[0,1,0,0],[0,0,0,1],[1,0,0,0],[0,0,1,0]], "current": [3,2], "phase": "choose", "action": "place"},
-                        {"step": 12, "description": "Solution found! All 4 queens placed safely", "board": [[0,1,0,0],[0,0,0,1],[1,0,0,0],[0,0,1,0]], "solution": true, "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "subset_generation",
-                    "description": "Generate all subsets of {1, 2, 3}",
-                    "elements": [1, 2, 3],
-                    "steps": [
-                        {"step": 1, "description": "Generate all subsets of {1, 2, 3}", "current": [], "index": 0, "results": [], "action": "init"},
-                        {"step": 2, "description": "At index 0: CHOOSE to include 1", "current": [1], "index": 0, "considering": 0, "phase": "choose", "action": "include"},
-                        {"step": 3, "description": "At index 1: CHOOSE to include 2", "current": [1, 2], "index": 1, "considering": 1, "phase": "choose", "action": "include"},
-                        {"step": 4, "description": "At index 2: CHOOSE to include 3", "current": [1, 2, 3], "index": 2, "considering": 2, "phase": "choose", "action": "include"},
-                        {"step": 5, "description": "Reached end - save subset {1,2,3}", "current": [1, 2, 3], "results": [[1,2,3]], "phase": "explore", "action": "save"},
-                        {"step": 6, "description": "UNCHOOSE 3, try excluding it", "current": [1, 2], "index": 2, "phase": "unchoose", "action": "exclude"},
-                        {"step": 7, "description": "Save subset {1,2}", "current": [1, 2], "results": [[1,2,3], [1,2]], "action": "save"},
-                        {"step": 8, "description": "UNCHOOSE 2, try excluding it", "current": [1], "index": 1, "phase": "unchoose", "action": "exclude"},
-                        {"step": 9, "description": "Include 3 (skip 2): save {1,3}", "current": [1, 3], "results": [[1,2,3], [1,2], [1,3]], "action": "save"},
-                        {"step": 10, "description": "Save {1}", "current": [1], "results": [[1,2,3], [1,2], [1,3], [1]], "action": "save"},
-                        {"step": 11, "description": "UNCHOOSE 1, explore without it", "current": [], "index": 0, "phase": "unchoose", "action": "exclude"},
-                        {"step": 12, "description": "Continue... All 8 subsets found", "current": [], "results": [[], [1], [2], [3], [1,2], [1,3], [2,3], [1,2,3]], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "permutations",
-                    "description": "Generate all permutations of [1, 2, 3]",
-                    "elements": [1, 2, 3],
-                    "steps": [
-                        {"step": 1, "description": "Generate all permutations of [1, 2, 3]", "current": [], "remaining": [1,2,3], "results": [], "action": "init"},
-                        {"step": 2, "description": "CHOOSE 1 as first element", "current": [1], "remaining": [2,3], "considering": 1, "phase": "choose", "action": "choose"},
-                        {"step": 3, "description": "CHOOSE 2 as second element", "current": [1,2], "remaining": [3], "considering": 2, "phase": "choose", "action": "choose"},
-                        {"step": 4, "description": "CHOOSE 3 as third element - save [1,2,3]", "current": [1,2,3], "remaining": [], "results": [[1,2,3]], "phase": "explore", "action": "save"},
-                        {"step": 5, "description": "UNCHOOSE 3, UNCHOOSE 2, try 3 as second", "current": [1,3], "remaining": [2], "phase": "unchoose", "action": "backtrack"},
-                        {"step": 6, "description": "CHOOSE 2 as third - save [1,3,2]", "current": [1,3,2], "remaining": [], "results": [[1,2,3], [1,3,2]], "action": "save"},
-                        {"step": 7, "description": "UNCHOOSE 1, try 2 as first", "current": [2], "remaining": [1,3], "phase": "unchoose", "action": "backtrack"},
-                        {"step": 8, "description": "Build [2,1,3] and [2,3,1]", "current": [2], "results": [[1,2,3], [1,3,2], [2,1,3], [2,3,1]], "action": "explore"},
-                        {"step": 9, "description": "Try 3 as first, build [3,1,2] and [3,2,1]", "current": [3], "results": [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]], "action": "explore"},
-                        {"step": 10, "description": "All 6 permutations found!", "results": [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]], "action": "complete"}
-                    ]
-                }
-            ]
-        };
+const codeSnippets = {
+    "n_queens_4": `<span class="code-keyword">def</span> <span class="code-function">solve_n_queens</span>(n):
+    <span class="code-keyword">def</span> <span class="code-function">is_safe</span>(board, row, col):
+        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(row):
+            <span class="code-keyword">if</span> board[i] == col:  <span class="code-comment"># Same column</span>
+                <span class="code-keyword">return</span> <span class="code-keyword">False</span>
+            <span class="code-keyword">if</span> abs(board[i] - col) == row - i:  <span class="code-comment"># Diagonal</span>
+                <span class="code-keyword">return</span> <span class="code-keyword">False</span>
+        <span class="code-keyword">return</span> <span class="code-keyword">True</span>
+    
+    <span class="code-keyword">def</span> <span class="code-function">backtrack</span>(row):
+        <span class="code-keyword">if</span> row == n:
+            solutions.append(board[:])
+            <span class="code-keyword">return</span>
+        <span class="code-keyword">for</span> col <span class="code-keyword">in</span> range(n):
+            <span class="code-keyword">if</span> is_safe(board, row, col):
+                board[row] = col  <span class="code-comment"># Place queen</span>
+                backtrack(row + <span class="code-number">1</span>)
+                board[row] = -<span class="code-number">1</span>  <span class="code-comment"># Backtrack</span>
+    
+    board, solutions = [-<span class="code-number">1</span>]*n, []
+    backtrack(<span class="code-number">0</span>)
+    <span class="code-keyword">return</span> solutions`,
+    "subsets": `<span class="code-keyword">def</span> <span class="code-function">subsets</span>(nums):
+    result = []
+    
+    <span class="code-keyword">def</span> <span class="code-function">backtrack</span>(start, current):
+        result.append(current[:])  <span class="code-comment"># Add subset</span>
+        
+        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(start, len(nums)):
+            current.append(nums[i])  <span class="code-comment"># Include</span>
+            backtrack(i + <span class="code-number">1</span>, current)
+            current.pop()  <span class="code-comment"># Exclude (backtrack)</span>
+    
+    backtrack(<span class="code-number">0</span>, [])
+    <span class="code-keyword">return</span> result`,
+    "permutations": `<span class="code-keyword">def</span> <span class="code-function">permutations</span>(nums):
+    result = []
+    
+    <span class="code-keyword">def</span> <span class="code-function">backtrack</span>(current, remaining):
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> remaining:
+            result.append(current[:])
+            <span class="code-keyword">return</span>
+        
+        <span class="code-keyword">for</span> i, num <span class="code-keyword">in</span> enumerate(remaining):
+            current.append(num)  <span class="code-comment"># Choose</span>
+            backtrack(current, remaining[:i] + remaining[i+<span class="code-number">1</span>:])
+            current.pop()  <span class="code-comment"># Unchoose</span>
+    
+    backtrack([], nums)
+    <span class="code-keyword">return</span> result`,
+    "maze_solving": `<span class="code-keyword">def</span> <span class="code-function">solve_maze</span>(maze):
+    rows, cols = len(maze), len(maze[<span class="code-number">0</span>])
+    path = []
+    
+    <span class="code-keyword">def</span> <span class="code-function">backtrack</span>(r, c):
+        <span class="code-keyword">if</span> r == rows-<span class="code-number">1</span> <span class="code-keyword">and</span> c == cols-<span class="code-number">1</span>:
+            path.append((r, c))
+            <span class="code-keyword">return</span> <span class="code-keyword">True</span>
+        
+        <span class="code-keyword">if</span> <span class="code-number">0</span> <= r < rows <span class="code-keyword">and</span> <span class="code-number">0</span> <= c < cols <span class="code-keyword">and</span> maze[r][c] == <span class="code-number">0</span>:
+            maze[r][c] = <span class="code-number">2</span>  <span class="code-comment"># Mark visited</span>
+            path.append((r, c))
+            
+            <span class="code-keyword">for</span> dr, dc <span class="code-keyword">in</span> [(<span class="code-number">0</span>,<span class="code-number">1</span>),(<span class="code-number">1</span>,<span class="code-number">0</span>),(<span class="code-number">0</span>,-<span class="code-number">1</span>),(-<span class="code-number">1</span>,<span class="code-number">0</span>)]:
+                <span class="code-keyword">if</span> backtrack(r+dr, c+dc):
+                    <span class="code-keyword">return</span> <span class="code-keyword">True</span>
+            
+            path.pop()  <span class="code-comment"># Backtrack</span>
+        <span class="code-keyword">return</span> <span class="code-keyword">False</span>
+    
+    backtrack(<span class="code-number">0</span>, <span class="code-number">0</span>)
+    <span class="code-keyword">return</span> path`,
+    "combination_sum": `<span class="code-keyword">def</span> <span class="code-function">combination_sum</span>(candidates, target):
+    result = []
+    
+    <span class="code-keyword">def</span> <span class="code-function">backtrack</span>(start, current, total):
+        <span class="code-keyword">if</span> total == target:
+            result.append(current[:])
+            <span class="code-keyword">return</span>
+        <span class="code-keyword">if</span> total > target:
+            <span class="code-keyword">return</span>  <span class="code-comment"># Prune</span>
+        
+        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(start, len(candidates)):
+            current.append(candidates[i])
+            backtrack(i, current, total + candidates[i])
+            current.pop()  <span class="code-comment"># Backtrack</span>
+    
+    backtrack(<span class="code-number">0</span>, [], <span class="code-number">0</span>)
+    <span class="code-keyword">return</span> result`
+};
 
-        let currentAlgo = null;
-        let currentStep = 0;
-        let isPlaying = false;
-        let playInterval = null;
-        let speed = 800;
+const codeLineMap = {
+    "n_queens_4": { 1: [0,20,21], 2: [14,15,16], 3: [2,3,4,5,6,7], 4: [2,3,4,5,6,7], 5: [14,15,16], 6: [2,3,4,5,6,7], 7: [17,18], 8: [14,15,16], 9: [14,15,16], 10: [17,18], 11: [11,12], 12: [11,12], 13: [22] },
+    "subsets": { 1: [0,1,10,11], 2: [4], 3: [6,7], 4: [4], 5: [6,7], 6: [4], 7: [6,7], 8: [4], 9: [8], 10: [6,7,8], 11: [12] },
+    "permutations": { 1: [0,1,13,14], 2: [9,10], 3: [9,10], 4: [9,10], 5: [5,6], 6: [11], 7: [11], 8: [9,10], 9: [9,10], 10: [5,6], 11: [9,10,11], 12: [15] },
+    "maze_solving": { 1: [0,1,2,18,19], 2: [9,10,11], 3: [9,10,11], 4: [9,10,11], 5: [9,10,11], 6: [9,10,11], 7: [9,10,11], 8: [4,5,6], 9: [20] },
+    "combination_sum": { 1: [0,1,13,14], 2: [10,11], 3: [10,11], 4: [10,11], 5: [7,8], 6: [7,8], 7: [4,5], 8: [10,11,12], 9: [4,5], 10: [15] }
+};
 
-        function init() {
-            const selector = document.getElementById('algoSelector');
-            visualData.algorithms.forEach((algo, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'algo-btn';
-                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                btn.onclick = () => selectAlgorithm(index);
-                selector.appendChild(btn);
-            });
-            document.getElementById('prevBtn').onclick = prevStep;
-            document.getElementById('nextBtn').onclick = nextStep;
-            document.getElementById('playBtn').onclick = togglePlay;
-            document.getElementById('resetBtn').onclick = reset;
-            document.getElementById('speedSlider').oninput = (e) => {
-                speed = 2100 - e.target.value;
-                document.getElementById('speedValue').textContent = speed + 'ms';
-            };
+const visualData = {"algorithms":[{"algorithm":"n_queens_4","name":"4-Queens","complexity":"O(N!)","steps":[{"step":1,"description":"N-Queens: Place N queens on NxN board so no two attack each other. Using backtracking.","action":"init","board":[],"n":4},{"step":2,"description":"Place Q1 at row 0, col 0. Check if safe (no conflicts).","action":"place","row":0,"col":0,"board":[0]},{"step":3,"description":"Try Q2 at (1,0): Column conflict with Q1! Skip.","action":"conflict","row":1,"col":0,"type":"column","board":[0]},{"step":4,"description":"Try Q2 at (1,1): Diagonal conflict with Q1! Skip.","action":"conflict","row":1,"col":1,"type":"diagonal","board":[0]},{"step":5,"description":"Place Q2 at (1,2). Safe - no column or diagonal conflicts.","action":"place","row":1,"col":2,"board":[0,2]},{"step":6,"description":"Row 2: All positions conflict! Need to backtrack.","action":"conflict_all","row":2,"board":[0,2]},{"step":7,"description":"Backtrack: Remove Q2 from (1,2). Try next column.","action":"backtrack","row":1,"col":2,"board":[0]},{"step":8,"description":"Place Q2 at (1,3). Continue exploring.","action":"place","row":1,"col":3,"board":[0,3]},{"step":9,"description":"Place Q3 at (2,1). Continue.","action":"place","row":2,"col":1,"board":[0,3,1]},{"step":10,"description":"Row 3 conflicts. Backtrack multiple times...","action":"backtrack_chain","board":[0,3,1]},{"step":11,"description":"Found solution: [1,3,0,2]. Queens at (0,1), (1,3), (2,0), (3,2).","action":"solution","board":[1,3,0,2]},{"step":12,"description":"Continue to find second solution: [2,0,3,1].","action":"solution","board":[2,0,3,1]},{"step":13,"description":"Complete! Found 2 solutions for 4-Queens.","action":"complete","solutions":[[1,3,0,2],[2,0,3,1]]}]},{"algorithm":"subsets","name":"Subsets","complexity":"O(2^n)","steps":[{"step":1,"description":"Generate all subsets of {1,2,3}. Each element: include or exclude.","action":"init","set":[1,2,3],"current":[]},{"step":2,"description":"Add empty subset []. First result.","action":"add","subset":[],"results":[[]]},{"step":3,"description":"Include 1. Current = [1].","action":"include","element":1,"current":[1]},{"step":4,"description":"Add subset [1].","action":"add","subset":[1],"results":[[],[1]]},{"step":5,"description":"Include 2. Current = [1,2].","action":"include","element":2,"current":[1,2]},{"step":6,"description":"Add subset [1,2].","action":"add","subset":[1,2],"results":[[],[1],[1,2]]},{"step":7,"description":"Include 3. Current = [1,2,3].","action":"include","element":3,"current":[1,2,3]},{"step":8,"description":"Add subset [1,2,3].","action":"add","subset":[1,2,3],"results":[[],[1],[1,2],[1,2,3]]},{"step":9,"description":"Backtrack: Exclude 3. Current = [1,2].","action":"exclude","element":3,"current":[1,2]},{"step":10,"description":"Continue DFS... Generate remaining subsets.","action":"continue"},{"step":11,"description":"Complete! 8 subsets: [], [1], [2], [3], [1,2], [1,3], [2,3], [1,2,3].","action":"complete","count":8,"results":[[],[1],[2],[3],[1,2],[1,3],[2,3],[1,2,3]]}]},{"algorithm":"permutations","name":"Permutations","complexity":"O(n!)","steps":[{"step":1,"description":"Generate all permutations of [1,2,3]. Choose-Explore-Unchoose pattern.","action":"init","elements":[1,2,3],"current":[],"available":[1,2,3]},{"step":2,"description":"Choose 1 for position 0. Available: [2,3].","action":"choose","element":1,"current":[1],"available":[2,3]},{"step":3,"description":"Choose 2 for position 1. Available: [3].","action":"choose","element":2,"current":[1,2],"available":[3]},{"step":4,"description":"Choose 3 for position 2. Available: [].","action":"choose","element":3,"current":[1,2,3],"available":[]},{"step":5,"description":"Add permutation [1,2,3]. First result!","action":"add","permutation":[1,2,3]},{"step":6,"description":"Unchoose 3. Return to pool.","action":"unchoose","element":3,"current":[1,2]},{"step":7,"description":"Unchoose 2. Return to pool.","action":"unchoose","element":2,"current":[1]},{"step":8,"description":"Choose 3 for position 1. Try different order.","action":"choose","element":3,"current":[1,3],"available":[2]},{"step":9,"description":"Choose 2 for position 2.","action":"choose","element":2,"current":[1,3,2],"available":[]},{"step":10,"description":"Add permutation [1,3,2].","action":"add","permutation":[1,3,2]},{"step":11,"description":"Continue for all 6 permutations...","action":"continue"},{"step":12,"description":"Complete! 6 permutations: [1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1].","action":"complete","count":6}]},{"algorithm":"maze_solving","name":"Maze Solving","complexity":"O(4^(m*n))","steps":[{"step":1,"description":"Find path from (0,0) to (3,3). 0=path, 1=wall. Try all directions.","action":"init","maze":[[0,0,1,0],[1,0,0,0],[0,0,1,0],[0,0,0,0]],"pos":[0,0],"path":[[0,0]]},{"step":2,"description":"Move right to (0,1). Mark visited.","action":"visit","pos":[0,1],"path":[[0,0],[0,1]]},{"step":3,"description":"Try right: (0,2) is WALL! Can't go there.","action":"wall","pos":[0,2]},{"step":4,"description":"Move down to (1,1).","action":"visit","pos":[1,1],"path":[[0,0],[0,1],[1,1]]},{"step":5,"description":"Move right to (1,2).","action":"visit","pos":[1,2],"path":[[0,0],[0,1],[1,1],[1,2]]},{"step":6,"description":"Move right to (1,3).","action":"visit","pos":[1,3],"path":[[0,0],[0,1],[1,1],[1,2],[1,3]]},{"step":7,"description":"Move down to (2,3).","action":"visit","pos":[2,3],"path":[[0,0],[0,1],[1,1],[1,2],[1,3],[2,3]]},{"step":8,"description":"Move down to (3,3). GOAL REACHED!","action":"goal","pos":[3,3],"path":[[0,0],[0,1],[1,1],[1,2],[1,3],[2,3],[3,3]]},{"step":9,"description":"Complete! Path found with 7 cells.","action":"complete","path":[[0,0],[0,1],[1,1],[1,2],[1,3],[2,3],[3,3]]}]},{"algorithm":"combination_sum","name":"Combination Sum","complexity":"O(n^(t/min))","steps":[{"step":1,"description":"Find combinations from [2,3,6,7] that sum to 7. Can reuse elements.","action":"init","candidates":[2,3,6,7],"target":7,"current":[],"sum":0},{"step":2,"description":"Add 2. Current=[2], sum=2.","action":"add","element":2,"current":[2],"sum":2},{"step":3,"description":"Add 2. Current=[2,2], sum=4.","action":"add","element":2,"current":[2,2],"sum":4},{"step":4,"description":"Add 2. Current=[2,2,2], sum=6.","action":"add","element":2,"current":[2,2,2],"sum":6},{"step":5,"description":"Add 2: sum=8 > 7. PRUNE! Backtrack.","action":"prune","current":[2,2,2,2],"sum":8},{"step":6,"description":"Try 3: sum=6+3=9 > 7. PRUNE!","action":"prune","sum":9},{"step":7,"description":"Backtrack to [2,2]. Try 3: sum=4+3=7. FOUND!","action":"found","current":[2,2,3],"sum":7},{"step":8,"description":"Continue exploring other branches...","action":"continue"},{"step":9,"description":"Try 7 directly: sum=7. FOUND!","action":"found","current":[7],"sum":7},{"step":10,"description":"Complete! 2 combinations: [2,2,3] and [7].","action":"complete","solutions":[[2,2,3],[7]]}]}]};
+
+let currentAlgorithm = null;
+let currentStep = 0;
+let isPlaying = false;
+let playInterval = null;
+let cameraRotX = 15;
+let cameraRotY = 0;
+let cameraZoom = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const scene = document.getElementById('scene');
+const stage = document.getElementById('stage');
+const backtrackContainer = document.getElementById('backtrackContainer');
+const codeBlock = document.getElementById('codeBlock');
+const stepDescription = document.getElementById('stepDescription');
+const complexityBadge = document.getElementById('complexityBadge');
+const stateInfo = document.getElementById('stateInfo');
+const progressFill = document.getElementById('progressFill');
+const stepCounter = document.getElementById('stepCounter');
+const playBtn = document.getElementById('playBtn');
+const resultDisplay = document.getElementById('resultDisplay');
+
+function initAlgorithmSelector() {
+    const selector = document.getElementById('algoSelector');
+    visualData.algorithms.forEach((algo, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'algo-btn';
+        btn.textContent = algo.name;
+        btn.onclick = () => selectAlgorithm(index);
+        selector.appendChild(btn);
+    });
+}
+
+function selectAlgorithm(index) {
+    document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+    currentAlgorithm = visualData.algorithms[index];
+    currentStep = 0;
+    stopPlaying();
+    complexityBadge.textContent = currentAlgorithm.complexity;
+    renderCode();
+    renderStep();
+    updateControls();
+}
+
+function renderCode() {
+    const code = codeSnippets[currentAlgorithm.algorithm] || '';
+    const lines = code.split('\n');
+    let html = '';
+    lines.forEach((line, idx) => {
+        html += '<div class="code-line" data-line="' + idx + '">' + line + '</div>';
+    });
+    codeBlock.innerHTML = html;
+}
+
+function highlightCodeLines(stepNum) {
+    const lineMap = codeLineMap[currentAlgorithm.algorithm] || {};
+    const activeLines = lineMap[stepNum] || [];
+    document.querySelectorAll('.code-line').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (activeLines.includes(idx)) el.classList.add('active');
+    });
+}
+
+function renderNQueens(step) {
+    const n = 4;
+    const board = step.board || [];
+    const conflictRow = step.row;
+    const conflictCol = step.col;
+    const isSolution = step.action === 'solution' || step.action === 'complete';
+    
+    let html = '<div class="chess-board" style="grid-template-columns:repeat(' + n + ',1fr)">';
+    
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            let cellClass = 'chess-cell ' + ((r + c) % 2 === 0 ? 'light' : 'dark');
+            let content = '';
+            
+            if (board[r] === c) {
+                cellClass += ' queen';
+                content = '\u265B';
+                if (isSolution) cellClass += ' solution';
+            }
+            
+            if (step.action === 'conflict' && r === conflictRow && c === conflictCol) {
+                cellClass += ' conflict';
+            }
+            if (step.action === 'conflict_all' && r === conflictRow) {
+                cellClass += ' conflict';
+            }
+            if (step.action === 'place' && r === step.row && c === step.col) {
+                cellClass += ' trying';
+            }
+            
+            html += '<div class="' + cellClass + '">' + content + '</div>';
         }
+    }
+    
+    html += '</div>';
+    backtrackContainer.innerHTML = html;
+}
 
-        function selectAlgorithm(index) {
-            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-            currentAlgo = visualData.algorithms[index];
-            currentStep = 0;
-            stopPlay();
-            renderStep();
-            updateControls();
-        }
-
-        function renderStep() {
-            if (!currentAlgo) return;
-            const step = currentAlgo.steps[currentStep];
-            document.getElementById('stepDesc').textContent = step.description;
-            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
-            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
-
-            const content = document.getElementById('vizContent');
+function renderMaze(step) {
+    const maze = [[0,0,1,0],[1,0,0,0],[0,0,1,0],[0,0,0,0]];
+    const path = step.path || [];
+    const current = step.pos;
+    const wallPos = step.action === 'wall' ? step.pos : null;
+    const isGoal = step.action === 'goal' || step.action === 'complete';
+    
+    let html = '<div class="maze-grid" style="grid-template-columns:repeat(4,1fr)">';
+    
+    for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+            let cellClass = 'maze-cell';
             
-            switch(currentAlgo.algorithm) {
-                case 'n_queens_4x4':
-                    renderNQueens(content, step);
-                    break;
-                case 'subset_generation':
-                case 'permutations':
-                    renderSubsets(content, step);
-                    break;
-            }
-        }
-
-        function renderNQueens(container, step) {
-            const board = step.board;
-            const current = step.current;
-            const conflicts = step.conflicts || [];
-            const n = currentAlgo.n;
-
-            let html = '<div class="board-container">';
-            
-            if (step.phase) {
-                html += `<div class="phase-indicator ${step.phase}">${step.phase.toUpperCase()}</div>`;
-            }
-            
-            html += `<div class="chess-board" style="grid-template-columns: repeat(${n}, 1fr);">`;
-            
-            for (let r = 0; r < n; r++) {
-                for (let c = 0; c < n; c++) {
-                    const isLight = (r + c) % 2 === 0;
-                    const hasQueen = board[r][c] === 1;
-                    const isCurrent = current && current[0] === r && current[1] === c;
-                    const isConflict = conflicts.some(cf => cf[0] === r && cf[1] === c);
-                    
-                    let cellClass = isLight ? 'light' : 'dark';
-                    if (isCurrent) cellClass = 'current';
-                    else if (isConflict) cellClass = 'conflict';
-                    else if (hasQueen) cellClass = 'queen';
-                    
-                    html += `<div class="board-cell ${cellClass}">${hasQueen ? '♛' : ''}</div>`;
-                }
-            }
-            html += '</div>';
-            html += '</div>';
-            
-            html += '<div class="info-panel">';
-            const queensPlaced = board.flat().filter(c => c === 1).length;
-            html += `<div class="info-box"><div class="info-label">Queens Placed</div><div class="info-value">${queensPlaced}/${n}</div></div>`;
-            if (step.solution) {
-                html += `<div class="info-box"><div class="info-label">Status</div><div class="info-value" style="color:#00ff00;">SOLVED!</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
-
-        function renderSubsets(container, step) {
-            const elements = currentAlgo.elements;
-            const current = step.current || [];
-            const results = step.results || [];
-            const considering = step.considering;
-
-            let html = '<div class="subset-container">';
-            
-            if (step.phase) {
-                html += `<div class="phase-indicator ${step.phase}">${step.phase.toUpperCase()}</div>`;
-            }
-            
-            html += '<div style="color: #888; margin-bottom: 10px;">Elements:</div>';
-            html += '<div class="elements-row">';
-            elements.forEach((el, i) => {
-                const isIncluded = current.includes(el);
-                const isConsidering = i === considering;
-                let elClass = '';
-                if (isConsidering) elClass = 'considering';
-                else if (isIncluded) elClass = 'included';
-                
-                html += `<div class="element ${elClass}">${el}</div>`;
-            });
-            html += '</div>';
-            
-            html += '<div style="color: #888; margin: 20px 0 10px;">Current Selection:</div>';
-            html += '<div class="current-subset">';
-            if (current.length === 0) {
-                html += '<span style="color: #666;">{ }</span>';
+            if (maze[r][c] === 1) {
+                cellClass += ' wall';
             } else {
-                html += `<span style="color: #00ff00;">{ ${current.join(', ')} }</span>`;
+                cellClass += ' path';
+                
+                const inPath = path.some(p => p[0] === r && p[1] === c);
+                if (inPath) cellClass += ' visited';
+                
+                if (current && current[0] === r && current[1] === c) {
+                    cellClass += ' current';
+                }
+                
+                if (r === 0 && c === 0) cellClass += ' start';
+                if (r === 3 && c === 3 && isGoal) cellClass += ' goal';
             }
-            html += '</div>';
             
-            if (results.length > 0) {
-                html += '<div style="color: #888; margin: 20px 0 10px;">Found Results:</div>';
-                html += '<div class="results-list">';
-                results.forEach(r => {
-                    const display = r.length === 0 ? '{ }' : `{ ${r.join(', ')} }`;
-                    html += `<div class="result-item">${display}</div>`;
-                });
-                html += '</div>';
+            if (wallPos && wallPos[0] === r && wallPos[1] === c) {
+                cellClass += ' wall';
             }
             
-            html += '</div>';
+            let content = '';
+            if (r === 0 && c === 0) content = 'S';
+            if (r === 3 && c === 3) content = 'G';
             
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Results Found</div><div class="info-value">${results.length}</div></div>`;
-            const expected = currentAlgo.algorithm === 'permutations' ? 6 : 8;
-            html += `<div class="info-box"><div class="info-label">Expected</div><div class="info-value">${expected}</div></div>`;
-            html += '</div>';
-            
-            container.innerHTML = html;
+            html += '<div class="' + cellClass + '">' + content + '</div>';
         }
+    }
+    
+    html += '</div>';
+    backtrackContainer.innerHTML = html;
+}
 
-        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
-        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
-        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
-        function startPlay() {
-            if (!currentAlgo) return;
-            isPlaying = true;
-            document.getElementById('playBtn').textContent = 'Pause';
-            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
+function renderSubsets(step) {
+    const current = step.current || [];
+    const results = step.results || [];
+    
+    let html = '<div class="subset-container">';
+    
+    html += '<div style="color:#888;font-size:0.9rem">Current subset:</div>';
+    html += '<div class="current-set">';
+    if (current.length === 0) {
+        html += '<span style="color:#666">{ }</span>';
+    } else {
+        current.forEach(el => {
+            html += '<div class="set-element">' + el + '</div>';
+        });
+    }
+    html += '</div>';
+    
+    html += '<div style="color:#888;font-size:0.9rem;margin-top:15px">Found subsets:</div>';
+    html += '<div class="results-list">';
+    results.forEach(subset => {
+        html += '<div class="result-item">{' + subset.join(',') + '}</div>';
+    });
+    html += '</div>';
+    
+    html += '</div>';
+    backtrackContainer.innerHTML = html;
+}
+
+function renderPermutations(step) {
+    const current = step.current || [];
+    const available = step.available || [1,2,3];
+    
+    let html = '<div class="subset-container">';
+    
+    html += '<div style="color:#888;font-size:0.9rem">Current permutation:</div>';
+    html += '<div class="current-set">';
+    for (let i = 0; i < 3; i++) {
+        if (i < current.length) {
+            html += '<div class="set-element">' + current[i] + '</div>';
+        } else {
+            html += '<div class="set-element" style="background:#333;color:#666">?</div>';
         }
-        function stopPlay() {
-            isPlaying = false;
-            document.getElementById('playBtn').textContent = 'Play';
-            if (playInterval) { clearInterval(playInterval); playInterval = null; }
-        }
-        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
-        function updateControls() {
-            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
-            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
-        }
-        init();
+    }
+    html += '</div>';
+    
+    html += '<div style="color:#888;font-size:0.9rem;margin-top:15px">Available:</div>';
+    html += '<div class="current-set" style="border-color:rgba(255,0,255,0.4)">';
+    available.forEach(el => {
+        html += '<div class="set-element" style="background:linear-gradient(135deg,#ff00ff,#aa0088)">' + el + '</div>';
+    });
+    if (available.length === 0) {
+        html += '<span style="color:#666">none</span>';
+    }
+    html += '</div>';
+    
+    html += '</div>';
+    backtrackContainer.innerHTML = html;
+}
+
+function renderCombinationSum(step) {
+    const current = step.current || [];
+    const sum = step.sum || 0;
+    const target = 7;
+    const isPrune = step.action === 'prune';
+    const isFound = step.action === 'found';
+    
+    let html = '<div class="subset-container">';
+    
+    html += '<div style="color:#888;font-size:0.9rem">Target: ' + target + ' | Current sum: ' + sum + '</div>';
+    
+    let setStyle = 'border-color:rgba(0,255,255,0.4)';
+    if (isPrune) setStyle = 'border-color:rgba(255,0,0,0.6);background:rgba(255,0,0,0.1)';
+    if (isFound) setStyle = 'border-color:rgba(0,255,136,0.6);background:rgba(0,255,136,0.1)';
+    
+    html += '<div class="current-set" style="' + setStyle + '">';
+    if (current.length === 0) {
+        html += '<span style="color:#666">[ ]</span>';
+    } else {
+        current.forEach(el => {
+            html += '<div class="set-element">' + el + '</div>';
+        });
+    }
+    html += '</div>';
+    
+    html += '<div style="margin-top:10px;font-size:1.2rem;font-weight:bold;color:' + (isPrune ? '#ff4444' : (isFound ? '#00ff88' : '#00ffff')) + '">';
+    if (isPrune) html += 'PRUNE! Sum > Target';
+    else if (isFound) html += 'FOUND! Sum = Target';
+    else html += 'Sum: ' + sum;
+    html += '</div>';
+    
+    html += '</div>';
+    backtrackContainer.innerHTML = html;
+}
+
+function renderStep() {
+    if (!currentAlgorithm) return;
+    const step = currentAlgorithm.steps[currentStep];
+    stepDescription.textContent = step.description;
+    highlightCodeLines(step.step);
+    resultDisplay.style.display = 'none';
+    
+    // Render based on algorithm type
+    const algo = currentAlgorithm.algorithm;
+    if (algo === 'n_queens_4') renderNQueens(step);
+    else if (algo === 'maze_solving') renderMaze(step);
+    else if (algo === 'subsets') renderSubsets(step);
+    else if (algo === 'permutations') renderPermutations(step);
+    else if (algo === 'combination_sum') renderCombinationSum(step);
+    
+    // Update state info
+    let info = '';
+    if (step.board) info += 'Board: [' + step.board.join(', ') + ']\n';
+    if (step.current) info += 'Current: [' + step.current.join(', ') + ']\n';
+    if (step.path) info += 'Path length: ' + step.path.length;
+    if (step.sum !== undefined) info += 'Sum: ' + step.sum;
+    if (step.solutions) info += 'Solutions: ' + step.solutions.length;
+    if (step.count) info += 'Count: ' + step.count;
+    stateInfo.textContent = info || '-';
+    
+    if (step.action === 'complete') {
+        resultDisplay.style.display = 'block';
+        if (step.count) resultDisplay.textContent = step.count + ' results';
+        else if (step.solutions) resultDisplay.textContent = step.solutions.length + ' solutions';
+        else resultDisplay.textContent = 'Complete!';
+    }
+    
+    progressFill.style.width = ((currentStep + 1) / currentAlgorithm.steps.length * 100) + '%';
+    stepCounter.textContent = 'Step ' + (currentStep + 1) + ' / ' + currentAlgorithm.steps.length;
+}
+
+function updateControls() {
+    document.getElementById('prevBtn').disabled = !currentAlgorithm || currentStep === 0;
+    document.getElementById('nextBtn').disabled = !currentAlgorithm || currentStep >= currentAlgorithm.steps.length - 1;
+    document.getElementById('playBtn').disabled = !currentAlgorithm;
+}
+
+function nextStep() {
+    if (currentAlgorithm && currentStep < currentAlgorithm.steps.length - 1) { currentStep++; renderStep(); updateControls(); }
+    else stopPlaying();
+}
+
+function prevStep() {
+    if (currentAlgorithm && currentStep > 0) { currentStep--; renderStep(); updateControls(); }
+}
+
+function togglePlay() { if (isPlaying) stopPlaying(); else startPlaying(); }
+
+function startPlaying() {
+    isPlaying = true;
+    playBtn.textContent = 'Pause';
+    playBtn.classList.add('playing');
+    playInterval = setInterval(() => {
+        if (currentStep < currentAlgorithm.steps.length - 1) nextStep();
+        else stopPlaying();
+    }, 2200 - document.getElementById('speedSlider').value);
+}
+
+function stopPlaying() {
+    isPlaying = false;
+    playBtn.textContent = 'Play';
+    playBtn.classList.remove('playing');
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+}
+
+function reset() { stopPlaying(); currentStep = 0; renderStep(); updateControls(); }
+
+function updateCamera() {
+    stage.style.transform = 'translateZ(' + cameraZoom + 'px) rotateX(' + cameraRotX + 'deg) rotateY(' + cameraRotY + 'deg)';
+}
+
+scene.addEventListener('mousedown', (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    cameraRotY += (e.clientX - lastMouseX) * 0.5;
+    cameraRotX -= (e.clientY - lastMouseY) * 0.3;
+    cameraRotX = Math.max(-60, Math.min(60, cameraRotX));
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+    updateCamera();
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+scene.addEventListener('wheel', (e) => { e.preventDefault(); cameraZoom += e.deltaY * -0.5; cameraZoom = Math.max(-300, Math.min(200, cameraZoom)); updateCamera(); });
+
+document.getElementById('playBtn').onclick = togglePlay;
+document.getElementById('prevBtn').onclick = prevStep;
+document.getElementById('nextBtn').onclick = nextStep;
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('speedSlider').oninput = () => { if (isPlaying) { stopPlaying(); startPlaying(); } };
+
+initAlgorithmSelector();
+updateCamera();
     </script>
 </body>
 </html>

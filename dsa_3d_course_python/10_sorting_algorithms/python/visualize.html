@@ -7,454 +7,633 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
-            color: #fff;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
-            padding: 30px 0;
-            background: rgba(0, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            margin-bottom: 30px;
+            padding: 25px 0;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            margin-bottom: 25px;
         }
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2rem;
             background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            animation: gradient-shift 3s linear infinite;
         }
-        .subtitle { color: #888; font-size: 1.1em; }
+        @keyframes gradient-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .subtitle { color: #888; font-size: 1rem; margin-top: 8px; }
         .algorithm-selector {
             display: flex;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
         }
         .algo-btn {
-            padding: 12px 20px;
-            background: rgba(0, 255, 255, 0.1);
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(0, 255, 255, 0.3);
             color: #00ffff;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-        .algo-btn:hover, .algo-btn.active {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-        .visualization-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            min-height: 450px;
-        }
-        .step-description {
-            text-align: center;
-            font-size: 1.2em;
-            color: #00ffff;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .control-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
-            border: none;
+        .algo-btn:hover { border-color: #00ffff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+        .algo-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
             color: #000;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease;
         }
-        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
-        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
-
-        /* Bar Chart Visualization */
-        .bars-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
             gap: 20px;
-            padding: 20px;
         }
-        .bars-row {
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
+        .visualization-area {
+            background: radial-gradient(ellipse at center, #0f0f1a 0%, #050508 70%, #000 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        .scene {
+            width: 100%;
+            height: 380px;
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .scene:active { cursor: grabbing; }
+        .stage {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+            transition: transform 0.1s ease-out;
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            gap: 8px;
-            height: 250px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            width: 100%;
-            max-width: 800px;
+            padding-bottom: 40px;
+        }
+        .bars-container {
+            display: flex;
+            gap: 6px;
+            align-items: flex-end;
+            transform-style: preserve-3d;
         }
         .bar {
-            width: 50px;
-            background: linear-gradient(180deg, #00ffff, #0088aa);
-            border-radius: 5px 5px 0 0;
+            width: 45px;
+            background: linear-gradient(180deg, #00ffff 0%, #0088aa 50%, #004455 100%);
+            border-radius: 6px 6px 0 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-end;
-            padding-bottom: 5px;
-            transition: all 0.3s ease;
+            justify-content: flex-start;
+            padding-top: 8px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            transform-style: preserve-3d;
             position: relative;
         }
+        .bar::after {
+            content: attr(data-index);
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.7rem;
+            color: #888;
+        }
         .bar-value {
-            color: #fff;
+            font-size: 0.8rem;
             font-weight: bold;
-            font-size: 0.9em;
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            color: #000;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
         }
         .bar.comparing {
-            background: linear-gradient(180deg, #ffd700, #cc9900);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            background: linear-gradient(180deg, #ffd700 0%, #cc9900 50%, #996600 100%);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+            transform: translateY(-10px);
         }
         .bar.swapping {
-            background: linear-gradient(180deg, #ff00ff, #880088);
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
-            animation: swap 0.3s ease;
+            background: linear-gradient(180deg, #ff00ff 0%, #aa0088 50%, #660055 100%);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+            animation: swap-pulse 0.3s ease-in-out;
         }
         .bar.sorted {
-            background: linear-gradient(180deg, #00ff00, #008800);
+            background: linear-gradient(180deg, #00ff88 0%, #00aa55 50%, #006633 100%);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
         }
         .bar.pivot {
-            background: linear-gradient(180deg, #ff6600, #cc4400);
-            box-shadow: 0 0 25px rgba(255, 102, 0, 0.6);
+            background: linear-gradient(180deg, #ffd700 0%, #ffaa00 50%, #cc8800 100%);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+        }
+        .bar.picked {
+            transform: translateY(-30px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.5);
         }
         .bar.min {
-            background: linear-gradient(180deg, #ff3333, #cc0000);
-            box-shadow: 0 0 20px rgba(255, 51, 51, 0.5);
+            background: linear-gradient(180deg, #ff6b6b 0%, #cc4444 50%, #992222 100%);
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.6);
         }
-        .bar.inserting {
-            background: linear-gradient(180deg, #00ffff, #00aaaa);
-            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
-            transform: translateY(-20px);
+        @keyframes swap-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1) translateZ(20px); }
         }
-        @keyframes swap {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-30px); }
+        .code-panel {
+            background: linear-gradient(135deg, #0d0d15, #1a1a25);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 15px;
+            max-height: 280px;
+            overflow-y: auto;
         }
-
-        /* Info Panel */
-        .info-panel {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .info-box {
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px 25px;
-            text-align: center;
-        }
-        .info-label { color: #888; font-size: 0.9em; }
-        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
-
-        .speed-control {
+        .code-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 8px;
         }
-        .speed-label { color: #888; }
-        .speed-slider {
-            width: 150px;
-            -webkit-appearance: none;
-            height: 6px;
+        .code-title::before { content: "</>"; color: #ff00ff; font-weight: bold; }
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: pre;
+        }
+        .code-line.active {
             background: rgba(0, 255, 255, 0.2);
+            border-left: 3px solid #00ffff;
+        }
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-number { color: #bd93f9; }
+        .code-comment { color: #6272a4; }
+        .code-variable { color: #8be9fd; }
+        .info-panel {
+            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+        }
+        .panel-section { margin-bottom: 20px; }
+        .panel-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 2px;
+        }
+        .step-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e0e0e0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+        }
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+            border: 1px solid rgba(255, 0, 255, 0.4);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        .stats-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover:not(:disabled) { background: linear-gradient(135deg, #00ffff, #0088aa); color: #000; }
+        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .control-btn.playing { background: linear-gradient(135deg, #ff00ff, #aa0088); border-color: #ff00ff; }
+        .speed-control { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .speed-label { color: #888; font-size: 0.85rem; }
+        .speed-slider {
+            width: 100px;
+            height: 5px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
             border-radius: 3px;
         }
         .speed-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #00ffff;
+            width: 16px;
+            height: 16px;
+            background: #fff;
             border-radius: 50%;
             cursor: pointer;
         }
-
+        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); transition: width 0.3s ease; }
+        .step-counter { text-align: center; color: #888; font-size: 0.85rem; margin-top: 8px; }
         .legend {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 15px;
             flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
         }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85em;
-            color: #888;
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+        .result-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #00ff88;
+            font-weight: bold;
+            display: none;
         }
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
+        .camera-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Sorting Algorithms</h1>
-        <p class="subtitle">Interactive 3D Visualization</p>
+        <p class="subtitle">Interactive 3D Visualization with Code - Drag to rotate, scroll to zoom</p>
     </header>
     <div class="container">
         <div class="algorithm-selector" id="algoSelector"></div>
-        <div class="visualization-area">
-            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
-            <div id="vizContent"></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
-        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
-        <div class="controls">
-            <button class="control-btn" id="prevBtn" disabled>Previous</button>
-            <button class="control-btn" id="playBtn">Play</button>
-            <button class="control-btn" id="nextBtn" disabled>Next</button>
-            <button class="control-btn" id="resetBtn">Reset</button>
-        </div>
-        <div class="speed-control">
-            <span class="speed-label">Speed:</span>
-            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
-            <span class="speed-label" id="speedValue">800ms</span>
-        </div>
-        <div class="legend">
-            <div class="legend-item"><div class="legend-color" style="background: linear-gradient(180deg, #00ffff, #0088aa);"></div>Unsorted</div>
-            <div class="legend-item"><div class="legend-color" style="background: linear-gradient(180deg, #ffd700, #cc9900);"></div>Comparing</div>
-            <div class="legend-item"><div class="legend-color" style="background: linear-gradient(180deg, #ff00ff, #880088);"></div>Swapping</div>
-            <div class="legend-item"><div class="legend-color" style="background: linear-gradient(180deg, #00ff00, #008800);"></div>Sorted</div>
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="scene" id="scene">
+                        <div class="stage" id="stage">
+                            <div class="bars-container" id="barsContainer"></div>
+                        </div>
+                        <div class="result-display" id="resultDisplay"></div>
+                        <div class="camera-hint">Drag to rotate | Scroll to zoom</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" id="prevBtn">Prev</button>
+                        <button class="control-btn" id="playBtn">Play</button>
+                        <button class="control-btn" id="nextBtn">Next</button>
+                        <button class="control-btn" id="resetBtn">Reset</button>
+                        <div class="speed-control">
+                            <span class="speed-label">Speed:</span>
+                            <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" value="800">
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+                </div>
+                <div class="code-panel">
+                    <div class="code-title">Python Code</div>
+                    <div class="code-block" id="codeBlock"></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="panel-section">
+                    <div class="panel-title">Current Step</div>
+                    <div class="step-description" id="stepDescription">Select an algorithm to begin</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Complexity</div>
+                    <div class="complexity-badge" id="complexityBadge">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Statistics</div>
+                    <div class="stats-info" id="statsInfo">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Legend</div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(180deg,#ffd700,#996600)"></div><span>Comparing</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(180deg,#ff00ff,#660055)"></div><span>Swapping</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(180deg,#00ff88,#006633)"></div><span>Sorted</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(180deg,#ff6b6b,#992222)"></div><span>Min/Pivot</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <script>
-        const visualData = {
-            "world": "10_sorting_algorithms",
-            "algorithms": [
-                {
-                    "algorithm": "bubble_sort",
-                    "description": "Bubble Sort - repeatedly swap adjacent elements",
-                    "steps": [
-                        {"step": 1, "description": "Initial array: [64, 34, 25, 12, 22, 11, 90]", "array": [64, 34, 25, 12, 22, 11, 90], "sorted": [], "action": "init"},
-                        {"step": 2, "description": "Compare 64 and 34: 64 > 34, swap!", "array": [64, 34, 25, 12, 22, 11, 90], "comparing": [0, 1], "action": "compare"},
-                        {"step": 3, "description": "After swap", "array": [34, 64, 25, 12, 22, 11, 90], "swapping": [0, 1], "action": "swap"},
-                        {"step": 4, "description": "Compare 64 and 25: 64 > 25, swap!", "array": [34, 64, 25, 12, 22, 11, 90], "comparing": [1, 2], "action": "compare"},
-                        {"step": 5, "description": "After swap", "array": [34, 25, 64, 12, 22, 11, 90], "swapping": [1, 2], "action": "swap"},
-                        {"step": 6, "description": "Compare 64 and 12: 64 > 12, swap!", "array": [34, 25, 64, 12, 22, 11, 90], "comparing": [2, 3], "action": "compare"},
-                        {"step": 7, "description": "After swap", "array": [34, 25, 12, 64, 22, 11, 90], "swapping": [2, 3], "action": "swap"},
-                        {"step": 8, "description": "Compare 64 and 22: 64 > 22, swap!", "array": [34, 25, 12, 64, 22, 11, 90], "comparing": [3, 4], "action": "compare"},
-                        {"step": 9, "description": "After swap", "array": [34, 25, 12, 22, 64, 11, 90], "swapping": [3, 4], "action": "swap"},
-                        {"step": 10, "description": "Compare 64 and 11: 64 > 11, swap!", "array": [34, 25, 12, 22, 64, 11, 90], "comparing": [4, 5], "action": "compare"},
-                        {"step": 11, "description": "After swap", "array": [34, 25, 12, 22, 11, 64, 90], "swapping": [4, 5], "action": "swap"},
-                        {"step": 12, "description": "Compare 64 and 90: 64 < 90, no swap", "array": [34, 25, 12, 22, 11, 64, 90], "comparing": [5, 6], "action": "compare"},
-                        {"step": 13, "description": "Pass 1 complete: 90 is in place", "array": [34, 25, 12, 22, 11, 64, 90], "sorted": [6], "action": "pass_done"},
-                        {"step": 14, "description": "Continue passes... Final sorted array", "array": [11, 12, 22, 25, 34, 64, 90], "sorted": [0,1,2,3,4,5,6], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "selection_sort",
-                    "description": "Selection Sort - find minimum and place at beginning",
-                    "steps": [
-                        {"step": 1, "description": "Initial array: [64, 25, 12, 22, 11]", "array": [64, 25, 12, 22, 11], "sorted": [], "action": "init"},
-                        {"step": 2, "description": "Find minimum in [0..4], current min: 64", "array": [64, 25, 12, 22, 11], "min": 0, "range": [0, 4], "action": "find_min"},
-                        {"step": 3, "description": "25 < 64, new min at index 1", "array": [64, 25, 12, 22, 11], "min": 1, "comparing": [0, 1], "action": "compare"},
-                        {"step": 4, "description": "12 < 25, new min at index 2", "array": [64, 25, 12, 22, 11], "min": 2, "comparing": [1, 2], "action": "compare"},
-                        {"step": 5, "description": "22 > 12, min stays at index 2", "array": [64, 25, 12, 22, 11], "min": 2, "comparing": [2, 3], "action": "compare"},
-                        {"step": 6, "description": "11 < 12, new min at index 4", "array": [64, 25, 12, 22, 11], "min": 4, "comparing": [2, 4], "action": "compare"},
-                        {"step": 7, "description": "Swap min (11) with first unsorted (64)", "array": [11, 25, 12, 22, 64], "swapping": [0, 4], "action": "swap"},
-                        {"step": 8, "description": "11 is now sorted", "array": [11, 25, 12, 22, 64], "sorted": [0], "action": "sorted"},
-                        {"step": 9, "description": "Find minimum in [1..4]", "array": [11, 25, 12, 22, 64], "min": 2, "range": [1, 4], "sorted": [0], "action": "find_min"},
-                        {"step": 10, "description": "Swap 12 with 25", "array": [11, 12, 25, 22, 64], "swapping": [1, 2], "sorted": [0], "action": "swap"},
-                        {"step": 11, "description": "Continue... Final sorted array", "array": [11, 12, 22, 25, 64], "sorted": [0,1,2,3,4], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "insertion_sort",
-                    "description": "Insertion Sort - insert each element into sorted portion",
-                    "steps": [
-                        {"step": 1, "description": "Initial array: [12, 11, 13, 5, 6]", "array": [12, 11, 13, 5, 6], "sorted": [0], "action": "init"},
-                        {"step": 2, "description": "Pick 11, insert into sorted portion", "array": [12, 11, 13, 5, 6], "inserting": 1, "sorted": [0], "action": "pick"},
-                        {"step": 3, "description": "11 < 12, shift 12 right, insert 11", "array": [11, 12, 13, 5, 6], "inserting": 0, "sorted": [0, 1], "action": "insert"},
-                        {"step": 4, "description": "Pick 13, compare with sorted portion", "array": [11, 12, 13, 5, 6], "inserting": 2, "sorted": [0, 1], "action": "pick"},
-                        {"step": 5, "description": "13 > 12, already in place", "array": [11, 12, 13, 5, 6], "sorted": [0, 1, 2], "action": "in_place"},
-                        {"step": 6, "description": "Pick 5, insert into sorted portion", "array": [11, 12, 13, 5, 6], "inserting": 3, "sorted": [0, 1, 2], "action": "pick"},
-                        {"step": 7, "description": "5 < all, shift all right, insert at 0", "array": [5, 11, 12, 13, 6], "inserting": 0, "sorted": [0, 1, 2, 3], "action": "insert"},
-                        {"step": 8, "description": "Pick 6, insert into sorted portion", "array": [5, 11, 12, 13, 6], "inserting": 4, "sorted": [0, 1, 2, 3], "action": "pick"},
-                        {"step": 9, "description": "6 > 5, insert after 5", "array": [5, 6, 11, 12, 13], "inserting": 1, "sorted": [0, 1, 2, 3, 4], "action": "insert"},
-                        {"step": 10, "description": "Sorting complete!", "array": [5, 6, 11, 12, 13], "sorted": [0, 1, 2, 3, 4], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "quick_sort",
-                    "description": "Quick Sort - partition around pivot",
-                    "steps": [
-                        {"step": 1, "description": "Initial array: [10, 7, 8, 9, 1, 5]", "array": [10, 7, 8, 9, 1, 5], "action": "init"},
-                        {"step": 2, "description": "Choose pivot: 5 (last element)", "array": [10, 7, 8, 9, 1, 5], "pivot": 5, "action": "choose_pivot"},
-                        {"step": 3, "description": "Partition: elements < 5 go left, > 5 go right", "array": [10, 7, 8, 9, 1, 5], "pivot": 5, "comparing": [0, 5], "action": "partition"},
-                        {"step": 4, "description": "1 < 5, swap 1 with first element > pivot", "array": [1, 7, 8, 9, 10, 5], "swapping": [0, 4], "pivot": 5, "action": "swap"},
-                        {"step": 5, "description": "Place pivot in correct position", "array": [1, 5, 8, 9, 10, 7], "pivot": 1, "action": "place_pivot"},
-                        {"step": 6, "description": "Pivot 5 is now sorted, recurse on subarrays", "array": [1, 5, 7, 8, 9, 10], "sorted": [1], "action": "pivot_sorted"},
-                        {"step": 7, "description": "Continue recursion... Final sorted array", "array": [1, 5, 7, 8, 9, 10], "sorted": [0,1,2,3,4,5], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "merge_sort",
-                    "description": "Merge Sort - divide, sort, and merge",
-                    "steps": [
-                        {"step": 1, "description": "Initial array: [38, 27, 43, 3, 9, 82, 10]", "array": [38, 27, 43, 3, 9, 82, 10], "action": "init"},
-                        {"step": 2, "description": "Divide: [38, 27, 43] | [3, 9, 82, 10]", "array": [38, 27, 43, 3, 9, 82, 10], "dividing": [[0,2], [3,6]], "action": "divide"},
-                        {"step": 3, "description": "Divide further: [38] [27, 43] | [3, 9] [82, 10]", "array": [38, 27, 43, 3, 9, 82, 10], "action": "divide"},
-                        {"step": 4, "description": "Merge [27] and [43] -> [27, 43]", "array": [38, 27, 43, 3, 9, 82, 10], "comparing": [1, 2], "action": "merge"},
-                        {"step": 5, "description": "Merge [38] and [27, 43] -> [27, 38, 43]", "array": [27, 38, 43, 3, 9, 82, 10], "action": "merge"},
-                        {"step": 6, "description": "Merge [3, 9] and [10, 82] -> [3, 9, 10, 82]", "array": [27, 38, 43, 3, 9, 10, 82], "action": "merge"},
-                        {"step": 7, "description": "Final merge: [27,38,43] + [3,9,10,82]", "array": [3, 9, 10, 27, 38, 43, 82], "action": "merge"},
-                        {"step": 8, "description": "Merge sort complete!", "array": [3, 9, 10, 27, 38, 43, 82], "sorted": [0,1,2,3,4,5,6], "action": "complete"}
-                    ]
-                }
-            ]
-        };
+const codeSnippets = {
+    "bubble_sort": `<span class="code-keyword">def</span> <span class="code-function">bubble_sort</span>(arr):
+    n = len(arr)
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(n):
+        <span class="code-keyword">for</span> j <span class="code-keyword">in</span> range(n - i - <span class="code-number">1</span>):
+            <span class="code-keyword">if</span> arr[j] > arr[j + <span class="code-number">1</span>]:
+                <span class="code-comment"># Swap adjacent elements</span>
+                arr[j], arr[j+<span class="code-number">1</span>] = arr[j+<span class="code-number">1</span>], arr[j]
+    <span class="code-keyword">return</span> arr`,
+    "selection_sort": `<span class="code-keyword">def</span> <span class="code-function">selection_sort</span>(arr):
+    n = len(arr)
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(n):
+        min_idx = i
+        <span class="code-comment"># Find minimum in unsorted portion</span>
+        <span class="code-keyword">for</span> j <span class="code-keyword">in</span> range(i + <span class="code-number">1</span>, n):
+            <span class="code-keyword">if</span> arr[j] < arr[min_idx]:
+                min_idx = j
+        <span class="code-comment"># Swap minimum with first unsorted</span>
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    <span class="code-keyword">return</span> arr`,
+    "insertion_sort": `<span class="code-keyword">def</span> <span class="code-function">insertion_sort</span>(arr):
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(<span class="code-number">1</span>, len(arr)):
+        key = arr[i]  <span class="code-comment"># Pick element</span>
+        j = i - <span class="code-number">1</span>
+        <span class="code-comment"># Shift larger elements right</span>
+        <span class="code-keyword">while</span> j >= <span class="code-number">0</span> <span class="code-keyword">and</span> arr[j] > key:
+            arr[j + <span class="code-number">1</span>] = arr[j]
+            j -= <span class="code-number">1</span>
+        arr[j + <span class="code-number">1</span>] = key  <span class="code-comment"># Insert</span>
+    <span class="code-keyword">return</span> arr`,
+    "merge_sort": `<span class="code-keyword">def</span> <span class="code-function">merge_sort</span>(arr):
+    <span class="code-keyword">if</span> len(arr) <= <span class="code-number">1</span>:
+        <span class="code-keyword">return</span> arr
+    mid = len(arr) // <span class="code-number">2</span>
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    <span class="code-keyword">return</span> merge(left, right)
 
-        let currentAlgo = null;
-        let currentStep = 0;
-        let isPlaying = false;
-        let playInterval = null;
-        let speed = 800;
+<span class="code-keyword">def</span> <span class="code-function">merge</span>(left, right):
+    result = []
+    i = j = <span class="code-number">0</span>
+    <span class="code-keyword">while</span> i < len(left) <span class="code-keyword">and</span> j < len(right):
+        <span class="code-keyword">if</span> left[i] <= right[j]:
+            result.append(left[i]); i += <span class="code-number">1</span>
+        <span class="code-keyword">else</span>:
+            result.append(right[j]); j += <span class="code-number">1</span>
+    <span class="code-keyword">return</span> result + left[i:] + right[j:]`,
+    "quick_sort": `<span class="code-keyword">def</span> <span class="code-function">quick_sort</span>(arr, low, high):
+    <span class="code-keyword">if</span> low < high:
+        pi = partition(arr, low, high)
+        quick_sort(arr, low, pi - <span class="code-number">1</span>)
+        quick_sort(arr, pi + <span class="code-number">1</span>, high)
 
-        function init() {
-            const selector = document.getElementById('algoSelector');
-            visualData.algorithms.forEach((algo, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'algo-btn';
-                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                btn.onclick = () => selectAlgorithm(index);
-                selector.appendChild(btn);
-            });
-            document.getElementById('prevBtn').onclick = prevStep;
-            document.getElementById('nextBtn').onclick = nextStep;
-            document.getElementById('playBtn').onclick = togglePlay;
-            document.getElementById('resetBtn').onclick = reset;
-            document.getElementById('speedSlider').oninput = (e) => {
-                speed = 2100 - e.target.value;
-                document.getElementById('speedValue').textContent = speed + 'ms';
-            };
-        }
+<span class="code-keyword">def</span> <span class="code-function">partition</span>(arr, low, high):
+    pivot = arr[high]  <span class="code-comment"># Choose last as pivot</span>
+    i = low - <span class="code-number">1</span>
+    <span class="code-keyword">for</span> j <span class="code-keyword">in</span> range(low, high):
+        <span class="code-keyword">if</span> arr[j] <= pivot:
+            i += <span class="code-number">1</span>
+            arr[i], arr[j] = arr[j], arr[i]
+    arr[i+<span class="code-number">1</span>], arr[high] = arr[high], arr[i+<span class="code-number">1</span>]
+    <span class="code-keyword">return</span> i + <span class="code-number">1</span>`
+};
 
-        function selectAlgorithm(index) {
-            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-            currentAlgo = visualData.algorithms[index];
-            currentStep = 0;
-            stopPlay();
-            renderStep();
-            updateControls();
-        }
+const codeLineMap = {
+    "bubble_sort": { 1: [0,1], 2: [3,4,5,6], 3: [3,4,5,6], 4: [3,4,5,6], 5: [3,4,5,6], 6: [3,4,5,6], 7: [3,4,5,6], 8: [7] },
+    "selection_sort": { 1: [0,1], 2: [2,3,4,5,6,7], 3: [5,6,7], 4: [5,6,7], 5: [9], 6: [9], 7: [2,3,4,5,6,7], 8: [10] },
+    "insertion_sort": { 1: [0,1], 2: [1,2], 3: [5,6,7], 4: [5,6,7], 5: [8], 6: [1,2], 7: [8], 8: [1,2,5,6,7,8], 9: [9] },
+    "merge_sort": { 1: [0,1,2], 2: [3,4,5], 3: [3,4,5], 4: [1,2], 5: [9,10,11,12,13,14,15], 6: [9,10,11,12,13,14,15], 7: [9,10,11,12,13,14,15], 8: [9,10,11,12,13,14,15], 9: [6,16], 10: [6,16] },
+    "quick_sort": { 1: [0,1], 2: [6,7,8], 3: [6,7,8,9], 4: [9,10,11,12], 5: [9,10,11,12], 6: [9,10,11,12], 7: [9,10,11,12], 8: [13], 9: [2,3], 10: [2,4], 11: [13,14] }
+};
 
-        function renderStep() {
-            if (!currentAlgo) return;
-            const step = currentAlgo.steps[currentStep];
-            document.getElementById('stepDesc').textContent = step.description;
-            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
-            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
+const visualData = {"algorithms":[{"algorithm":"bubble_sort","name":"Bubble Sort","complexity":"O(n^2)","steps":[{"step":1,"description":"Bubble Sort: Compare adjacent elements and swap if out of order. Largest 'bubbles' to the end.","action":"init","array":[64,34,25,12,22,11]},{"step":2,"description":"Compare 64 and 34. Since 64 > 34, swap them.","action":"compare","indices":[0,1],"array":[64,34,25,12,22,11]},{"step":3,"description":"Swapped! Array is now [34, 64, 25, 12, 22, 11]. Continue comparing.","action":"swap","indices":[0,1],"array":[34,64,25,12,22,11]},{"step":4,"description":"Compare 64 and 25. Since 64 > 25, swap them.","action":"compare","indices":[1,2],"array":[34,64,25,12,22,11]},{"step":5,"description":"Swapped! Continue bubbling 64 to the right.","action":"swap","indices":[1,2],"array":[34,25,64,12,22,11]},{"step":6,"description":"Pass 1 complete: 64 is now at the end (sorted position).","action":"pass_complete","sorted":[5],"array":[34,25,12,22,11,64]},{"step":7,"description":"Pass 2 complete: 34 bubbled to position 4.","action":"pass_complete","sorted":[4,5],"array":[25,12,22,11,34,64]},{"step":8,"description":"All passes complete! Array is sorted.","action":"complete","array":[11,12,22,25,34,64],"comparisons":15,"swaps":10}]},{"algorithm":"selection_sort","name":"Selection Sort","complexity":"O(n^2)","steps":[{"step":1,"description":"Selection Sort: Find minimum element and place it at the beginning. Repeat for remaining.","action":"init","array":[29,10,14,37,13]},{"step":2,"description":"Round 1: Scan array to find minimum. Current min = 29 at index 0.","action":"find_min","searchRange":[0,4],"currentMin":0,"array":[29,10,14,37,13]},{"step":3,"description":"Found 10 < 29. New minimum is 10 at index 1.","action":"new_min","minIndex":1,"array":[29,10,14,37,13]},{"step":4,"description":"Scan complete. Minimum is 10 at index 1.","action":"min_found","minIndex":1,"array":[29,10,14,37,13]},{"step":5,"description":"Swap 10 with 29 (position 0). Position 0 is now sorted.","action":"swap","indices":[0,1],"array":[10,29,14,37,13]},{"step":6,"description":"Position 0 sorted. Now find minimum in remaining [1-4].","action":"position_sorted","sorted":[0],"array":[10,29,14,37,13]},{"step":7,"description":"Continue finding minimums and placing them.","action":"continue","sorted":[0,1],"array":[10,13,14,37,29]},{"step":8,"description":"All positions sorted! Array is complete.","action":"complete","array":[10,13,14,29,37],"comparisons":10,"swaps":3}]},{"algorithm":"insertion_sort","name":"Insertion Sort","complexity":"O(n^2)","steps":[{"step":1,"description":"Insertion Sort: Build sorted portion by inserting each element in correct position.","action":"init","array":[12,11,13,5,6],"sorted":[0]},{"step":2,"description":"Pick element 11 at index 1. Find its correct position in sorted portion.","action":"pick","index":1,"value":11,"array":[12,11,13,5,6]},{"step":3,"description":"Compare 11 with 12. Since 11 < 12, shift 12 right.","action":"compare","indices":[0,1],"array":[12,11,13,5,6]},{"step":4,"description":"Shift 12 to the right to make room for 11.","action":"shift","from":0,"to":1,"array":[12,12,13,5,6]},{"step":5,"description":"Insert 11 at position 0. Sorted portion: [11, 12].","action":"insert","index":0,"value":11,"array":[11,12,13,5,6],"sorted":[0,1]},{"step":6,"description":"Pick 13. It's already >= 12, stays in place. Sorted: [11, 12, 13].","action":"insert","index":2,"value":13,"array":[11,12,13,5,6],"sorted":[0,1,2]},{"step":7,"description":"Pick 5. Shift 11, 12, 13 right. Insert 5 at position 0.","action":"insert","index":0,"value":5,"array":[5,11,12,13,6],"sorted":[0,1,2,3]},{"step":8,"description":"Pick 6. Shift elements, insert at position 1.","action":"insert","index":1,"value":6,"array":[5,6,11,12,13],"sorted":[0,1,2,3,4]},{"step":9,"description":"All elements inserted in correct positions. Array sorted!","action":"complete","array":[5,6,11,12,13]}]},{"algorithm":"merge_sort","name":"Merge Sort","complexity":"O(n log n)","steps":[{"step":1,"description":"Merge Sort: Divide array in half recursively, then merge sorted halves.","action":"init","array":[38,27,43,3,9,82,10]},{"step":2,"description":"Divide: Split [38,27,43,3,9,82,10] into two halves.","action":"divide","left":[38,27,43],"right":[3,9,82,10],"array":[38,27,43,3,9,82,10]},{"step":3,"description":"Continue dividing until single elements (base case).","action":"divide","elements":[[38],[27],[43],[3],[9],[82],[10]],"array":[38,27,43,3,9,82,10]},{"step":4,"description":"Base case reached. Single elements are trivially sorted.","action":"base_case","array":[38,27,43,3,9,82,10]},{"step":5,"description":"Merge [38] and [27]: Compare, take smaller first. Result: [27, 38].","action":"merge","left":[38],"right":[27],"result":[27,38],"array":[27,38,43,3,9,82,10]},{"step":6,"description":"Merge [27,38] and [43]: Result: [27, 38, 43].","action":"merge","left":[27,38],"right":[43],"result":[27,38,43],"array":[27,38,43,3,9,82,10]},{"step":7,"description":"Merge right side: [3,9] and [10,82] -> [3, 9, 10, 82].","action":"merge","result":[3,9,10,82],"array":[27,38,43,3,9,10,82]},{"step":8,"description":"Final merge: [27,38,43] and [3,9,10,82].","action":"merge","left":[27,38,43],"right":[3,9,10,82],"array":[27,38,43,3,9,10,82]},{"step":9,"description":"Compare and interleave: 3<27, take 3. 9<27, take 9...","action":"merging","array":[3,9,10,27,38,43,82]},{"step":10,"description":"Merge complete! Array is sorted.","action":"complete","array":[3,9,10,27,38,43,82]}]},{"algorithm":"quick_sort","name":"Quick Sort","complexity":"O(n log n)","steps":[{"step":1,"description":"Quick Sort: Choose pivot, partition array so smaller elements are left, larger right.","action":"init","array":[10,80,30,90,40,50,70]},{"step":2,"description":"Choose pivot: 70 (last element). Partition around it.","action":"pivot","pivotIndex":6,"pivot":70,"array":[10,80,30,90,40,50,70]},{"step":3,"description":"Initialize i=-1 (boundary). Scan with j from 0 to 5.","action":"init_partition","i":-1,"j":0,"array":[10,80,30,90,40,50,70]},{"step":4,"description":"j=0: 10 <= 70. Increment i to 0, swap arr[0] with arr[0] (no change).","action":"partition_step","i":0,"j":0,"array":[10,80,30,90,40,50,70]},{"step":5,"description":"j=1: 80 > 70. Don't swap, just move j.","action":"partition_step","i":0,"j":1,"array":[10,80,30,90,40,50,70]},{"step":6,"description":"j=2: 30 <= 70. Increment i to 1, swap arr[1] with arr[2].","action":"partition_step","i":1,"j":2,"swap":[1,2],"array":[10,30,80,90,40,50,70]},{"step":7,"description":"Continue partitioning... Elements <= 70 move left.","action":"partition_step","i":3,"array":[10,30,40,50,80,90,70]},{"step":8,"description":"Place pivot at i+1=4. Pivot 70 is now in final sorted position!","action":"pivot_placed","pivotFinal":4,"array":[10,30,40,50,70,90,80],"sorted":[4]},{"step":9,"description":"Recursively sort left partition [10,30,40,50].","action":"recurse","range":[0,3],"array":[10,30,40,50,70,90,80]},{"step":10,"description":"Recursively sort right partition [90,80].","action":"recurse","range":[5,6],"array":[10,30,40,50,70,80,90]},{"step":11,"description":"All partitions sorted. Array is complete!","action":"complete","array":[10,30,40,50,70,80,90]}]}]};
 
-            const content = document.getElementById('vizContent');
-            renderBars(content, step);
-        }
+let currentAlgorithm = null;
+let currentStep = 0;
+let isPlaying = false;
+let playInterval = null;
+let cameraRotX = 15;
+let cameraRotY = 0;
+let cameraZoom = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
 
-        function renderBars(container, step) {
-            const array = step.array || [];
-            const comparing = step.comparing || [];
-            const swapping = step.swapping || [];
-            const sorted = step.sorted || [];
-            const pivot = step.pivot;
-            const min = step.min;
-            const inserting = step.inserting;
-            
-            const maxVal = Math.max(...array);
+const scene = document.getElementById('scene');
+const stage = document.getElementById('stage');
+const barsContainer = document.getElementById('barsContainer');
+const codeBlock = document.getElementById('codeBlock');
+const stepDescription = document.getElementById('stepDescription');
+const complexityBadge = document.getElementById('complexityBadge');
+const statsInfo = document.getElementById('statsInfo');
+const progressFill = document.getElementById('progressFill');
+const stepCounter = document.getElementById('stepCounter');
+const playBtn = document.getElementById('playBtn');
+const resultDisplay = document.getElementById('resultDisplay');
 
-            let html = '<div class="bars-container">';
-            html += '<div class="bars-row">';
-            
-            array.forEach((val, i) => {
-                const height = (val / maxVal) * 200 + 30;
-                let barClass = '';
-                
-                if (swapping.includes(i)) barClass = 'swapping';
-                else if (comparing.includes(i)) barClass = 'comparing';
-                else if (sorted.includes(i)) barClass = 'sorted';
-                else if (i === pivot || val === pivot) barClass = 'pivot';
-                else if (i === min) barClass = 'min';
-                else if (i === inserting) barClass = 'inserting';
-                
-                html += `<div class="bar ${barClass}" style="height: ${height}px;">
-                    <span class="bar-value">${val}</span>
-                </div>`;
-            });
-            
-            html += '</div></div>';
-            
-            // Info panel
-            html += '<div class="info-panel">';
-            html += `<div class="info-box"><div class="info-label">Array Size</div><div class="info-value">${array.length}</div></div>`;
-            
-            const complexity = {
-                'bubble_sort': 'O(n²)',
-                'selection_sort': 'O(n²)',
-                'insertion_sort': 'O(n²)',
-                'quick_sort': 'O(n log n)',
-                'merge_sort': 'O(n log n)'
-            };
-            html += `<div class="info-box"><div class="info-label">Time Complexity</div><div class="info-value">${complexity[currentAlgo.algorithm]}</div></div>`;
-            
-            if (step.action === 'complete') {
-                html += `<div class="info-box"><div class="info-label">Status</div><div class="info-value" style="color:#00ff00;">SORTED!</div></div>`;
-            }
-            html += '</div>';
-            
-            container.innerHTML = html;
-        }
+function initAlgorithmSelector() {
+    const selector = document.getElementById('algoSelector');
+    visualData.algorithms.forEach((algo, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'algo-btn';
+        btn.textContent = algo.name;
+        btn.onclick = () => selectAlgorithm(index);
+        selector.appendChild(btn);
+    });
+}
 
-        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
-        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
-        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
-        function startPlay() {
-            if (!currentAlgo) return;
-            isPlaying = true;
-            document.getElementById('playBtn').textContent = 'Pause';
-            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
-        }
-        function stopPlay() {
-            isPlaying = false;
-            document.getElementById('playBtn').textContent = 'Play';
-            if (playInterval) { clearInterval(playInterval); playInterval = null; }
-        }
-        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
-        function updateControls() {
-            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
-            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
-        }
-        init();
+function selectAlgorithm(index) {
+    document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+    currentAlgorithm = visualData.algorithms[index];
+    currentStep = 0;
+    stopPlaying();
+    complexityBadge.textContent = currentAlgorithm.complexity;
+    renderCode();
+    renderStep();
+    updateControls();
+}
+
+function renderCode() {
+    const code = codeSnippets[currentAlgorithm.algorithm] || '';
+    const lines = code.split('\n');
+    let html = '';
+    lines.forEach((line, idx) => {
+        html += '<div class="code-line" data-line="' + idx + '">' + line + '</div>';
+    });
+    codeBlock.innerHTML = html;
+}
+
+function highlightCodeLines(stepNum) {
+    const lineMap = codeLineMap[currentAlgorithm.algorithm] || {};
+    const activeLines = lineMap[stepNum] || [];
+    document.querySelectorAll('.code-line').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (activeLines.includes(idx)) el.classList.add('active');
+    });
+}
+
+function renderBars(step) {
+    const array = step.array;
+    const comparing = step.indices || [];
+    const sorted = step.sorted || [];
+    const swapping = step.action === 'swap' ? step.indices : [];
+    const pivot = step.pivotIndex;
+    const minIndex = step.minIndex;
+    const picked = step.action === 'pick' ? step.index : -1;
+    const isComplete = step.action === 'complete';
+    
+    const maxVal = Math.max(...array);
+    let html = '';
+    
+    array.forEach((val, idx) => {
+        const height = (val / maxVal) * 200 + 40;
+        let barClass = 'bar';
+        
+        if (isComplete || sorted.includes(idx)) barClass += ' sorted';
+        else if (swapping.includes(idx)) barClass += ' swapping';
+        else if (comparing.includes(idx)) barClass += ' comparing';
+        else if (idx === pivot) barClass += ' pivot';
+        else if (idx === minIndex) barClass += ' min';
+        else if (idx === picked) barClass += ' picked';
+        
+        html += '<div class="' + barClass + '" style="height:' + height + 'px" data-index="' + idx + '"><span class="bar-value">' + val + '</span></div>';
+    });
+    
+    barsContainer.innerHTML = html;
+}
+
+function renderStep() {
+    if (!currentAlgorithm) return;
+    const step = currentAlgorithm.steps[currentStep];
+    stepDescription.textContent = step.description;
+    highlightCodeLines(step.step);
+    resultDisplay.style.display = 'none';
+    
+    renderBars(step);
+    
+    // Update stats
+    let stats = 'Array: [' + step.array.join(', ') + ']';
+    if (step.comparisons) stats += '\nComparisons: ' + step.comparisons;
+    if (step.swaps) stats += '\nSwaps: ' + step.swaps;
+    statsInfo.textContent = stats;
+    
+    if (step.action === 'complete') {
+        resultDisplay.style.display = 'block';
+        resultDisplay.textContent = 'Sorted!';
+    }
+    
+    progressFill.style.width = ((currentStep + 1) / currentAlgorithm.steps.length * 100) + '%';
+    stepCounter.textContent = 'Step ' + (currentStep + 1) + ' / ' + currentAlgorithm.steps.length;
+}
+
+function updateControls() {
+    document.getElementById('prevBtn').disabled = !currentAlgorithm || currentStep === 0;
+    document.getElementById('nextBtn').disabled = !currentAlgorithm || currentStep >= currentAlgorithm.steps.length - 1;
+    document.getElementById('playBtn').disabled = !currentAlgorithm;
+}
+
+function nextStep() {
+    if (currentAlgorithm && currentStep < currentAlgorithm.steps.length - 1) { currentStep++; renderStep(); updateControls(); }
+    else stopPlaying();
+}
+
+function prevStep() {
+    if (currentAlgorithm && currentStep > 0) { currentStep--; renderStep(); updateControls(); }
+}
+
+function togglePlay() { if (isPlaying) stopPlaying(); else startPlaying(); }
+
+function startPlaying() {
+    isPlaying = true;
+    playBtn.textContent = 'Pause';
+    playBtn.classList.add('playing');
+    playInterval = setInterval(() => {
+        if (currentStep < currentAlgorithm.steps.length - 1) nextStep();
+        else stopPlaying();
+    }, 2200 - document.getElementById('speedSlider').value);
+}
+
+function stopPlaying() {
+    isPlaying = false;
+    playBtn.textContent = 'Play';
+    playBtn.classList.remove('playing');
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+}
+
+function reset() { stopPlaying(); currentStep = 0; renderStep(); updateControls(); }
+
+function updateCamera() {
+    stage.style.transform = 'translateZ(' + cameraZoom + 'px) rotateX(' + cameraRotX + 'deg) rotateY(' + cameraRotY + 'deg)';
+}
+
+scene.addEventListener('mousedown', (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    cameraRotY += (e.clientX - lastMouseX) * 0.5;
+    cameraRotX -= (e.clientY - lastMouseY) * 0.3;
+    cameraRotX = Math.max(-60, Math.min(60, cameraRotX));
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+    updateCamera();
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+scene.addEventListener('wheel', (e) => { e.preventDefault(); cameraZoom += e.deltaY * -0.5; cameraZoom = Math.max(-300, Math.min(200, cameraZoom)); updateCamera(); });
+
+document.getElementById('playBtn').onclick = togglePlay;
+document.getElementById('prevBtn').onclick = prevStep;
+document.getElementById('nextBtn').onclick = nextStep;
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('speedSlider').oninput = () => { if (isPlaying) { stopPlaying(); startPlaying(); } };
+
+initAlgorithmSelector();
+updateCamera();
     </script>
 </body>
 </html>

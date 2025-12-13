@@ -7,550 +7,806 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
-            color: #fff;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
-            padding: 30px 0;
-            background: rgba(0, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            margin-bottom: 30px;
+            padding: 25px 0;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            margin-bottom: 25px;
         }
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2rem;
             background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            animation: gradient-shift 3s linear infinite;
         }
-        .subtitle { color: #888; font-size: 1.1em; }
+        @keyframes gradient-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        .subtitle { color: #888; font-size: 1rem; margin-top: 8px; }
         .algorithm-selector {
             display: flex;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
         }
         .algo-btn {
-            padding: 12px 20px;
-            background: rgba(0, 255, 255, 0.1);
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(0, 255, 255, 0.3);
             color: #00ffff;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-        .algo-btn:hover, .algo-btn.active {
-            background: rgba(0, 255, 255, 0.2);
+        .algo-btn:hover {
             border-color: #00ffff;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
         }
-        .visualization-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            min-height: 450px;
-        }
-        .step-description {
-            text-align: center;
-            font-size: 1.2em;
-            color: #00ffff;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .control-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
-            border: none;
+        .algo-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
             color: #000;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease;
         }
-        .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ffff, #ff00ff); border-radius: 3px; transition: width 0.3s ease; }
-        .step-counter { text-align: center; color: #888; margin-bottom: 20px; }
-
-        /* Hash Table Visualization */
-        .hash-table-container {
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+        @media (max-width: 1200px) {
+            .main-content { grid-template-columns: 1fr; }
+        }
+        .left-panel {
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding: 20px;
         }
-        .hash-input {
+        .visualization-area {
+            background: radial-gradient(ellipse at center, #0f0f1a 0%, #050508 70%, #000 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        .scene {
+            width: 100%;
+            height: 380px;
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .scene:active { cursor: grabbing; }
+        .stage {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+            transition: transform 0.1s ease-out;
             display: flex;
-            justify-content: center;
             align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
+            justify-content: center;
         }
-        .input-box {
-            padding: 15px 30px;
-            background: rgba(255, 215, 0, 0.2);
-            border: 2px solid #ffd700;
-            border-radius: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-        .hash-arrow {
-            font-size: 2em;
-            color: #00ffff;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .hash-function {
-            padding: 10px 20px;
-            background: rgba(255, 0, 255, 0.2);
-            border: 2px solid #ff00ff;
-            border-radius: 10px;
-            font-family: monospace;
-        }
-        .buckets-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        .viz-container {
+            transform-style: preserve-3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             gap: 15px;
-            max-width: 800px;
-            margin: 0 auto;
+        }
+        .hash-table {
+            display: flex;
+            gap: 8px;
+            transform-style: preserve-3d;
         }
         .bucket {
-            background: rgba(0, 0, 0, 0.4);
+            width: 70px;
+            min-height: 100px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
             border: 2px solid rgba(0, 255, 255, 0.3);
             border-radius: 10px;
-            padding: 15px;
-            min-height: 100px;
-            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            gap: 6px;
+            transition: all 0.4s ease;
         }
         .bucket.active {
             border-color: #00ffff;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+            transform: translateZ(20px);
         }
         .bucket.collision {
-            border-color: #ff6600;
-            box-shadow: 0 0 30px rgba(255, 102, 0, 0.4);
+            border-color: #ff6b6b;
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
         }
         .bucket-index {
+            font-size: 0.7rem;
             color: #888;
-            font-size: 0.8em;
-            margin-bottom: 10px;
-            text-align: center;
+            margin-bottom: 5px;
         }
-        .bucket-items {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .bucket-item {
-            background: linear-gradient(135deg, #00ffff33, #00888833);
-            border: 1px solid #00ffff;
-            border-radius: 5px;
-            padding: 8px;
+        .hash-item {
+            width: 55px;
+            padding: 6px;
+            background: linear-gradient(135deg, #0a2a2a, #0f1f1f);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            font-size: 0.75rem;
             text-align: center;
-            font-size: 0.9em;
+            color: #fff;
             transition: all 0.3s ease;
         }
-        .bucket-item.new {
-            animation: fadeIn 0.5s ease;
+        .hash-item.inserting {
+            animation: insert-glow 0.5s ease-out;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+        }
+        @keyframes insert-glow {
+            0% { transform: scale(0) translateY(-30px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .hash-item.found {
+            border-color: #00ff88;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.7);
+        }
+        .hash-item.checking {
             border-color: #ffd700;
-            background: linear-gradient(135deg, #ffd70033, #cc990033);
-        }
-        .bucket-item.probing {
-            border-color: #ff6600;
-            background: linear-gradient(135deg, #ff660033, #cc440033);
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.5); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Set Operations */
-        .set-container {
-            display: flex;
-            justify-content: center;
-            gap: 50px;
-            flex-wrap: wrap;
-            padding: 20px;
-        }
-        .set-circle {
-            width: 200px;
-            height: 200px;
-            border: 3px solid #00ffff;
-            border-radius: 50%;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 20px;
-            position: relative;
-            background: rgba(0, 255, 255, 0.05);
-        }
-        .set-label {
-            position: absolute;
-            top: -30px;
-            font-weight: bold;
-            color: #00ffff;
-        }
-        .set-element {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #00ffff, #0088aa);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #000;
-            font-size: 0.9em;
-        }
-        .set-element.highlight {
-            background: linear-gradient(135deg, #ffd700, #cc9900);
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
         }
-        .set-element.intersection {
-            background: linear-gradient(135deg, #00ff00, #008800);
-        }
-
-        /* Info Panel */
-        .info-panel {
+        .array-display {
             display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .array-item {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            gap: 30px;
-            margin-top: 30px;
+            transition: all 0.3s ease;
+        }
+        .array-item.current {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            transform: translateY(-5px);
+        }
+        .array-item.found {
+            border-color: #00ff88;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+        }
+        .array-value { font-size: 1.1rem; font-weight: bold; color: #fff; }
+        .array-index { font-size: 0.65rem; color: #888; }
+        .code-panel {
+            background: linear-gradient(135deg, #0d0d15, #1a1a25);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .code-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .code-title::before {
+            content: "</>";
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: pre;
+        }
+        .code-line.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-left: 3px solid #00ffff;
+        }
+        .code-line.executed {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid #00ff88;
+        }
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-string { color: #f1fa8c; }
+        .code-number { color: #bd93f9; }
+        .code-comment { color: #6272a4; }
+        .code-variable { color: #8be9fd; }
+        .info-panel {
+            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 20px;
+        }
+        .panel-section { margin-bottom: 20px; }
+        .panel-title {
+            font-size: 0.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 2px;
+        }
+        .step-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e0e0e0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+        }
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+            border: 1px solid rgba(255, 0, 255, 0.4);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        .hashmap-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .hashmap-entry {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .hashmap-entry.new {
+            background: rgba(0, 255, 136, 0.2);
+            border-left: 3px solid #00ff88;
+        }
+        .controls {
+            display: flex;
             flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
         }
-        .info-box {
-            background: rgba(0, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px 25px;
-            text-align: center;
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
-        .info-label { color: #888; font-size: 0.9em; }
-        .info-value { color: #00ffff; font-size: 1.3em; font-weight: bold; margin-top: 5px; }
-
+        .control-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #00ffff, #0088aa);
+            color: #000;
+        }
+        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .control-btn.playing {
+            background: linear-gradient(135deg, #ff00ff, #aa0088);
+            border-color: #ff00ff;
+        }
         .speed-control {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 10px;
+            margin-left: auto;
         }
-        .speed-label { color: #888; }
+        .speed-label { color: #888; font-size: 0.85rem; }
         .speed-slider {
-            width: 150px;
+            width: 100px;
+            height: 5px;
             -webkit-appearance: none;
-            height: 6px;
-            background: rgba(0, 255, 255, 0.2);
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
             border-radius: 3px;
         }
         .speed-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #00ffff;
+            width: 16px;
+            height: 16px;
+            background: #fff;
             border-radius: 50%;
             cursor: pointer;
+        }
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            transition: width 0.3s ease;
+        }
+        .step-counter {
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+        .result-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #00ff88;
+            font-weight: bold;
+            display: none;
+        }
+        .camera-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Hashing & Sets/Maps</h1>
-        <p class="subtitle">Interactive 3D Visualization</p>
+        <p class="subtitle">Interactive 3D Visualization with Code - Drag to rotate, scroll to zoom</p>
     </header>
     <div class="container">
         <div class="algorithm-selector" id="algoSelector"></div>
-        <div class="visualization-area">
-            <div class="step-description" id="stepDesc">Select an algorithm to begin</div>
-            <div id="vizContent"></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
-        <div class="step-counter" id="stepCounter">Step 0 / 0</div>
-        <div class="controls">
-            <button class="control-btn" id="prevBtn" disabled>Previous</button>
-            <button class="control-btn" id="playBtn">Play</button>
-            <button class="control-btn" id="nextBtn" disabled>Next</button>
-            <button class="control-btn" id="resetBtn">Reset</button>
-        </div>
-        <div class="speed-control">
-            <span class="speed-label">Speed:</span>
-            <input type="range" class="speed-slider" id="speedSlider" min="100" max="2000" value="800">
-            <span class="speed-label" id="speedValue">800ms</span>
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="scene" id="scene">
+                        <div class="stage" id="stage">
+                            <div class="viz-container" id="vizContainer"></div>
+                        </div>
+                        <div class="result-display" id="resultDisplay"></div>
+                        <div class="camera-hint">Drag to rotate | Scroll to zoom</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" id="prevBtn">Prev</button>
+                        <button class="control-btn" id="playBtn">Play</button>
+                        <button class="control-btn" id="nextBtn">Next</button>
+                        <button class="control-btn" id="resetBtn">Reset</button>
+                        <div class="speed-control">
+                            <span class="speed-label">Speed:</span>
+                            <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" value="800">
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="step-counter" id="stepCounter">Step 0 / 0</div>
+                </div>
+                <div class="code-panel">
+                    <div class="code-title">Python Code</div>
+                    <div class="code-block" id="codeBlock"></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="panel-section">
+                    <div class="panel-title">Current Step</div>
+                    <div class="step-description" id="stepDescription">Select an algorithm to begin</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Complexity</div>
+                    <div class="complexity-badge" id="complexityBadge">-</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Hash Map State</div>
+                    <div class="hashmap-display" id="hashmapDisplay">{}</div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title">Legend</div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color" style="border-color:#00ffff;background:rgba(0,255,255,0.2)"></div><span>Active</span></div>
+                        <div class="legend-item"><div class="legend-color" style="border-color:#00ff88;background:rgba(0,255,136,0.2)"></div><span>Found/Insert</span></div>
+                        <div class="legend-item"><div class="legend-color" style="border-color:#ff6b6b;background:rgba(255,107,107,0.2)"></div><span>Collision</span></div>
+                        <div class="legend-item"><div class="legend-color" style="border-color:#ffd700;background:rgba(255,215,0,0.2)"></div><span>Checking</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <script>
-        const visualData = {
-            "world": "05_hashing_and_sets_maps",
-            "algorithms": [
-                {
-                    "algorithm": "hash_table_insert",
-                    "description": "Insert elements into hash table with separate chaining",
-                    "table_size": 7,
-                    "steps": [
-                        {"step": 1, "description": "Initialize hash table with 7 buckets", "buckets": [[],[],[],[],[],[],[]], "action": "init"},
-                        {"step": 2, "description": "Insert 15: hash(15) = 15 % 7 = 1", "key": 15, "hash": 1, "buckets": [[],[15],[],[],[],[],[]], "action": "insert"},
-                        {"step": 3, "description": "Insert 22: hash(22) = 22 % 7 = 1 (collision!)", "key": 22, "hash": 1, "buckets": [[],[15,22],[],[],[],[],[]], "collision": true, "action": "insert"},
-                        {"step": 4, "description": "Insert 8: hash(8) = 8 % 7 = 1 (another collision!)", "key": 8, "hash": 1, "buckets": [[],[15,22,8],[],[],[],[],[]], "collision": true, "action": "insert"},
-                        {"step": 5, "description": "Insert 35: hash(35) = 35 % 7 = 0", "key": 35, "hash": 0, "buckets": [[35],[15,22,8],[],[],[],[],[]], "action": "insert"},
-                        {"step": 6, "description": "Insert 27: hash(27) = 27 % 7 = 6", "key": 27, "hash": 6, "buckets": [[35],[15,22,8],[],[],[],[],[27]], "action": "insert"},
-                        {"step": 7, "description": "Insert 10: hash(10) = 10 % 7 = 3", "key": 10, "hash": 3, "buckets": [[35],[15,22,8],[],[10],[],[],[27]], "action": "insert"},
-                        {"step": 8, "description": "Hash table complete - load factor = 6/7", "buckets": [[35],[15,22,8],[],[10],[],[],[27]], "load_factor": 0.86, "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "hash_table_search",
-                    "description": "Search for element in hash table",
-                    "table_size": 7,
-                    "steps": [
-                        {"step": 1, "description": "Hash table state - search for 22", "buckets": [[35],[15,22,8],[],[10],[],[],[27]], "target": 22, "action": "init"},
-                        {"step": 2, "description": "Calculate hash(22) = 22 % 7 = 1", "target": 22, "hash": 1, "action": "hash"},
-                        {"step": 3, "description": "Go to bucket 1, check first element: 15 != 22", "bucket": 1, "checking": 15, "action": "check"},
-                        {"step": 4, "description": "Check next in chain: 22 == 22 FOUND!", "bucket": 1, "checking": 22, "found": true, "action": "found"},
-                        {"step": 5, "description": "Element 22 found in bucket 1, position 2", "result": "found", "complexity": "O(1) average", "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "open_addressing",
-                    "description": "Linear probing for collision resolution",
-                    "table_size": 7,
-                    "steps": [
-                        {"step": 1, "description": "Initialize hash table (open addressing)", "table": [null,null,null,null,null,null,null], "action": "init"},
-                        {"step": 2, "description": "Insert 15: hash(15) = 1, slot 1 empty", "key": 15, "hash": 1, "table": [null,15,null,null,null,null,null], "action": "insert"},
-                        {"step": 3, "description": "Insert 22: hash(22) = 1, collision! Probe to slot 2", "key": 22, "hash": 1, "probe": 2, "table": [null,15,22,null,null,null,null], "collision": true, "action": "insert"},
-                        {"step": 4, "description": "Insert 8: hash(8) = 1, collision! Probe 2 occupied, probe to 3", "key": 8, "hash": 1, "probe": 3, "table": [null,15,22,8,null,null,null], "collision": true, "action": "insert"},
-                        {"step": 5, "description": "Insert 35: hash(35) = 0, slot 0 empty", "key": 35, "hash": 0, "table": [35,15,22,8,null,null,null], "action": "insert"},
-                        {"step": 6, "description": "Insert 10: hash(10) = 3, collision! Probe to 4", "key": 10, "hash": 3, "probe": 4, "table": [35,15,22,8,10,null,null], "collision": true, "action": "insert"},
-                        {"step": 7, "description": "Open addressing complete", "table": [35,15,22,8,10,null,null], "action": "complete"}
-                    ]
-                },
-                {
-                    "algorithm": "set_operations",
-                    "description": "Set union, intersection, and difference",
-                    "steps": [
-                        {"step": 1, "description": "Set A = {1, 2, 3, 4}, Set B = {3, 4, 5, 6}", "setA": [1,2,3,4], "setB": [3,4,5,6], "action": "init"},
-                        {"step": 2, "description": "Union: A | B - combine all unique elements", "setA": [1,2,3,4], "setB": [3,4,5,6], "result": [1,2,3,4,5,6], "operation": "union", "action": "operation"},
-                        {"step": 3, "description": "Intersection: A & B - elements in both sets", "setA": [1,2,3,4], "setB": [3,4,5,6], "result": [3,4], "highlight": [3,4], "operation": "intersection", "action": "operation"},
-                        {"step": 4, "description": "Difference: A - B - elements only in A", "setA": [1,2,3,4], "setB": [3,4,5,6], "result": [1,2], "highlight": [1,2], "operation": "difference", "action": "operation"},
-                        {"step": 5, "description": "Symmetric Difference: A ^ B - elements in either but not both", "setA": [1,2,3,4], "setB": [3,4,5,6], "result": [1,2,5,6], "operation": "symmetric_diff", "action": "operation"},
-                        {"step": 6, "description": "Set operations complete - all O(n) time", "action": "complete"}
-                    ]
+const codeSnippets = {
+    "hash_insert_chaining": `<span class="code-keyword">class</span> <span class="code-function">HashTable</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-variable">self</span>, size=<span class="code-number">8</span>):
+        <span class="code-variable">self</span>.buckets = [[] <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(size)]
+    
+    <span class="code-keyword">def</span> <span class="code-function">_hash</span>(<span class="code-variable">self</span>, key):
+        <span class="code-keyword">return</span> hash(key) % len(<span class="code-variable">self</span>.buckets)
+    
+    <span class="code-keyword">def</span> <span class="code-function">insert</span>(<span class="code-variable">self</span>, key, value):
+        idx = <span class="code-variable">self</span>._hash(key)  <span class="code-comment"># Compute bucket index</span>
+        bucket = <span class="code-variable">self</span>.buckets[idx]
+        <span class="code-keyword">for</span> i, (k, v) <span class="code-keyword">in</span> enumerate(bucket):
+            <span class="code-keyword">if</span> k == key:  <span class="code-comment"># Update existing</span>
+                bucket[i] = (key, value)
+                <span class="code-keyword">return</span>
+        bucket.append((key, value))  <span class="code-comment"># Add to chain</span>`,
+    "two_sum_hashmap": `<span class="code-keyword">def</span> <span class="code-function">two_sum</span>(nums, target):
+    <span class="code-variable">hashmap</span> = {}  <span class="code-comment"># value -> index</span>
+    
+    <span class="code-keyword">for</span> i, num <span class="code-keyword">in</span> enumerate(nums):
+        complement = target - num
+        
+        <span class="code-keyword">if</span> complement <span class="code-keyword">in</span> <span class="code-variable">hashmap</span>:
+            <span class="code-comment"># Found! Return indices</span>
+            <span class="code-keyword">return</span> [<span class="code-variable">hashmap</span>[complement], i]
+        
+        <span class="code-comment"># Store current number and index</span>
+        <span class="code-variable">hashmap</span>[num] = i
+    
+    <span class="code-keyword">return</span> []  <span class="code-comment"># No solution</span>`,
+    "hash_lookup_chaining": `<span class="code-keyword">def</span> <span class="code-function">lookup</span>(<span class="code-variable">self</span>, key):
+    idx = <span class="code-variable">self</span>._hash(key)  <span class="code-comment"># Compute bucket</span>
+    bucket = <span class="code-variable">self</span>.buckets[idx]
+    
+    <span class="code-keyword">for</span> k, v <span class="code-keyword">in</span> bucket:  <span class="code-comment"># Search chain</span>
+        <span class="code-keyword">if</span> k == key:
+            <span class="code-keyword">return</span> v  <span class="code-comment"># Found!</span>
+    
+    <span class="code-keyword">return</span> <span class="code-keyword">None</span>  <span class="code-comment"># Not found</span>`,
+    "hash_insert_linear_probing": `<span class="code-keyword">def</span> <span class="code-function">insert</span>(<span class="code-variable">self</span>, key):
+    idx = <span class="code-variable">self</span>._hash(key)
+    
+    <span class="code-keyword">while</span> <span class="code-variable">self</span>.buckets[idx] <span class="code-keyword">is not</span> <span class="code-keyword">None</span>:
+        <span class="code-comment"># Collision! Linear probe</span>
+        idx = (idx + <span class="code-number">1</span>) % len(<span class="code-variable">self</span>.buckets)
+    
+    <span class="code-variable">self</span>.buckets[idx] = key  <span class="code-comment"># Insert</span>`,
+    "set_operations": `<span class="code-variable">set_a</span> = {<span class="code-number">1</span>, <span class="code-number">2</span>, <span class="code-number">3</span>, <span class="code-number">4</span>}
+<span class="code-variable">set_b</span> = {<span class="code-number">3</span>, <span class="code-number">4</span>, <span class="code-number">5</span>, <span class="code-number">6</span>}
+
+<span class="code-comment"># Union: all unique elements</span>
+union = <span class="code-variable">set_a</span> | <span class="code-variable">set_b</span>  <span class="code-comment"># {1,2,3,4,5,6}</span>
+
+<span class="code-comment"># Intersection: common elements</span>
+inter = <span class="code-variable">set_a</span> & <span class="code-variable">set_b</span>  <span class="code-comment"># {3, 4}</span>
+
+<span class="code-comment"># Difference: in A but not B</span>
+diff = <span class="code-variable">set_a</span> - <span class="code-variable">set_b</span>  <span class="code-comment"># {1, 2}</span>`,
+    "hash_resize": `<span class="code-keyword">def</span> <span class="code-function">_resize</span>(<span class="code-variable">self</span>):
+    old = <span class="code-variable">self</span>.buckets
+    <span class="code-variable">self</span>.buckets = [<span class="code-keyword">None</span>] * (len(old) * <span class="code-number">2</span>)
+    
+    <span class="code-keyword">for</span> item <span class="code-keyword">in</span> old:
+        <span class="code-keyword">if</span> item <span class="code-keyword">is not</span> <span class="code-keyword">None</span>:
+            <span class="code-comment"># Rehash into new table</span>
+            <span class="code-variable">self</span>.insert(item)`
+};
+
+const codeLineMap = {
+    "hash_insert_chaining": { 1: [0,1,2], 2: [4,5], 3: [7,8], 4: [4,5], 5: [7,8], 6: [4,5], 7: [9,10], 8: [14] },
+    "two_sum_hashmap": { 1: [0,1], 2: [3,4], 3: [6,7], 4: [10], 5: [3,4], 6: [6,7,8], 7: [8] },
+    "hash_lookup_chaining": { 1: [0], 2: [1,2], 3: [4,5], 4: [4,5,6], 5: [6] },
+    "hash_insert_linear_probing": { 1: [0], 2: [0,1], 3: [3,4], 4: [3,4], 5: [6], 6: [3,4], 7: [3,4], 8: [6] },
+    "set_operations": { 1: [0,1], 2: [3,4], 3: [4], 4: [6,7], 5: [7], 6: [9,10], 7: [10] },
+    "hash_resize": { 1: [0], 2: [1,2], 3: [4,5,6], 4: [4,5,6], 5: [4,5,6], 6: [2] }
+};
+
+const visualData = {"algorithms":[{"algorithm":"hash_insert_chaining","name":"Hash Insert (Chaining)","complexity":"O(1) avg","steps":[{"step":1,"description":"Initialize empty hash table with 8 buckets. Each bucket can hold a chain (linked list) of key-value pairs.","action":"init","buckets":[[],[],[],[],[],[],[],[]]},{"step":2,"description":"Insert 'apple'. Compute hash: hash('apple') % 8 = 1. The hash function maps the key to bucket index 1.","action":"hash","key":"apple","bucket":1,"buckets":[[],[],[],[],[],[],[],[]]},{"step":3,"description":"Insert 'apple':10 into bucket 1. The bucket was empty, so we just add it to the chain.","action":"insert","key":"apple","value":10,"bucket":1,"buckets":[[],[["apple",10]],[],[],[],[],[],[]]},{"step":4,"description":"Insert 'banana'. Compute hash: hash('banana') % 8 = 2. Different key, different bucket.","action":"hash","key":"banana","bucket":2,"buckets":[[],[["apple",10]],[],[],[],[],[],[]]},{"step":5,"description":"Insert 'banana':20 into bucket 2. No collision here either.","action":"insert","key":"banana","value":20,"bucket":2,"buckets":[[],[["apple",10]],[["banana",20]],[],[],[],[],[]]},{"step":6,"description":"Insert 'apricot'. Compute hash: hash('apricot') % 8 = 1. Same bucket as 'apple'! This is a COLLISION.","action":"hash","key":"apricot","bucket":1,"collision":true,"buckets":[[],[["apple",10]],[["banana",20]],[],[],[],[],[]]},{"step":7,"description":"COLLISION at bucket 1! With separate chaining, we simply add to the chain. No need to find another bucket.","action":"collision","bucket":1,"buckets":[[],[["apple",10]],[["banana",20]],[],[],[],[],[]]},{"step":8,"description":"Append 'apricot':30 to the chain in bucket 1. Now bucket 1 has two items. Lookup may need to traverse the chain.","action":"insert","key":"apricot","value":30,"bucket":1,"buckets":[[],[["apple",10],["apricot",30]],[["banana",20]],[],[],[],[],[]]}]},{"algorithm":"two_sum_hashmap","name":"Two Sum (Hash Map)","complexity":"O(n)","input":{"array":[2,7,11,15],"target":9},"steps":[{"step":1,"description":"Find two numbers that sum to 9. We'll use a hash map to store seen numbers. This gives O(n) instead of O(n²)!","action":"init","array":[2,7,11,15],"target":9,"hashmap":{}},{"step":2,"description":"Process nums[0]=2. We need complement = 9-2 = 7. Is 7 in our hash map?","action":"process","index":0,"value":2,"complement":7,"hashmap":{}},{"step":3,"description":"7 is NOT in hash map (it's empty). Store {2: 0} so we can find it later if needed.","action":"lookup_miss","key":7,"hashmap":{}},{"step":4,"description":"Add 2 to hash map with its index. hashmap = {2: 0}. Now if we see 7 later, we know 2 is at index 0.","action":"store","key":2,"value":0,"hashmap":{"2":0}},{"step":5,"description":"Process nums[1]=7. We need complement = 9-7 = 2. Is 2 in our hash map?","action":"process","index":1,"value":7,"complement":2,"hashmap":{"2":0}},{"step":6,"description":"YES! 2 IS in hash map at index 0! We found our pair: nums[0] + nums[1] = 2 + 7 = 9","action":"lookup_hit","key":2,"found_index":0,"hashmap":{"2":0}},{"step":7,"description":"SOLUTION FOUND! Return indices [0, 1]. The hash map let us find the complement in O(1) time!","action":"solution","indices":[0,1],"values":[2,7]}]},{"algorithm":"hash_lookup_chaining","name":"Hash Lookup (Chaining)","complexity":"O(1) avg","steps":[{"step":1,"description":"Look up 'apricot' in our hash table. First, we compute the hash to find which bucket to search.","action":"start","key":"apricot","buckets":[[],[["apple",10],["apricot",30]],[["banana",20]],[],[],[],[],[]]},{"step":2,"description":"Compute hash: hash('apricot') % 8 = 1. Go to bucket 1.","action":"hash","key":"apricot","bucket":1,"buckets":[[],[["apple",10],["apricot",30]],[["banana",20]],[],[],[],[],[]]},{"step":3,"description":"Bucket 1 has a chain with 2 items. Check first item: 'apple'. Does 'apple' == 'apricot'? No.","action":"check","key":"apricot","checking":"apple","match":false,"bucket":1},{"step":4,"description":"Check second item: 'apricot'. Does 'apricot' == 'apricot'? YES! Found it!","action":"check","key":"apricot","checking":"apricot","match":true,"bucket":1},{"step":5,"description":"Return value 30. Lookup complete! Average O(1), but worst case O(n) if all keys hash to same bucket.","action":"found","key":"apricot","value":30}]},{"algorithm":"set_operations","name":"Set Operations","complexity":"O(n+m)","steps":[{"step":1,"description":"Two sets: A = {1,2,3,4} and B = {3,4,5,6}. Sets are implemented using hash tables for O(1) membership testing.","action":"init","set_a":[1,2,3,4],"set_b":[3,4,5,6]},{"step":2,"description":"UNION (A | B): Combine all unique elements from both sets.","action":"union_start","set_a":[1,2,3,4],"set_b":[3,4,5,6]},{"step":3,"description":"Union result: {1, 2, 3, 4, 5, 6}. Every element appears exactly once.","action":"union_result","result":[1,2,3,4,5,6]},{"step":4,"description":"INTERSECTION (A & B): Find elements that exist in BOTH sets.","action":"intersection_start","set_a":[1,2,3,4],"set_b":[3,4,5,6]},{"step":5,"description":"Intersection result: {3, 4}. Only 3 and 4 appear in both sets.","action":"intersection_result","result":[3,4]},{"step":6,"description":"DIFFERENCE (A - B): Find elements in A that are NOT in B.","action":"difference_start","set_a":[1,2,3,4],"set_b":[3,4,5,6]},{"step":7,"description":"Difference result: {1, 2}. These are in A but not in B.","action":"difference_result","result":[1,2]}]}]};
+
+let currentAlgorithm = null;
+let currentStep = 0;
+let isPlaying = false;
+let playInterval = null;
+let cameraRotX = 10;
+let cameraRotY = 0;
+let cameraZoom = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const scene = document.getElementById('scene');
+const stage = document.getElementById('stage');
+const vizContainer = document.getElementById('vizContainer');
+const codeBlock = document.getElementById('codeBlock');
+const stepDescription = document.getElementById('stepDescription');
+const complexityBadge = document.getElementById('complexityBadge');
+const hashmapDisplay = document.getElementById('hashmapDisplay');
+const progressFill = document.getElementById('progressFill');
+const stepCounter = document.getElementById('stepCounter');
+const playBtn = document.getElementById('playBtn');
+const resultDisplay = document.getElementById('resultDisplay');
+
+function initAlgorithmSelector() {
+    const selector = document.getElementById('algoSelector');
+    visualData.algorithms.forEach((algo, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'algo-btn';
+        btn.textContent = algo.name;
+        btn.onclick = () => selectAlgorithm(index);
+        selector.appendChild(btn);
+    });
+}
+
+function selectAlgorithm(index) {
+    document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+    currentAlgorithm = visualData.algorithms[index];
+    currentStep = 0;
+    stopPlaying();
+    complexityBadge.textContent = currentAlgorithm.complexity;
+    renderCode();
+    renderStep();
+    updateControls();
+}
+
+function renderCode() {
+    const code = codeSnippets[currentAlgorithm.algorithm] || '';
+    const lines = code.split('\n');
+    let html = '';
+    lines.forEach((line, idx) => {
+        html += '<div class="code-line" data-line="' + idx + '">' + line + '</div>';
+    });
+    codeBlock.innerHTML = html;
+}
+
+function highlightCodeLines(stepNum) {
+    const lineMap = codeLineMap[currentAlgorithm.algorithm] || {};
+    const activeLines = lineMap[stepNum] || [];
+    document.querySelectorAll('.code-line').forEach((el, idx) => {
+        el.classList.remove('active', 'executed');
+        if (activeLines.includes(idx)) el.classList.add('active');
+    });
+}
+
+function renderHashTable(buckets, step) {
+    let html = '<div class="hash-table">';
+    buckets.forEach((bucket, idx) => {
+        let bucketClass = 'bucket';
+        if (step.bucket === idx) {
+            bucketClass += step.collision ? ' collision' : ' active';
+        }
+        html += '<div class="' + bucketClass + '">';
+        html += '<div class="bucket-index">[' + idx + ']</div>';
+        if (Array.isArray(bucket)) {
+            bucket.forEach((item, itemIdx) => {
+                let itemClass = 'hash-item';
+                if (step.action === 'insert' && step.bucket === idx && itemIdx === bucket.length - 1) {
+                    itemClass += ' inserting';
                 }
-            ]
-        };
-
-        let currentAlgo = null;
-        let currentStep = 0;
-        let isPlaying = false;
-        let playInterval = null;
-        let speed = 800;
-
-        function init() {
-            const selector = document.getElementById('algoSelector');
-            visualData.algorithms.forEach((algo, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'algo-btn';
-                btn.textContent = algo.algorithm.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                btn.onclick = () => selectAlgorithm(index);
-                selector.appendChild(btn);
+                if (step.action === 'check' && step.checking === item[0]) {
+                    itemClass += step.match ? ' found' : ' checking';
+                }
+                if (step.action === 'found' && step.key === item[0]) {
+                    itemClass += ' found';
+                }
+                html += '<div class="' + itemClass + '">' + item[0] + ':' + item[1] + '</div>';
             });
-            document.getElementById('prevBtn').onclick = prevStep;
-            document.getElementById('nextBtn').onclick = nextStep;
-            document.getElementById('playBtn').onclick = togglePlay;
-            document.getElementById('resetBtn').onclick = reset;
-            document.getElementById('speedSlider').oninput = (e) => {
-                speed = 2100 - e.target.value;
-                document.getElementById('speedValue').textContent = speed + 'ms';
-            };
         }
+        html += '</div>';
+    });
+    html += '</div>';
+    return html;
+}
 
-        function selectAlgorithm(index) {
-            document.querySelectorAll('.algo-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-            currentAlgo = visualData.algorithms[index];
-            currentStep = 0;
-            stopPlay();
-            renderStep();
-            updateControls();
-        }
-
-        function renderStep() {
-            if (!currentAlgo) return;
-            const step = currentAlgo.steps[currentStep];
-            document.getElementById('stepDesc').textContent = step.description;
-            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${currentAlgo.steps.length}`;
-            document.getElementById('progressFill').style.width = ((currentStep + 1) / currentAlgo.steps.length * 100) + '%';
-
-            const content = document.getElementById('vizContent');
-            
-            switch(currentAlgo.algorithm) {
-                case 'hash_table_insert':
-                case 'hash_table_search':
-                    renderHashTableChaining(content, step);
-                    break;
-                case 'open_addressing':
-                    renderOpenAddressing(content, step);
-                    break;
-                case 'set_operations':
-                    renderSetOperations(content, step);
-                    break;
+function renderTwoSum(step) {
+    const array = currentAlgorithm.input.array;
+    let html = '<div class="array-display">';
+    array.forEach((val, idx) => {
+        let itemClass = 'array-item';
+        if (step.index === idx) itemClass += ' current';
+        if (step.action === 'solution' && step.indices.includes(idx)) itemClass += ' found';
+        html += '<div class="' + itemClass + '"><span class="array-value">' + val + '</span><span class="array-index">[' + idx + ']</span></div>';
+    });
+    html += '</div>';
+    
+    html += '<div class="hash-table" style="margin-top:20px">';
+    const hashmap = step.hashmap || {};
+    for (let i = 0; i < 4; i++) {
+        html += '<div class="bucket"><div class="bucket-index">[' + i + ']</div>';
+        Object.entries(hashmap).forEach(([k, v]) => {
+            if (parseInt(k) % 4 === i) {
+                let itemClass = 'hash-item';
+                if (step.action === 'store' && step.key == k) itemClass += ' inserting';
+                if (step.action === 'lookup_hit' && step.key == k) itemClass += ' found';
+                html += '<div class="' + itemClass + '">' + k + ':' + v + '</div>';
             }
-        }
+        });
+        html += '</div>';
+    }
+    html += '</div>';
+    
+    hashmapDisplay.innerHTML = JSON.stringify(step.hashmap || {}, null, 2);
+    return html;
+}
 
-        function renderHashTableChaining(container, step) {
-            const buckets = step.buckets || [];
-            const activeHash = step.hash;
-            const isCollision = step.collision;
-            const newKey = step.key;
-            const checking = step.checking;
+function renderSets(step) {
+    let html = '<div style="display:flex;gap:30px;align-items:flex-start">';
+    
+    const setA = step.set_a || currentAlgorithm.steps[0].set_a;
+    const setB = step.set_b || currentAlgorithm.steps[0].set_b;
+    const result = step.result;
+    
+    html += '<div><div style="color:#00ffff;margin-bottom:8px;font-size:0.9rem">Set A</div><div class="hash-table" style="flex-direction:column">';
+    setA.forEach(v => {
+        let cls = 'hash-item';
+        if (result && result.includes(v)) cls += ' found';
+        html += '<div class="' + cls + '">' + v + '</div>';
+    });
+    html += '</div></div>';
+    
+    html += '<div><div style="color:#ff00ff;margin-bottom:8px;font-size:0.9rem">Set B</div><div class="hash-table" style="flex-direction:column">';
+    setB.forEach(v => {
+        let cls = 'hash-item';
+        if (result && result.includes(v)) cls += ' found';
+        html += '<div class="' + cls + '">' + v + '</div>';
+    });
+    html += '</div></div>';
+    
+    if (result) {
+        html += '<div><div style="color:#00ff88;margin-bottom:8px;font-size:0.9rem">Result</div><div class="hash-table" style="flex-direction:column">';
+        result.forEach(v => {
+            html += '<div class="hash-item found">' + v + '</div>';
+        });
+        html += '</div></div>';
+    }
+    
+    html += '</div>';
+    return html;
+}
 
-            let html = '<div class="hash-table-container">';
-            
-            if (step.key !== undefined || step.target !== undefined) {
-                html += `<div class="hash-input">
-                    <div class="input-box">${step.key || step.target}</div>
-                    <span class="hash-arrow">→</span>
-                    <div class="hash-function">hash(${step.key || step.target}) % 7 = ${step.hash}</div>
-                </div>`;
-            }
-            
-            html += '<div class="buckets-grid">';
-            buckets.forEach((bucket, i) => {
-                const isActive = i === activeHash;
-                html += `<div class="bucket ${isActive ? (isCollision ? 'collision' : 'active') : ''}">
-                    <div class="bucket-index">Bucket ${i}</div>
-                    <div class="bucket-items">
-                        ${bucket.map(item => {
-                            const isNew = item === newKey && isActive;
-                            const isChecking = item === checking;
-                            const isFound = item === checking && step.found;
-                            return `<div class="bucket-item ${isNew ? 'new' : ''} ${isChecking ? 'probing' : ''}" style="${isFound ? 'background: linear-gradient(135deg, #00ff0033, #00880033); border-color: #00ff00;' : ''}">${item}</div>`;
-                        }).join('')}
-                        ${bucket.length === 0 ? '<div style="color: #666; font-size: 0.8em;">empty</div>' : ''}
-                    </div>
-                </div>`;
-            });
-            html += '</div></div>';
-            
-            html += '<div class="info-panel">';
-            if (step.load_factor) html += `<div class="info-box"><div class="info-label">Load Factor</div><div class="info-value">${step.load_factor.toFixed(2)}</div></div>`;
-            if (step.complexity) html += `<div class="info-box"><div class="info-label">Complexity</div><div class="info-value">${step.complexity}</div></div>`;
-            if (isCollision) html += `<div class="info-box"><div class="info-label">Status</div><div class="info-value" style="color:#ff6600;">COLLISION!</div></div>`;
-            html += '</div>';
-            
-            container.innerHTML = html;
+function renderStep() {
+    if (!currentAlgorithm) return;
+    const step = currentAlgorithm.steps[currentStep];
+    stepDescription.textContent = step.description;
+    highlightCodeLines(step.step);
+    resultDisplay.style.display = 'none';
+    
+    let html = '';
+    if (currentAlgorithm.algorithm === 'two_sum_hashmap') {
+        html = renderTwoSum(step);
+        if (step.action === 'solution') {
+            resultDisplay.style.display = 'block';
+            resultDisplay.textContent = 'Found: [' + step.indices.join(', ') + ']';
         }
+    } else if (currentAlgorithm.algorithm === 'set_operations') {
+        html = renderSets(step);
+        hashmapDisplay.textContent = step.result ? 'Result: {' + step.result.join(', ') + '}' : '-';
+    } else {
+        html = renderHashTable(step.buckets || [[],[],[],[],[],[],[],[]], step);
+        if (step.action === 'found') {
+            resultDisplay.style.display = 'block';
+            resultDisplay.textContent = step.key + ' = ' + step.value;
+        }
+        hashmapDisplay.textContent = step.buckets ? JSON.stringify(step.buckets.filter(b => b.length > 0)) : '{}';
+    }
+    
+    vizContainer.innerHTML = html;
+    progressFill.style.width = ((currentStep + 1) / currentAlgorithm.steps.length * 100) + '%';
+    stepCounter.textContent = 'Step ' + (currentStep + 1) + ' / ' + currentAlgorithm.steps.length;
+}
 
-        function renderOpenAddressing(container, step) {
-            const table = step.table || [];
-            const activeHash = step.hash;
-            const probe = step.probe;
-            const newKey = step.key;
-            const isCollision = step.collision;
+function updateControls() {
+    document.getElementById('prevBtn').disabled = !currentAlgorithm || currentStep === 0;
+    document.getElementById('nextBtn').disabled = !currentAlgorithm || currentStep >= currentAlgorithm.steps.length - 1;
+    document.getElementById('playBtn').disabled = !currentAlgorithm;
+}
 
-            let html = '<div class="hash-table-container">';
-            
-            if (step.key !== undefined) {
-                html += `<div class="hash-input">
-                    <div class="input-box">${step.key}</div>
-                    <span class="hash-arrow">→</span>
-                    <div class="hash-function">hash(${step.key}) % 7 = ${step.hash}${probe !== undefined ? ` → probe ${probe}` : ''}</div>
-                </div>`;
-            }
-            
-            html += '<div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">';
-            table.forEach((val, i) => {
-                const isActive = i === activeHash || i === probe;
-                const isProbed = i === probe;
-                const hasNew = val === newKey;
-                html += `<div class="bucket ${isActive ? (isCollision && i === activeHash ? 'collision' : 'active') : ''}" style="min-height: 80px; width: 80px;">
-                    <div class="bucket-index">[${i}]</div>
-                    <div class="bucket-items">
-                        ${val !== null ? `<div class="bucket-item ${hasNew ? 'new' : ''} ${isProbed && isCollision ? 'probing' : ''}">${val}</div>` : '<div style="color: #666;">-</div>'}
-                    </div>
-                </div>`;
-            });
-            html += '</div></div>';
-            
-            if (isCollision) {
-                html += '<div class="info-panel"><div class="info-box"><div class="info-label">Status</div><div class="info-value" style="color:#ff6600;">Linear Probing</div></div></div>';
-            }
-            
-            container.innerHTML = html;
-        }
+function nextStep() {
+    if (currentAlgorithm && currentStep < currentAlgorithm.steps.length - 1) { currentStep++; renderStep(); updateControls(); }
+    else stopPlaying();
+}
 
-        function renderSetOperations(container, step) {
-            const setA = step.setA || [];
-            const setB = step.setB || [];
-            const result = step.result || [];
-            const highlight = step.highlight || [];
-            const operation = step.operation;
+function prevStep() {
+    if (currentAlgorithm && currentStep > 0) { currentStep--; renderStep(); updateControls(); }
+}
 
-            let html = '<div class="set-container">';
-            
-            html += `<div class="set-circle">
-                <div class="set-label">Set A</div>
-                ${setA.map(el => `<div class="set-element ${highlight.includes(el) ? 'highlight' : ''} ${operation === 'intersection' && [3,4].includes(el) ? 'intersection' : ''}">${el}</div>`).join('')}
-            </div>`;
-            
-            html += `<div class="set-circle" style="border-color: #ff00ff; background: rgba(255, 0, 255, 0.05);">
-                <div class="set-label" style="color: #ff00ff;">Set B</div>
-                ${setB.map(el => `<div class="set-element ${highlight.includes(el) ? 'highlight' : ''} ${operation === 'intersection' && [3,4].includes(el) ? 'intersection' : ''}" style="background: linear-gradient(135deg, #ff00ff, #880088);">${el}</div>`).join('')}
-            </div>`;
-            
-            html += '</div>';
-            
-            if (result.length > 0) {
-                html += `<div style="text-align: center; margin-top: 30px;">
-                    <div style="color: #888; margin-bottom: 10px;">${operation ? operation.replace('_', ' ').toUpperCase() : 'Result'}:</div>
-                    <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                        ${result.map(el => `<div class="set-element" style="background: linear-gradient(135deg, #ffd700, #cc9900);">${el}</div>`).join('')}
-                    </div>
-                </div>`;
-            }
-            
-            container.innerHTML = html;
-        }
+function togglePlay() { if (isPlaying) stopPlaying(); else startPlaying(); }
 
-        function nextStep() { if (currentAlgo && currentStep < currentAlgo.steps.length - 1) { currentStep++; renderStep(); updateControls(); } }
-        function prevStep() { if (currentAlgo && currentStep > 0) { currentStep--; renderStep(); updateControls(); } }
-        function togglePlay() { isPlaying ? stopPlay() : startPlay(); }
-        function startPlay() {
-            if (!currentAlgo) return;
-            isPlaying = true;
-            document.getElementById('playBtn').textContent = 'Pause';
-            playInterval = setInterval(() => { currentStep < currentAlgo.steps.length - 1 ? nextStep() : stopPlay(); }, speed);
-        }
-        function stopPlay() {
-            isPlaying = false;
-            document.getElementById('playBtn').textContent = 'Play';
-            if (playInterval) { clearInterval(playInterval); playInterval = null; }
-        }
-        function reset() { stopPlay(); currentStep = 0; renderStep(); updateControls(); }
-        function updateControls() {
-            document.getElementById('prevBtn').disabled = !currentAlgo || currentStep === 0;
-            document.getElementById('nextBtn').disabled = !currentAlgo || currentStep >= currentAlgo.steps.length - 1;
-        }
-        init();
+function startPlaying() {
+    isPlaying = true;
+    playBtn.textContent = 'Pause';
+    playBtn.classList.add('playing');
+    playInterval = setInterval(() => {
+        if (currentStep < currentAlgorithm.steps.length - 1) nextStep();
+        else stopPlaying();
+    }, 2200 - document.getElementById('speedSlider').value);
+}
+
+function stopPlaying() {
+    isPlaying = false;
+    playBtn.textContent = 'Play';
+    playBtn.classList.remove('playing');
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+}
+
+function reset() { stopPlaying(); currentStep = 0; renderStep(); updateControls(); }
+
+function updateCamera() {
+    stage.style.transform = 'translateZ(' + cameraZoom + 'px) rotateX(' + cameraRotX + 'deg) rotateY(' + cameraRotY + 'deg)';
+}
+
+scene.addEventListener('mousedown', (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    cameraRotY += (e.clientX - lastMouseX) * 0.5;
+    cameraRotX -= (e.clientY - lastMouseY) * 0.3;
+    cameraRotX = Math.max(-60, Math.min(60, cameraRotX));
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+    updateCamera();
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+scene.addEventListener('wheel', (e) => { e.preventDefault(); cameraZoom += e.deltaY * -0.5; cameraZoom = Math.max(-300, Math.min(200, cameraZoom)); updateCamera(); });
+
+document.getElementById('playBtn').onclick = togglePlay;
+document.getElementById('prevBtn').onclick = prevStep;
+document.getElementById('nextBtn').onclick = nextStep;
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('speedSlider').oninput = () => { if (isPlaying) { stopPlaying(); startPlaying(); } };
+
+initAlgorithmSelector();
+updateCamera();
     </script>
 </body>
 </html>
